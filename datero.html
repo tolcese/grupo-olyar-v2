@@ -442,14 +442,7 @@
             <option>Otra</option>
           </select>
         </div>
-        <div class="field">
-          <label>Teléfono Alternativo 1</label>
-          <input type="tel" id="telefono_alt1" placeholder="Opcional" inputmode="numeric">
-        </div>
-        <div class="field">
-          <label>Teléfono Alternativo 2</label>
-          <input type="tel" id="telefono_alt2" placeholder="Opcional" inputmode="numeric">
-        </div>
+
         <div class="field col-span-2">
           <label>Email del Cliente <span class="req">*</span></label>
           <input type="email" id="email_cliente" required placeholder="cliente@email.com">
@@ -726,8 +719,7 @@
         dni:                  getVal('dni'),
         telefono:             getVal('telefono'),
         compania_telefono:    getVal('compania_telefono'),
-        telefono_alt1:        getVal('telefono_alt1') || null,
-        telefono_alt2:        getVal('telefono_alt2') || null,
+
         email_cliente:        getVal('email_cliente'),
         archivos_dni:         archivoUrls,
         fecha_ingreso:        getVal('fecha_ingreso'),
