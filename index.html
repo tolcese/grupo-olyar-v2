@@ -497,9 +497,9 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="ph">
         <div><div class="ph-t">Solicitudes</div><div class="ph-s" id="ph-count">—</div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-s" onclick="loadRecords()">↻ Actualizar</button>
-          <button class="btn btn-s" onclick="exportCSV()">📊 Exportar a Excel</button>
-          <button class="btn btn-s" onclick="exportPDF()">📄 Exportar a PDF</button>
+          <button class="btn btn-s invitado-hidden" onclick="loadRecords()">↻ Actualizar</button>
+          <button class="btn btn-s invitado-hidden" onclick="exportCSV()">📊 Exportar a Excel</button>
+          <button class="btn btn-s invitado-hidden" onclick="exportPDF()">📄 Exportar a PDF</button>
           <button class="btn btn-p invitado-hidden" onclick="showV('nueva')">＋ Nueva solicitud</button>
         </div>
       </div>
@@ -878,13 +878,13 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="ph">
         <div><div class="ph-t">Mi cuenta</div><div class="ph-s">Cambiar contraseña</div></div>
       </div>
-      <div class="card" style="max-width:420px">
+      <div class="card invitado-hidden" style="max-width:420px">
         <div class="card-t">🔑 Cambiar contraseña</div>
         <div class="card-s">Ingresá tu contraseña actual y la nueva</div>
         <div class="fc" style="margin-bottom:13px"><label>Contraseña actual</label><input id="pwd-actual" type="password" placeholder="••••••••"></div>
         <div class="fc" style="margin-bottom:13px"><label>Nueva contraseña</label><input id="pwd-nueva" type="password" placeholder="••••••••"></div>
         <div class="fc" style="margin-bottom:18px"><label>Repetir nueva contraseña</label><input id="pwd-rep" type="password" placeholder="••••••••"></div>
-        <button class="btn btn-p" onclick="cambiarPassword()">💾 Guardar nueva contraseña</button>
+        <button class="btn btn-p invitado-hidden" onclick="cambiarPassword()">💾 Guardar nueva contraseña</button>
       </div>
     </div>
 
@@ -1595,6 +1595,7 @@ function renderGestoresList(gestores) {
 let GESTORES_CACHE = [];
 
 async function openFormGestor(id) {
+  if (!requireEdit()) return;
   document.getElementById('gestores-list-wrap').style.display = 'none';
   document.getElementById('gestor-form-wrap').style.display = '';
   // Limpiar
@@ -1815,6 +1816,7 @@ let ASIGNAR_ID = null;
 let SEL_GESTORES_CACHE = [];
 
 async function asignarGestoria(id) {
+  if (!requireEdit()) return;
   ASIGNAR_ID = id;
   const r = RECORDS.find(x => x.id === id);
   document.getElementById('sel-gestor-sub').textContent = r ? (r.nombrecliente || id) : id;
@@ -2968,6 +2970,7 @@ function nuevaConc() {
 }
 
 function editConc(nombre) {
+  if (!requireEdit()) return;
   const c = CONC_CACHE.find(x => x.nombre === nombre) || { nombre };
   document.getElementById('conc-edit-nombre-orig').value = nombre;
   document.getElementById('conc-edit-titulo').textContent = nombre;
@@ -3920,6 +3923,7 @@ document.getElementById('l-u').addEventListener('keydown', e => { if(e.key==='En
 // ══════════════════════════════════════════════
 function showV(v) {
   if (v === 'nueva' && !canEdit()) { toast('No tenés permisos para crear solicitudes', 'warn'); return; }
+  if ((v === 'contabilidad' || v === 'bancos') && !canEdit()) { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
   if (v === 'reportes') {
     const isAdmin = ME?.rol === 'admin';
     // Tabs solo para admin
@@ -5899,7 +5903,7 @@ function renderReportes() {
     <button class="sb-item" onclick="closeSidebar();openPrendasEntregadas()">
       <span class="sb-icon">✅</span> Prendas entregadas
     </button>
-    <button class="sb-item" onclick="closeSidebar();showV('bancos')">
+    <button class="sb-item invitado-hidden" onclick="closeSidebar();showV('bancos')">
       <span class="sb-icon">🏦</span> Bancos
     </button>
     <button class="sb-item" onclick="closeSidebar();showV('datero')">
