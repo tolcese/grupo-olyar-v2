@@ -3068,7 +3068,7 @@ async function loadDatero() {
   document.getElementById('datero-empty').style.display = 'none';
   document.getElementById('datero-tbody').innerHTML = '<tr><td colspan="22" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>';
 
-  const { data, error } = await sb.from('datero').select('*').order('created_at', { ascending: false });
+  const { data, error } = await SB.from('datero').select('*').order('created_at', { ascending: false });
   if (error) {
     document.getElementById('datero-tbody').innerHTML = '<tr><td colspan="22" style="text-align:center;padding:30px;color:var(--red)">Error al cargar datero</td></tr>';
     return;
