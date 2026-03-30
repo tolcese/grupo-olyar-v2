@@ -748,66 +748,17 @@
       const { error: insertErr } = await db.from('datero').insert(payload);
       if (insertErr) throw insertErr;
 
-      // 3. Email via Resend (no-fatal: si falla el mail, la solicitud ya quedó guardada)
+      // 3. Email via Edge Function (server-side)
       try {
         btn.textContent = 'Enviando notificación…';
-        const archivosHtml = archivoUrls.length
-          ? archivoUrls.map(u => `<li><a href="${u}" target="_blank">${u}</a></li>`).join('')
-          : '<li>Sin archivos</li>';
-
-        const resendResp = await fetch('https://api.resend.com/emails', {
+        await fetch('https://zohniclbfhvqmurtrhka.supabase.co/functions/v1/resend-email', {
           method: 'POST',
-          headers: { 'Authorization': `Bearer ${RESEND_KEY}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            from: 'Grupo Olyar <onboarding@resend.dev>',
-            to: [NOTIFY_TO],
-            subject: `📋 Nuevo Datero — ${payload.nombre_apellido} | ${payload.nombre_concesionaria}`,
-            html: `
-              <div style="font-family:sans-serif;max-width:600px;margin:0 auto;color:#1c1c2e">
-                <div style="background:#0f1f3d;padding:20px 24px;border-radius:10px 10px 0 0">
-                  <h2 style="color:#f0a500;margin:0;font-size:1.1rem">Grupo Olyar</h2>
-                  <p style="color:rgba(255,255,255,0.6);margin:4px 0 0;font-size:0.85rem">Nueva solicitud de datero recibida</p>
-                </div>
-                <div style="border:1px solid #dde2ef;border-top:none;border-radius:0 0 10px 10px;padding:24px">
-                  <h3 style="color:#1a4bbd;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">🏢 Agencia</h3>
-                  <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem;width:40%">Provincia</td><td style="font-size:0.9rem">${payload.provincia}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Concesionaria</td><td style="font-size:0.9rem">${payload.nombre_concesionaria}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Encargado</td><td style="font-size:0.9rem">${payload.encargado_operacion}</td></tr>
-                  </table>
-                  <h3 style="color:#1a4bbd;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">👤 Solicitante</h3>
-                  <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem;width:40%">Nombre</td><td style="font-size:0.9rem"><strong>${payload.nombre_apellido}</strong></td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">DNI</td><td style="font-size:0.9rem">${payload.dni}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Teléfono</td><td style="font-size:0.9rem">${payload.telefono} (${payload.compania_telefono})</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Email</td><td style="font-size:0.9rem">${payload.email_cliente}</td></tr>
-                  </table>
-                  <h3 style="color:#1a4bbd;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">🚗 Vehículo</h3>
-                  <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem;width:40%">Unidad</td><td style="font-size:0.9rem">${payload.marca} ${payload.modelo_version} ${payload.anio}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Dominio</td><td style="font-size:0.9rem">${payload.dominio}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">GNC</td><td style="font-size:0.9rem">${payload.equipo_gnc}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Monto Venta</td><td style="font-size:0.9rem">${fmt(payload.monto_venta)}</td></tr>
-                  </table>
-                  <h3 style="color:#1a4bbd;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">🏦 Crédito</h3>
-                  <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem;width:40%">Banco</td><td style="font-size:0.9rem">${payload.entidad_bancaria}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Tasa</td><td style="font-size:0.9rem">${payload.tipo_tasa}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">A Financiar</td><td style="font-size:0.9rem">${fmt(payload.monto_financiar)}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Cuotas</td><td style="font-size:0.9rem">${payload.cantidad_cuotas}</td></tr>
-                    <tr><td style="padding:4px 0;color:#6b7280;font-size:0.85rem">Cuota simulada</td><td style="font-size:0.9rem">${fmt(payload.monto_cuota_simulada)}</td></tr>
-                  </table>
-                  <h3 style="color:#1a4bbd;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 12px">📎 Archivos DNI</h3>
-                  <ul style="padding-left:16px;font-size:0.85rem">${archivosHtml}</ul>
-                </div>
-              </div>
-            `
-          })
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+          },
+          body: JSON.stringify(payload),
         });
-        if (!resendResp.ok) {
-          const resendErr = await resendResp.json().catch(() => ({}));
-          console.warn('Resend error (no fatal):', resendErr);
-        }
       } catch (emailErr) {
         console.warn('Email no enviado (no fatal):', emailErr);
       }
