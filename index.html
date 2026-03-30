@@ -62,6 +62,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:var(--ink);font-size:1
 /* MODAL EDITAR CONT */
 .admin-only { display: none !important; }
 body.is-admin .admin-only { display: revert !important; }
+body.is-invitado .invitado-hidden { display: none !important; }
 body::-webkit-scrollbar{width:6px;}
 body::-webkit-scrollbar-track{background:#fff;}
 body::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:10px;}
@@ -499,7 +500,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <button class="btn btn-s" onclick="loadRecords()">↻ Actualizar</button>
           <button class="btn btn-s" onclick="exportCSV()">📊 Exportar a Excel</button>
           <button class="btn btn-s" onclick="exportPDF()">📄 Exportar a PDF</button>
-          <button class="btn btn-p" onclick="showV('nueva')">＋ Nueva solicitud</button>
+          <button class="btn btn-p invitado-hidden" onclick="showV('nueva')">＋ Nueva solicitud</button>
         </div>
       </div>
       <div class="stats">
@@ -658,7 +659,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         </div>
         <div class="mfoot">
           <button class="btn btn-s" onclick="resetForm()">Limpiar</button>
-          <button class="btn btn-p" id="save-btn" onclick="saveRecord()">💾 Guardar solicitud</button>
+          <button class="btn btn-p invitado-hidden" id="save-btn" onclick="saveRecord()">💾 Guardar solicitud</button>
         </div>
       </div>
     </div>
@@ -1226,6 +1227,8 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 const SUPABASE_URL  = 'https://zohniclbfhvqmurtrhka.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvaG5pY2xiZmh2cW11cnRyaGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNjIsImV4cCI6MjA5MDM5ODM2Mn0.1RTJAiwftxFFGrOFr3hV9W8DIjkESHBdV_PZnwKxOjQ';
 const SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+function canEdit() { return ME?.rol !== 'invitado'; }
+function requireEdit() { if (!canEdit()) { toast('No tenés permisos para realizar esta acción', 'warn'); return false; } return true; }
 
 // ══════════════════════════════════════════════════════════════
 // APPS SCRIPT — ESTE ES EL CÓDIGO QUE VA EN GOOGLE APPS SCRIPT
@@ -1452,7 +1455,7 @@ async function enterApp() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('tb-av').textContent = ME.nom[0].toUpperCase();
   document.getElementById('tb-uname').textContent = ME.nom;
-  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : '👤 Usuario';
+  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : '👤 Usuario';
   if (ME.rol === 'admin') {
     document.getElementById('sb-usuarios').style.display = '';
     document.getElementById('th-acc').style.display = '';
@@ -1466,6 +1469,8 @@ async function enterApp() {
   document.getElementById('tn-pe').style.display = ME.rol === 'admin' ? '' : 'none';
   if (ME.rol === 'admin') document.body.classList.add('is-admin');
   else document.body.classList.remove('is-admin');
+  if (ME.rol === 'invitado') document.body.classList.add('is-invitado');
+  else document.body.classList.remove('is-invitado');
   document.getElementById('btn-datero').style.display = ME.rol === 'admin' ? 'none' : '';
   syncUI('ok');
 
@@ -1668,6 +1673,7 @@ function closeGestorPanelSinReabrir() {
 }
 
 async function saveGestor() {
+  if (!requireEdit()) return;
   const nombre = document.getElementById('g-nombre').value.trim();
   if (!nombre) { toast('El nombre es obligatorio','er'); return; }
   const existingId = document.getElementById('g-id').value;
@@ -1693,6 +1699,7 @@ async function saveGestor() {
 }
 
 async function delGestor(id) {
+  if (!requireEdit()) return;
   if (!confirm('¿Eliminar este gestor?')) return;
   try {
     const { error } = await SB.from('gestores').delete().eq('id', id);
@@ -1959,6 +1966,7 @@ function renderPrendasEntregadas() {
 }
 
 function editPERecord(id) {
+  if (!requireEdit()) return;
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
   document.getElementById('pe-edit-id').value = id;
@@ -1988,6 +1996,7 @@ async function savePEEdit() {
 }
 
 async function delPERecord(id) {
+  if (!requireEdit()) return;
   if (!confirm('¿Eliminar este registro de Prendas entregadas?')) return;
   try {
     const { error } = await SB.from('solicitudes').update({ finalizada: null, gestor_asignado: null, gestor_id: null }).eq('id', id);
@@ -2149,6 +2158,7 @@ function renderClientes() {
 }
 
 function editCliente(dni, nombre) {
+  if (!requireEdit()) return;
   const cd = CLIENTES_DATA[dni] || {};
   document.getElementById('cliente-edit-dni').value      = dni;
   document.getElementById('cliente-edit-nombre').textContent = nombre;
@@ -2183,6 +2193,7 @@ async function saveCliente() {
 }
 
 async function delCliente(dni) {
+  if (!requireEdit()) return;
   if (!confirm('¿Eliminar los datos de este cliente?')) return;
   try {
     const { error } = await SB.from('clientes').delete().eq('dni', dni);
@@ -2510,6 +2521,7 @@ function renderCuotas() {
 }
 
 function nuevoCredito() {
+  if (!requireEdit()) return;
   CRED_SOL_SEL = null;
   document.getElementById('cred-nuevo-id').value = '';
   document.getElementById('cred-buscar-sol').value = '';
@@ -3602,6 +3614,7 @@ function closeContEdit() {
 }
 
 async function saveContEdit(silent = false) {
+  if (!requireEdit()) return;
   const id = document.getElementById('cont-edit-id').value;
   const n = v => { const p = parseFloat(String(v||'').replace(/[$,]/g,'')); return isNaN(p) ? null : p; };
   const row = {
@@ -3741,6 +3754,7 @@ function renderPrendas() {
 }
 
 function editPrenda(id) {
+  if (!requireEdit()) return;
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
   document.getElementById('prenda-id').value        = id;
@@ -3752,6 +3766,7 @@ function editPrenda(id) {
 }
 
 async function savePrenda() {
+  if (!requireEdit()) return;
   const id = document.getElementById('prenda-id').value;
   const enProceso  = document.getElementById('prenda-en-proceso').checked;
   const presentada = document.getElementById('prenda-presentada').checked;
@@ -3773,6 +3788,7 @@ function closePrendaEdit() {
 }
 
 async function delPrenda(id) {
+  if (!requireEdit()) return;
   if (!confirm('¿Eliminar este registro de Prendas?')) return;
   try {
     const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null, en_proceso: false, presentada: false, finalizada: null }).eq('id', id);
@@ -3903,6 +3919,7 @@ document.getElementById('l-u').addEventListener('keydown', e => { if(e.key==='En
 // NAVIGATION
 // ══════════════════════════════════════════════
 function showV(v) {
+  if (v === 'nueva' && !canEdit()) { toast('No tenés permisos para crear solicitudes', 'warn'); return; }
   if (v === 'reportes') {
     const isAdmin = ME?.rol === 'admin';
     // Tabs solo para admin
@@ -4229,6 +4246,7 @@ function fillForm(r) {
 }
 
 async function saveRecord() {
+  if (!requireEdit()) return;
   const d = getForm();
   if (!d.fecha) { toast('La fecha es obligatoria','er'); return; }
   if (!d.banco) { toast('El banco es obligatorio','er'); return; }
@@ -4548,6 +4566,7 @@ async function loadUsers() {
 function openAddUser() { document.getElementById('user-modal').classList.add('open'); }
 
 async function saveUser() {
+  if (!requireEdit()) return;
   const n=document.getElementById('u-nom').value.trim();
   const u=document.getElementById('u-usr').value.trim();
   const p=document.getElementById('u-pwd').value;
