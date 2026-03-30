@@ -1466,7 +1466,7 @@ async function enterApp() {
   document.getElementById('tn-pe').style.display = ME.rol === 'admin' ? '' : 'none';
   if (ME.rol === 'admin') document.body.classList.add('is-admin');
   else document.body.classList.remove('is-admin');
-  document.getElementById('btn-datero').style.display = ME.rol === 'admin' ? 'none' : '';
+  document.getElementById('btn-datero').style.display = '';
   syncUI('ok');
 
   // Verificar mantenimiento ANTES de mostrar la app
@@ -4990,7 +4990,7 @@ function limpiarNotas() {
 }
 
 function copyDatero() {
-  const url = 'https://docs.google.com/forms/d/1S2TuDsiQ2BLFHDOHGYzoJpTsbonJ71jtOAkR0Vud8fI/viewform?edit_requested=true#responses';
+  const url = 'https://grupo-olyar-v2.vercel.app/datero.html';
   navigator.clipboard.writeText(url).then(() => {
     toast('Link copiado al portapapeles ✓', 'ok');
   }).catch(() => {
