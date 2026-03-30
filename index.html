@@ -1466,7 +1466,7 @@ async function enterApp() {
   document.getElementById('tn-pe').style.display = ME.rol === 'admin' ? '' : 'none';
   if (ME.rol === 'admin') document.body.classList.add('is-admin');
   else document.body.classList.remove('is-admin');
-  document.getElementById('btn-datero').style.display = '';
+  document.getElementById('btn-datero').style.display = ME.rol === 'admin' ? 'none' : '';
   syncUI('ok');
 
   // Verificar mantenimiento ANTES de mostrar la app
