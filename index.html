@@ -1788,7 +1788,16 @@ function renderGestoria() {
   tbody.innerHTML = data.map((r, i) => `
     <tr>
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
-      <td><button class="btn-asignar" onclick="asignarGestoria('${r.id}')">Asignar</button></td>
+      <td>
+        ${canEdit()
+          ? r.gestorAsignado
+            ? `<button class="btn-asignar" style="background:var(--red-soft);color:var(--red);border-color:#fca5a5" onclick="desasignarGestoria('${r.id}')">✕ Desasignar</button>`
+            : `<button class="btn-asignar" onclick="asignarGestoria('${r.id}')">Asignar</button>`
+          : r.gestorAsignado
+            ? `<span style="font-size:11px;color:var(--muted)">Asignado</span>`
+            : `<span style="font-size:11px;color:var(--muted)">Sin asignar</span>`
+        }
+      </td>
       <td>${r.fecha ? r.fecha.split('-').reverse().join('/') : '—'}</td>
       <td>${val(r.anio)}</td>
       <td style="font-weight:700;min-width:130px">${val(r.nombrecliente)}</td>
@@ -1814,6 +1823,19 @@ function renderGestoria() {
 let ASIGNAR_ID = null;
 
 let SEL_GESTORES_CACHE = [];
+
+async function desasignarGestoria(id) {
+  if (!requireEdit()) return;
+  const r = RECORDS.find(x => x.id === id);
+  const nombre = r?.nombrecliente || 'esta operación';
+  if (!confirm(`¿Desasignar gestor de "${nombre}"?`)) return;
+  const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null }).eq('id', id);
+  if (error) { toast('Error al desasignar gestor', 'er'); return; }
+  const rec = RECORDS.find(x => x.id === id);
+  if (rec) { rec.gestorAsignado = null; rec.gestorId = null; }
+  renderGestoria();
+  toast('Gestor desasignado ✓', 'ok');
+}
 
 async function asignarGestoria(id) {
   if (!requireEdit()) return;
