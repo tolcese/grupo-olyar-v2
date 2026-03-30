@@ -3065,9 +3065,44 @@ let DATERO_CACHE = [];
 
 async function loadDatero() {
   document.getElementById('datero-badge').style.display = 'none';
-  document.getElementById('datero-tbody').innerHTML = '<tr><td colspan="22" style="text-align:center;padding:30px;color:var(--muted)">Datero — pendiente migración de Google Forms (Etapa 4)</td></tr>';
   document.getElementById('datero-empty').style.display = 'none';
-  DATERO_CACHE = [];
+  document.getElementById('datero-tbody').innerHTML = '<tr><td colspan="22" style="text-align:center;padding:30px;color:var(--muted)">Cargando...</td></tr>';
+
+  const { data, error } = await sb.from('datero').select('*').order('created_at', { ascending: false });
+  if (error) {
+    document.getElementById('datero-tbody').innerHTML = '<tr><td colspan="22" style="text-align:center;padding:30px;color:var(--red)">Error al cargar datero</td></tr>';
+    return;
+  }
+
+  DATERO_CACHE = (data || []).map(r => ({
+    id:             r.id,
+    fecha:          r.fecha || r.created_at?.slice(0,10) || '—',
+    provincia:      r.provincia,
+    concesionaria:  r.nombre_concesionaria,
+    encargado:      r.encargado_operacion,
+    solicitante:    r.nombre_apellido,
+    dni:            r.dni,
+    telefono:       r.telefono,
+    compania:       r.compania_telefono,
+    email:          r.email_cliente,
+    fotoDni:        Array.isArray(r.archivos_dni) ? r.archivos_dni.join(', ') : (r.archivos_dni || ''),
+    fechaIngreso:   r.fecha_ingreso,
+    domicilioLaboral: r.domicilio_laboral,
+    telefonoLaboral:  r.telefono_laboral,
+    montoVenta:     r.monto_venta,
+    dominio:        r.dominio,
+    marca:          r.marca,
+    modelo:         r.modelo_version,
+    anio:           r.anio,
+    gnc:            r.equipo_gnc,
+    banco:          r.entidad_bancaria,
+    tipoTasa:       r.tipo_tasa,
+    montoFinanciar: r.monto_financiar,
+    cuotas:         r.cantidad_cuotas,
+    cuotaEstimada:  r.monto_cuota_simulada,
+    estado:         r.estado,
+  }));
+
   renderDatero();
 }
 
