@@ -5588,14 +5588,40 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 })();
 
 // Auto refresh cada 1 minuto
+// Auto-refresh cada 30 segundos — solo recarga la sección visible
 setInterval(() => {
-  if (ME) {
+  if (!ME) return;
+  SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
+  checkMantenimiento();
+  checkDateroNuevos();
+
+  const sections = ['sol','nueva','reportes','datero','micuenta','config','usuarios','backup','creditos','bancos','liq-terceros'];
+  const activeSection = sections.find(s => {
+    const el = document.getElementById('v-' + s);
+    return el && el.style.display !== 'none';
+  });
+
+  if (activeSection === 'sol' || activeSection === 'nueva') {
     loadRecords();
-    checkMantenimiento();
-    checkDateroNuevos();
-    SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
+  } else if (activeSection === 'datero') {
+    loadDatero();
+  } else if (activeSection === 'reportes') {
+    loadRecords();
+  } else if (activeSection === 'creditos') {
+    if (typeof loadCreditos === 'function') loadCreditos();
   }
-}, 60000);
+
+  // Modales abiertos
+  if (document.getElementById('gestoria-overlay')?.classList.contains('open')) {
+    loadRecords().then(() => renderGestoria()).catch(() => {});
+  }
+  if (document.getElementById('cont-overlay')?.classList.contains('open')) {
+    if (typeof recargarLiquidaciones === 'function') recargarLiquidaciones();
+  }
+  if (document.getElementById('prendas-overlay')?.classList.contains('open')) {
+    if (typeof loadPrendas === 'function') loadPrendas();
+  }
+}, 30000);
 
 // Heartbeat cada 30 segundos
 setInterval(() => {
