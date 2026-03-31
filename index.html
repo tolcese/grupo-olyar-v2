@@ -732,6 +732,91 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
     </div>
 
+    <!-- CALENDARIO -->
+    <div id="v-calendario" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📅 Calendario</div><div class="ph-s">Eventos, tareas y recordatorios</div></div>
+        <button class="btn btn-p" onclick="abrirModalCalendario(null)">＋ Nuevo</button>
+      </div>
+
+      <!-- NAVEGACIÓN MES -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+        <button class="btn btn-s" onclick="cambiarMes(-1)">← Anterior</button>
+        <div id="cal-titulo" style="font-size:16px;font-weight:700;color:var(--ink);flex:1;text-align:center"></div>
+        <button class="btn btn-s" onclick="cambiarMes(1)">Siguiente →</button>
+      </div>
+
+      <!-- LEYENDA -->
+      <div style="display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#2563eb;display:inline-block"></span>Evento</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#059669;display:inline-block"></span>Tarea</span>
+        <span style="display:flex;align-items:center;gap:6px;font-size:12px"><span style="width:12px;height:12px;border-radius:3px;background:#d97706;display:inline-block"></span>Recordatorio</span>
+      </div>
+
+      <!-- GRILLA -->
+      <div style="border:1.5px solid var(--line);border-radius:12px;overflow:hidden">
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface);border-bottom:1.5px solid var(--line)">
+          ${['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(d=>`<div style="padding:8px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase">${d}</div>`).join('')}
+        </div>
+        <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr)"></div>
+      </div>
+
+      <!-- LISTA EVENTOS DEL DÍA -->
+      <div id="cal-day-panel" style="display:none;margin-top:20px">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div id="cal-day-titulo" style="font-size:14px;font-weight:700;color:var(--ink)"></div>
+            <button class="xbtn" onclick="document.getElementById('cal-day-panel').style.display='none'">×</button>
+          </div>
+          <div id="cal-day-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CALENDARIO -->
+    <div class="overlay" id="cal-modal-overlay" onclick="if(event.target===this)cerrarModalCalendario()">
+      <div class="modal" style="max-width:480px">
+        <div class="mh">
+          <div class="mh-t" id="cal-modal-titulo">Nuevo evento</div>
+          <button class="xbtn" onclick="cerrarModalCalendario()">×</button>
+        </div>
+        <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+          <input type="hidden" id="cal-id">
+          <div class="fc">
+            <label>Título *</label>
+            <input id="cal-titulo-input" placeholder="Título del evento" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+          </div>
+          <div class="fg" style="grid-template-columns:1fr 1fr">
+            <div class="fc">
+              <label>Tipo *</label>
+              <select id="cal-tipo" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+                <option value="evento">📘 Evento</option>
+                <option value="tarea">✅ Tarea</option>
+                <option value="recordatorio">🔔 Recordatorio</option>
+              </select>
+            </div>
+            <div class="fc">
+              <label>Fecha *</label>
+              <input type="date" id="cal-fecha" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+            </div>
+          </div>
+          <div class="fc">
+            <label>Hora (opcional)</label>
+            <input type="time" id="cal-hora" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+          </div>
+          <div class="fc">
+            <label>Descripción (opcional)</label>
+            <textarea id="cal-desc" rows="3" placeholder="Detalle..." style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px;resize:vertical"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <button class="btn btn-s" id="cal-btn-del" style="display:none;color:var(--red);border-color:var(--red)" onclick="eliminarEventoCalendario()">🗑️ Eliminar</button>
+            <button class="btn btn-s" onclick="cerrarModalCalendario()">Cancelar</button>
+            <button class="btn btn-p" onclick="guardarEventoCalendario()">💾 Guardar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- REPORTES -->
     <div id="v-reportes" style="display:none">
       <div class="ph">
@@ -4027,6 +4112,7 @@ function showV(v) {
     if (DATERO_CACHE.length) { renderDatero(); loadDatero(); }
     else loadDatero();
   }
+  if (v==='calendario') { loadCalendario(); }
   if (v==='creditos')     { showCredTab('creditos'); }
   // Cerrar panel lateral de créditos al salir
   if (v !== 'creditos') {
@@ -5087,6 +5173,187 @@ async function addLTPVOpt() {
 // ══════════════════════════════════════════════
 let notasTimer = null;
 
+// ══════════════════════════════════════════════
+// CALENDARIO
+// ══════════════════════════════════════════════
+let CAL_DATA = [];
+let CAL_MES = new Date().getMonth();
+let CAL_ANIO = new Date().getFullYear();
+
+const CAL_COLORES = { evento: '#2563eb', tarea: '#059669', recordatorio: '#d97706' };
+const CAL_LABELS  = { evento: 'Evento', tarea: 'Tarea', recordatorio: 'Recordatorio' };
+
+async function loadCalendario() {
+  const { data, error } = await SB.from('calendario').select('*').order('fecha').order('hora');
+  if (error) return;
+  // Filtrar: admin/user-admin ve todos; usuario común solo los propios + los de admin
+  CAL_DATA = (data || []).filter(e => {
+    if (ME.rol === 'admin') return true;
+    return e.rol_creador === 'admin' || e.usuario_creador === ME.usr;
+  });
+  renderCalendario();
+}
+
+function renderCalendario() {
+  const titulo = new Date(CAL_ANIO, CAL_MES, 1).toLocaleString('es-AR', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-titulo').textContent = titulo.charAt(0).toUpperCase() + titulo.slice(1);
+
+  const grid = document.getElementById('cal-grid');
+  const primerDia = new Date(CAL_ANIO, CAL_MES, 1).getDay();
+  const diasEnMes = new Date(CAL_ANIO, CAL_MES + 1, 0).getDate();
+  const hoy = new Date().toISOString().slice(0, 10);
+
+  let html = '';
+  // Celdas vacías antes del primer día
+  for (let i = 0; i < primerDia; i++) {
+    html += `<div style="min-height:80px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#fafafa"></div>`;
+  }
+
+  for (let d = 1; d <= diasEnMes; d++) {
+    const fechaStr = `${CAL_ANIO}-${String(CAL_MES+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const esHoy = fechaStr === hoy;
+    const eventos = CAL_DATA.filter(e => e.fecha === fechaStr);
+
+    html += `<div onclick="abrirDia('${fechaStr}')" style="min-height:80px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px;cursor:pointer;transition:background .1s${esHoy?';background:var(--blue-soft)':''}" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background='${esHoy?'var(--blue-soft)':'#fff'}'">
+      <div style="font-size:12px;font-weight:${esHoy?'800':'500'};color:${esHoy?'var(--blue)':'var(--ink)'};margin-bottom:4px">${d}</div>
+      ${eventos.slice(0,3).map(e => `
+        <div style="background:${CAL_COLORES[e.tipo]};color:#fff;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:${e.completado?0.5:1}" title="${e.titulo}">${e.titulo}</div>
+      `).join('')}
+      ${eventos.length > 3 ? `<div style="font-size:10px;color:var(--muted)">+${eventos.length-3} más</div>` : ''}
+    </div>`;
+  }
+
+  // Celdas vacías al final
+  const totalCeldas = primerDia + diasEnMes;
+  const restantes = totalCeldas % 7 === 0 ? 0 : 7 - (totalCeldas % 7);
+  for (let i = 0; i < restantes; i++) {
+    html += `<div style="min-height:80px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);background:#fafafa"></div>`;
+  }
+
+  grid.innerHTML = html;
+  document.getElementById('cal-day-panel').style.display = 'none';
+}
+
+function cambiarMes(delta) {
+  CAL_MES += delta;
+  if (CAL_MES > 11) { CAL_MES = 0; CAL_ANIO++; }
+  if (CAL_MES < 0)  { CAL_MES = 11; CAL_ANIO--; }
+  renderCalendario();
+}
+
+function abrirDia(fecha) {
+  const eventos = CAL_DATA.filter(e => e.fecha === fecha);
+  const panel = document.getElementById('cal-day-panel');
+  const d = new Date(fecha + 'T12:00:00');
+  document.getElementById('cal-day-titulo').textContent = d.toLocaleDateString('es-AR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  if (!eventos.length) {
+    document.getElementById('cal-day-list').innerHTML = `<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Sin eventos este día. <span style="color:var(--blue);cursor:pointer" onclick="abrirModalCalendario('${fecha}')">＋ Agregar</span></div>`;
+  } else {
+    document.getElementById('cal-day-list').innerHTML = eventos.map(e => `
+      <div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)">
+        <div style="width:10px;height:10px;border-radius:3px;background:${CAL_COLORES[e.tipo]};flex-shrink:0;margin-top:4px"></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700;color:var(--ink);${e.completado?'text-decoration:line-through;opacity:.6':''}">${e.titulo}</div>
+          <div style="font-size:11px;color:var(--muted)">${CAL_LABELS[e.tipo]}${e.hora ? ' · ' + e.hora.slice(0,5) : ''}${e.usuario_creador !== ME.usr ? ' · ' + e.usuario_creador : ''}</div>
+          ${e.descripcion ? `<div style="font-size:12px;color:var(--ink2);margin-top:3px">${e.descripcion}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          ${e.tipo==='tarea' ? `<button class="ibtn" onclick="toggleTarea('${e.id}')" title="${e.completado?'Marcar pendiente':'Completar'}">${e.completado?'↩️':'✅'}</button>` : ''}
+          <button class="ibtn" onclick="abrirModalCalendario(null,'${e.id}')" title="Editar">✏️</button>
+          <button class="ibtn del" onclick="eliminarEventoCalendarioDirecto('${e.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  panel.style.display = '';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function abrirModalCalendario(fecha, id = null) {
+  document.getElementById('cal-id').value = id || '';
+  document.getElementById('cal-titulo-input').value = '';
+  document.getElementById('cal-tipo').value = 'evento';
+  document.getElementById('cal-fecha').value = fecha || new Date().toISOString().slice(0,10);
+  document.getElementById('cal-hora').value = '';
+  document.getElementById('cal-desc').value = '';
+  document.getElementById('cal-btn-del').style.display = 'none';
+  document.getElementById('cal-modal-titulo').textContent = 'Nuevo evento';
+
+  if (id) {
+    const e = CAL_DATA.find(x => String(x.id) === String(id));
+    if (e) {
+      document.getElementById('cal-titulo-input').value = e.titulo;
+      document.getElementById('cal-tipo').value = e.tipo;
+      document.getElementById('cal-fecha').value = e.fecha;
+      document.getElementById('cal-hora').value = e.hora ? e.hora.slice(0,5) : '';
+      document.getElementById('cal-desc').value = e.descripcion || '';
+      document.getElementById('cal-btn-del').style.display = '';
+      document.getElementById('cal-modal-titulo').textContent = 'Editar evento';
+    }
+  }
+
+  document.getElementById('cal-modal-overlay').classList.add('open');
+}
+
+function cerrarModalCalendario() {
+  document.getElementById('cal-modal-overlay').classList.remove('open');
+}
+
+async function guardarEventoCalendario() {
+  const titulo = document.getElementById('cal-titulo-input').value.trim();
+  const fecha  = document.getElementById('cal-fecha').value;
+  if (!titulo) { toast('El título es obligatorio', 'er'); return; }
+  if (!fecha)  { toast('La fecha es obligatoria', 'er'); return; }
+
+  const id   = document.getElementById('cal-id').value;
+  const data = {
+    titulo,
+    tipo:             document.getElementById('cal-tipo').value,
+    fecha,
+    hora:             document.getElementById('cal-hora').value || null,
+    descripcion:      document.getElementById('cal-desc').value.trim() || null,
+    usuario_creador:  ME.usr,
+    rol_creador:      ME.rol,
+  };
+
+  if (id) {
+    const { error } = await SB.from('calendario').update(data).eq('id', id);
+    if (error) { toast('Error al guardar', 'er'); return; }
+  } else {
+    const { error } = await SB.from('calendario').insert(data);
+    if (error) { toast('Error al guardar', 'er'); return; }
+  }
+
+  cerrarModalCalendario();
+  await loadCalendario();
+  toast('Guardado ✓', 'ok');
+}
+
+async function eliminarEventoCalendario() {
+  const id = document.getElementById('cal-id').value;
+  if (!id || !confirm('¿Eliminar este evento?')) return;
+  await SB.from('calendario').delete().eq('id', id);
+  cerrarModalCalendario();
+  await loadCalendario();
+  toast('Eliminado ✓', 'ok');
+}
+
+async function eliminarEventoCalendarioDirecto(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  await SB.from('calendario').delete().eq('id', id);
+  await loadCalendario();
+  toast('Eliminado ✓', 'ok');
+}
+
+async function toggleTarea(id) {
+  const e = CAL_DATA.find(x => String(x.id) === String(id));
+  if (!e) return;
+  await SB.from('calendario').update({ completado: !e.completado }).eq('id', id);
+  await loadCalendario();
+}
+
 function getNotasKey() {
   return 'notas_' + (ME?.usr || 'default');
 }
@@ -5693,7 +5960,7 @@ setInterval(() => {
   checkMantenimiento();
   checkDateroNuevos();
 
-  const sections = ['sol','nueva','reportes','datero','micuenta','config','usuarios','backup','creditos','bancos','liq-terceros'];
+  const sections = ['sol','nueva','reportes','datero','micuenta','config','usuarios','backup','creditos','bancos','liq-terceros','calendario'];
   const activeSection = sections.find(s => {
     const el = document.getElementById('v-' + s);
     return el && el.style.display !== 'none';
@@ -6060,6 +6327,9 @@ function renderReportes() {
     </button>
     <button class="sb-item" onclick="closeSidebar();openNotasBlock()">
       <span class="sb-icon">📝</span> Block de notas
+    </button>
+    <button class="sb-item" onclick="closeSidebar();showV('calendario')">
+      <span class="sb-icon">📅</span> Calendario
     </button>
 
     <div class="sb-divider"></div>
