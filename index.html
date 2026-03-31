@@ -5298,7 +5298,7 @@ async function saveLTEdit() {
       SB.from('punto_de_venta').upsert({ nombre: pv }).then(()=>{}).catch(()=>{});
       initLTSelectPV();
     }
-    await SB.from('solicitudes').update({ punto_de_venta: pv }).eq('id', id);
+    SB.from('solicitudes').update({ punto_de_venta: pv }).eq('id', id).then(()=>{}).catch(()=>{});
   }
 
   const n = v => { const p = parseFloat(String(v||'').replace(/[$,]/g,'')); return isNaN(p) ? null : p; };
