@@ -1590,6 +1590,29 @@ let CONT_DATA = {};
 let GASTOS_DATA = [];
 
 // ══════════════════════════════════════════════
+// HISTORIAL
+// ══════════════════════════════════════════════
+async function registrarHistorial(entidad, entidad_id, cambios) {
+  if (!cambios || !cambios.length) return;
+  const rows = cambios.map(c => ({
+    entidad, entidad_id: String(entidad_id),
+    campo: c.campo, valor_ant: c.ant !== undefined && c.ant !== null ? String(c.ant) : null,
+    valor_nuevo: c.nuevo !== undefined && c.nuevo !== null ? String(c.nuevo) : null,
+    usuario: ME?.nom || ME?.usr || '—',
+    created_at: new Date().toISOString()
+  }));
+  SB.from('historial_cambios').insert(rows).then(()=>{}).catch(()=>{});
+}
+
+function diffObjetos(viejo, nuevo, campos) {
+  return campos.filter(f => {
+    const v = viejo?.[f] !== undefined ? String(viejo[f] ?? '') : '';
+    const n = nuevo?.[f] !== undefined ? String(nuevo[f] ?? '') : '';
+    return v !== n;
+  }).map(f => ({ campo: f, ant: viejo?.[f] ?? null, nuevo: nuevo?.[f] ?? null }));
+}
+
+// ══════════════════════════════════════════════
 // GASTOS
 // ══════════════════════════════════════════════
 async function loadGastos() {
@@ -1965,10 +1988,17 @@ async function saveGestor() {
     cp:        document.getElementById('g-cp').value.trim(),
   };
   try {
-    const { error } = existingId
-      ? await SB.from('gestores').update(row).eq('id', id)
-      : await SB.from('gestores').insert(row);
-    if (error) throw error;
+    if (existingId) {
+      const viejoGestor = GESTORES_CACHE.find(g => g.id === existingId) || {};
+      const { error } = await SB.from('gestores').update(row).eq('id', id);
+      if (error) throw error;
+      const cambiosGestor = diffObjetos(viejoGestor, row, ['nombre','telefono','email','direccion','localidad','provincia','cp']);
+      registrarHistorial('gestor', id, cambiosGestor);
+    } else {
+      const { error } = await SB.from('gestores').insert(row);
+      if (error) throw error;
+      registrarHistorial('gestor', id, [{ campo: 'creado', ant: null, nuevo: nombre }]);
+    }
     toast('Gestor guardado ✓', 'ok');
     closeFormGestor();
     await loadGestores();
@@ -3302,6 +3332,7 @@ async function saveConcEdit() {
   };
   try {
     const existing = CONC_CACHE.find(x => x.nombre === nombre);
+    const viejaConc = existing ? { ...existing } : {};
     const { error } = existing
       ? await SB.from('concesionarias').update(row).eq('nombre', nombre)
       : await SB.from('concesionarias').insert(row);
@@ -3309,6 +3340,10 @@ async function saveConcEdit() {
     const idx = CONC_CACHE.findIndex(x => x.nombre === nombre);
     if (idx >= 0) Object.assign(CONC_CACHE[idx], row);
     else CONC_CACHE.push(row);
+    const cambiosConc = existing
+      ? diffObjetos(viejaConc, row, ['cuit','telefono','email','direccion','localidad','provincia'])
+      : [{ campo: 'creado', ant: null, nuevo: nombre }];
+    registrarHistorial('concesionaria', nombre, cambiosConc);
     toast('Guardado ✓', 'ok');
     closeConcEdit();
     renderConcesionarias(CONC_CACHE);
@@ -4004,6 +4039,7 @@ async function saveContEdit(silent = false) {
     obs:             document.getElementById('cont-obs').value || null,
   };
   try {
+    const viejoCont = { ...CONT_DATA[id] };
     const { error } = await SB.from('contabilidad').upsert(row, { onConflict: 'solicitud_id' });
     if (error) throw error;
     CONT_DATA[id] = {
@@ -4015,6 +4051,8 @@ async function saveContEdit(silent = false) {
       pagado: row.pagado, fechaPagado: row.fecha_pagado,
       pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs
     };
+    const cambiosCont = diffObjetos(viejoCont, CONT_DATA[id], ['aLiquidar','impCredito','gastosGestoria','comLukaya','fechaLiq','comComercial','comOperativo','comGestora','retribBanco','ganancia','pagado','fechaPagado','pagoGest','obs']);
+    registrarHistorial('contabilidad', id, cambiosCont);
     if (!silent) { toast('Guardado ✓', 'ok'); closeContEdit(); }
     renderContabilidad();
   } catch(e) { if (!silent) toast('Error: ' + e.message, 'er'); }
@@ -4140,10 +4178,13 @@ async function savePrenda() {
   const presentada = document.getElementById('prenda-presentada').checked;
   const finalizada = document.getElementById('prenda-finalizada').value;
   try {
+    const r = RECORDS.find(x => x.id === id);
+    const viejaPrenda = r ? { enProceso: r.enProceso, presentada: r.presentada, finalizada: r.finalizada } : {};
     const { error } = await SB.from('solicitudes').update({ en_proceso: enProceso, presentada, finalizada: finalizada || null }).eq('id', id);
     if (error) throw error;
-    const r = RECORDS.find(x => x.id === id);
     if (r) { r.enProceso = enProceso; r.presentada = presentada; r.finalizada = finalizada; }
+    const cambiosPrenda = diffObjetos(viejaPrenda, { enProceso, presentada, finalizada }, ['enProceso','presentada','finalizada']);
+    registrarHistorial('prenda', id, cambiosPrenda);
     toast('Prenda actualizada ✓', 'ok');
     closePrendaEdit();
     renderPrendas();
@@ -4657,10 +4698,14 @@ async function saveRecord() {
   try {
     if (editId) {
       const idx = RECORDS.findIndex(r=>r.id===editId);
+      const viejo = { ...RECORDS[idx] };
       RECORDS[idx] = { ...RECORDS[idx], ...d };
       rec = { ...RECORDS[idx], usuarioEdit: ME.nom };
       const { error } = await SB.from('solicitudes').update(toDb(rec)).eq('id', editId);
       if (error) throw error;
+      const campos = ['fecha','banco','concesionaria','provincia','localidad','dni','nombrecliente','dominio','marca','descripcion','tipocta','importe','agencia','vehiculo','estado','tasa','obs','comision'];
+      const cambios = diffObjetos(viejo, rec, campos);
+      registrarHistorial('solicitud', editId, cambios);
     } else {
       rec = { id:'S'+Date.now(), ...d, usuario:ME.nom, fechaReg:new Date().toISOString().slice(0,10) };
       RECORDS.push(rec);
@@ -5326,10 +5371,13 @@ async function saveLTEdit() {
   };
 
   try {
+    const viejoLT = { ...LT_DATA[id] };
     const { error } = await SB.from('contabilidad').upsert(row, { onConflict: 'solicitud_id' });
     if (error) throw error;
     LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
     CONT_DATA[id] = LT_DATA[id];
+    const cambiosLT = diffObjetos(viejoLT, LT_DATA[id], ['aLiquidar','impCredito','gastosGestoria','comLukaya','fechaLiq','comComercial','comOperativo','comGestora','retribBanco','ganancia','pagado','fechaPagado','pagoGest','obs']);
+    registrarHistorial('liquidacion', id, cambiosLT);
     toast('Guardado ✓', 'ok');
     closeLTEdit();
     renderLiqTerceros();
