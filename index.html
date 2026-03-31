@@ -472,7 +472,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button class="tn" id="tn-pe" onclick="openPrendasEntregadas()" style="display:none">✅ Prendas entregadas</button>
         <button class="tn" onclick="showV('datero')" id="tn-datero" style="position:relative">
           📨 Datero
-          <span id="datero-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 5px var(--red)"></span>
+          <span id="datero-badge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)"></span>
         </button>
         <button class="tn" id="tn-micuenta" onclick="showV('micuenta')">🔑 Mi cuenta</button>
       </nav>
@@ -3091,8 +3091,26 @@ function closeConcHist() {
 
 let DATERO_LAST_COUNT = null;
 
+let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
+
 async function checkDateroNuevos() {
-  // Datero lee desde Google Forms — pendiente migración Etapa 4
+  try {
+    const { data } = await SB.from('datero').select('created_at').order('created_at', { ascending: false }).limit(1);
+    if (!data || !data.length) return;
+    const latest = data[0].created_at;
+    if (!DATERO_LAST_SEEN || latest > DATERO_LAST_SEEN) {
+      document.getElementById('datero-badge').style.display = '';
+    } else {
+      document.getElementById('datero-badge').style.display = 'none';
+    }
+  } catch(e) {}
+}
+
+function markDateroSeen() {
+  const now = new Date().toISOString();
+  DATERO_LAST_SEEN = now;
+  localStorage.setItem('datero_last_seen', now);
+  document.getElementById('datero-badge').style.display = 'none';
 }
 
 // ══════════════════════════════════════════════
@@ -3972,6 +3990,7 @@ function showV(v) {
   if (v==='usuarios') loadUsers();
   if (v==='config')   { loadMantenimientoStatus(); }
   if (v==='datero') {
+    markDateroSeen();
     if (DATERO_CACHE.length) { renderDatero(); loadDatero(); }
     else loadDatero();
   }
