@@ -1139,6 +1139,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--line);padding-bottom:0">
         <button id="cont-tab-liq" onclick="showContTab('liquidaciones')" style="padding:10px 22px;border:none;border-bottom:3px solid var(--blue);background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:-2px">💰 Liquidaciones</button>
         <button id="cont-tab-tot" onclick="showContTab('totales')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">📊 Totales</button>
+        <button id="cont-tab-gas" onclick="showContTab('gastos')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">💸 Gastos</button>
         <button id="cont-tab-coef" onclick="showContTab('coeficientes')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">⚙️ Cambio de Coeficientes</button>
       </div>
 
@@ -1241,7 +1242,76 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">📊 Totales del período</div>
           <div id="cont-totales-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px"></div>
         </div>
+        <div id="cont-totales-neto" class="card" style="padding:16px 20px;display:none;margin-top:16px;border-color:var(--green)">
+          <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.05em">💰 Ganancia Lukaya menos Gastos</div>
+          <div id="cont-totales-neto-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
+        </div>
         <div id="cont-totales-empty" style="text-align:center;color:var(--muted);padding:40px;font-size:13px">Seleccioná un rango de fechas para ver los totales</div>
+      </div>
+
+      <!-- TAB GASTOS -->
+      <div id="cont-tab-gastos" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div style="font-size:13px;font-weight:600;color:var(--ink2)">Gastos generales del negocio</div>
+          <button class="btn btn-p" onclick="abrirModalGasto(null)">＋ Agregar gasto</button>
+        </div>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:1.5px solid var(--line)">
+                <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Fecha</th>
+                <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Descripción</th>
+                <th style="padding:10px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Categoría</th>
+                <th style="padding:10px 14px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Monto</th>
+                <th style="padding:10px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="gastos-tbody"></tbody>
+          </table>
+          <div id="gastos-empty" style="display:none;text-align:center;padding:40px;color:var(--muted);font-size:13px">
+            <div style="font-size:32px;margin-bottom:8px">💸</div>
+            <div>Sin gastos registrados</div>
+          </div>
+        </div>
+        <div id="gastos-total-bar" style="display:none;margin-top:12px;text-align:right;font-size:13px;font-weight:700;color:var(--ink)">
+          Total gastos: <span id="gastos-total-valor" style="color:var(--red);font-family:monospace"></span>
+        </div>
+      </div>
+
+      <!-- MODAL GASTO -->
+      <div class="overlay" id="gasto-modal-overlay" onclick="if(event.target===this)cerrarModalGasto()">
+        <div class="modal" style="max-width:420px">
+          <div class="mh">
+            <div class="mh-t" id="gasto-modal-titulo">Nuevo gasto</div>
+            <button class="xbtn" onclick="cerrarModalGasto()">×</button>
+          </div>
+          <div style="padding:20px;display:flex;flex-direction:column;gap:14px">
+            <input type="hidden" id="gasto-id">
+            <div class="fc">
+              <label>Descripción *</label>
+              <input id="gasto-desc" placeholder="Descripción del gasto" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+            </div>
+            <div class="fg" style="grid-template-columns:1fr 1fr">
+              <div class="fc">
+                <label>Monto *</label>
+                <input type="number" id="gasto-monto" min="0" placeholder="$ 0" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+              </div>
+              <div class="fc">
+                <label>Fecha *</label>
+                <input type="date" id="gasto-fecha" style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+              </div>
+            </div>
+            <div class="fc">
+              <label>Categoría (opcional)</label>
+              <input id="gasto-cat" placeholder="Ej: Alquiler, Sueldos, Servicios..." style="width:100%;padding:8px 12px;border:1.5px solid var(--line);border-radius:8px;font-family:Inter,sans-serif;font-size:13.5px">
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+              <button class="btn btn-s" id="gasto-btn-del" style="display:none;color:var(--red);border-color:var(--red)" onclick="eliminarGasto()">🗑️ Eliminar</button>
+              <button class="btn btn-s" onclick="cerrarModalGasto()">Cancelar</button>
+              <button class="btn btn-p" onclick="guardarGasto()">💾 Guardar</button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- TAB COEFICIENTES -->
@@ -1513,6 +1583,108 @@ let ME = null;
 let RECORDS = [];
 let CLIENTES_DATA = {};
 let CONT_DATA = {};
+let GASTOS_DATA = [];
+
+// ══════════════════════════════════════════════
+// GASTOS
+// ══════════════════════════════════════════════
+async function loadGastos() {
+  const { data, error } = await SB.from('gastos').select('*').order('fecha', { ascending: false });
+  if (error) return;
+  GASTOS_DATA = data || [];
+  renderGastos();
+}
+
+function renderGastos() {
+  const tbody = document.getElementById('gastos-tbody');
+  const empty = document.getElementById('gastos-empty');
+  const totalBar = document.getElementById('gastos-total-bar');
+  if (!tbody) return;
+
+  if (!GASTOS_DATA.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    totalBar.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const fmt = v => '$' + Number(v).toLocaleString('es-AR');
+  const fmtFecha = v => v ? v.split('-').reverse().join('/') : '—';
+  const total = GASTOS_DATA.reduce((acc, g) => acc + (parseFloat(g.monto) || 0), 0);
+
+  tbody.innerHTML = GASTOS_DATA.map(g => `
+    <tr style="border-bottom:1px solid var(--line)">
+      <td style="padding:9px 14px;white-space:nowrap;font-size:12px">${fmtFecha(g.fecha)}</td>
+      <td style="padding:9px 14px;font-weight:600">${g.descripcion}</td>
+      <td style="padding:9px 14px;color:var(--muted);font-size:12px">${g.categoria || '—'}</td>
+      <td style="padding:9px 14px;text-align:right;font-family:monospace;font-weight:700;color:var(--red)">${fmt(g.monto)}</td>
+      <td style="padding:9px 14px;text-align:center">
+        <button class="ibtn" onclick="abrirModalGasto('${g.id}')" title="Editar">✏️</button>
+      </td>
+    </tr>`).join('');
+
+  document.getElementById('gastos-total-valor').textContent = fmt(total);
+  totalBar.style.display = '';
+}
+
+function abrirModalGasto(id) {
+  document.getElementById('gasto-id').value = id || '';
+  document.getElementById('gasto-modal-titulo').textContent = id ? 'Editar gasto' : 'Nuevo gasto';
+  document.getElementById('gasto-btn-del').style.display = id ? '' : 'none';
+  document.getElementById('gasto-desc').value = '';
+  document.getElementById('gasto-monto').value = '';
+  document.getElementById('gasto-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('gasto-cat').value = '';
+
+  if (id) {
+    const g = GASTOS_DATA.find(x => String(x.id) === String(id));
+    if (g) {
+      document.getElementById('gasto-desc').value  = g.descripcion || '';
+      document.getElementById('gasto-monto').value = g.monto || '';
+      document.getElementById('gasto-fecha').value = g.fecha || '';
+      document.getElementById('gasto-cat').value   = g.categoria || '';
+    }
+  }
+  document.getElementById('gasto-modal-overlay').classList.add('open');
+}
+
+function cerrarModalGasto() {
+  document.getElementById('gasto-modal-overlay').classList.remove('open');
+}
+
+async function guardarGasto() {
+  const desc  = document.getElementById('gasto-desc').value.trim();
+  const monto = parseFloat(document.getElementById('gasto-monto').value);
+  const fecha = document.getElementById('gasto-fecha').value;
+  if (!desc)        { toast('La descripción es obligatoria', 'er'); return; }
+  if (!monto || monto <= 0) { toast('El monto es obligatorio', 'er'); return; }
+  if (!fecha)       { toast('La fecha es obligatoria', 'er'); return; }
+
+  const id   = document.getElementById('gasto-id').value;
+  const data = { descripcion: desc, monto, fecha, categoria: document.getElementById('gasto-cat').value.trim() || null };
+
+  if (id) {
+    const { error } = await SB.from('gastos').update(data).eq('id', id);
+    if (error) { toast('Error al guardar', 'er'); return; }
+  } else {
+    const { error } = await SB.from('gastos').insert(data);
+    if (error) { toast('Error al guardar', 'er'); return; }
+  }
+
+  cerrarModalGasto();
+  await loadGastos();
+  toast('Guardado ✓', 'ok');
+}
+
+async function eliminarGasto() {
+  const id = document.getElementById('gasto-id').value;
+  if (!id || !confirm('¿Eliminar este gasto?')) return;
+  await SB.from('gastos').delete().eq('id', id);
+  cerrarModalGasto();
+  await loadGastos();
+  toast('Eliminado ✓', 'ok');
+}
 let LISTS = { banco:['Columbia','San Cristóbal'], concesionaria:[], provincia:[], localidad:[], marca:[], descripcion:[], dni:[], nombrecliente:[], dominio:[], tasa:[] };
 let editId = null;
 
@@ -1584,7 +1756,7 @@ async function enterApp() {
   CONT_DATA = {};
   document.getElementById('app').style.display = 'block';
   await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
-  Promise.all([loadGestores(), loadDatero()]).catch(()=>{});
+  Promise.all([loadGestores(), loadDatero(), loadGastos()]).catch(()=>{});
   SB.from('coeficientes').select('*').eq('id',1).single().then(({data}) => {
     if (data) COEFICIENTES = { impCredito: data.imp_credito, comLukaya: data.com_lukaya, comGestor: data.com_gestor, retribBanco: data.retrib_banco };
   }).catch(()=>{});
@@ -3569,6 +3741,26 @@ function renderTotalesCont(data) {
     </div>`).join('');
 
   panel.style.display = '';
+
+  // Cajón Ganancia Lukaya menos Gastos
+  const netoPanel = document.getElementById('cont-totales-neto');
+  const netoGrid  = document.getElementById('cont-totales-neto-grid');
+  if (netoPanel && netoGrid) {
+    const gananciaLukaya = sum('ganancia');
+    const totalGastos = GASTOS_DATA.reduce((acc, g) => acc + (parseFloat(g.monto) || 0), 0);
+    const neto = gananciaLukaya - totalGastos;
+    const fmtN = v => '$' + Math.round(v).toLocaleString('es-AR');
+    netoGrid.innerHTML = [
+      { label: 'Ganancia LUKAYA', value: fmtN(gananciaLukaya), color: 'var(--green)' },
+      { label: 'Total Gastos',    value: fmtN(totalGastos),    color: 'var(--red)' },
+      { label: 'Ganancia Neta',   value: fmtN(neto),           color: neto >= 0 ? 'var(--green)' : 'var(--red)', bold: true },
+    ].map(item => `
+      <div style="background:var(--surface);border-radius:8px;padding:10px 12px;border:1px solid var(--line)${item.bold?';border-color:var(--green)':''}">
+        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${item.label}</div>
+        <div style="font-size:15px;font-weight:${item.bold?'800':'700'};color:${item.color};font-family:monospace">${item.value}</div>
+      </div>`).join('');
+    netoPanel.style.display = '';
+  }
 }
 
 function editCont(id) {
@@ -3670,10 +3862,10 @@ async function recargarLiquidaciones() {
 }
 
 function showContTab(tab) {
-  ['liquidaciones','totales','coeficientes'].forEach(t => {
+  ['liquidaciones','totales','gastos','coeficientes'].forEach(t => {
     const el = document.getElementById('cont-tab-'+t);
     if (el) el.style.display = t === tab ? '' : 'none';
-    const btnId = t === 'liquidaciones' ? 'liq' : t === 'totales' ? 'tot' : 'coef';
+    const btnId = t === 'liquidaciones' ? 'liq' : t === 'totales' ? 'tot' : t === 'gastos' ? 'gas' : 'coef';
     const btn = document.getElementById('cont-tab-'+btnId);
     if (btn) {
       btn.style.borderBottomColor = t === tab ? 'var(--blue)' : 'transparent';
@@ -3683,6 +3875,7 @@ function showContTab(tab) {
   });
   if (tab === 'liquidaciones') { renderContabilidad(); setTimeout(initContMirror, 100); }
   if (tab === 'totales') renderTotalesTab();
+  if (tab === 'gastos') loadGastos();
   if (tab === 'coeficientes') loadCoeficientes();
 }
 
@@ -5105,7 +5298,7 @@ async function saveLTEdit() {
       SB.from('punto_de_venta').upsert({ nombre: pv }).then(()=>{}).catch(()=>{});
       initLTSelectPV();
     }
-    SB.from('solicitudes').update({ obs: r.obs }).eq('id', id).then(()=>{}).catch(()=>{});
+    SB.from('solicitudes').update({ punto_de_venta: pv }).eq('id', id).then(()=>{}).catch(()=>{});
   }
 
   const n = v => { const p = parseFloat(String(v||'').replace(/[$,]/g,'')); return isNaN(p) ? null : p; };
@@ -5129,7 +5322,7 @@ async function saveLTEdit() {
   };
 
   try {
-    const { error } = await SB.from('contabilidad').upsert(row);
+    const { error } = await SB.from('contabilidad').upsert(row, { onConflict: 'solicitud_id' });
     if (error) throw error;
     LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
     CONT_DATA[id] = LT_DATA[id];
