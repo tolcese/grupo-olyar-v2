@@ -3854,7 +3854,7 @@ function closePrendas() {
 
 function renderPrendas() {
   const q = (document.getElementById('prendas-srch')?.value || '').toLowerCase();
-  let data = RECORDS.filter(r => r.gestorAsignado && r.gestorAsignado.trim() !== '');
+  let data = RECORDS.filter(r => r.gestorAsignado && r.gestorAsignado.trim() !== '' && (!r.finalizada || r.finalizada.trim() === ''));
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.banco, r.concesionaria, r.provincia, r.localidad, r.marca, r.gestorAsignado].some(v => (v||'').toLowerCase().includes(q))
   );
@@ -5220,7 +5220,8 @@ function renderCalendario() {
     const esHoy = fechaStr === hoy;
     const eventos = CAL_DATA.filter(e => e.fecha === fechaStr);
 
-    html += `<div onclick="abrirDia('${fechaStr}')" style="min-height:80px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px;cursor:pointer;transition:background .1s${esHoy?';background:var(--blue-soft)':''}" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background='${esHoy?'var(--blue-soft)':'#fff'}'">
+    const bgHoy = esHoy ? 'var(--blue-soft)' : '#fff';
+    html += `<div onclick="abrirDia('${fechaStr}')" style="min-height:80px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:4px;cursor:pointer;transition:background .1s${esHoy?';background:var(--blue-soft)':''}" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background='${bgHoy}'">
       <div style="font-size:12px;font-weight:${esHoy?'800':'500'};color:${esHoy?'var(--blue)':'var(--ink)'};margin-bottom:4px">${d}</div>
       ${eventos.slice(0,3).map(e => `
         <div style="background:${CAL_COLORES[e.tipo]};color:#fff;border-radius:4px;padding:2px 5px;font-size:10px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:${e.completado?0.5:1}" title="${e.titulo}">${e.titulo}</div>
