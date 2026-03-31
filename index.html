@@ -1828,13 +1828,13 @@ async function desasignarGestoria(id) {
   if (!requireEdit()) return;
   const r = RECORDS.find(x => x.id === id);
   const nombre = r?.nombrecliente || 'esta operación';
-  if (!confirm(`¿Desasignar gestor de "${nombre}"?`)) return;
-  const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null }).eq('id', id);
+  if (!confirm(`¿Desasignar gestor de "${nombre}"? La operación volverá al estado "Aprobado".`)) return;
+  const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null, estado: 'Aprobado' }).eq('id', id);
   if (error) { toast('Error al desasignar gestor', 'er'); return; }
   const rec = RECORDS.find(x => x.id === id);
-  if (rec) { rec.gestorAsignado = null; rec.gestorId = null; }
+  if (rec) { rec.gestorAsignado = null; rec.gestorId = null; rec.estado = 'Aprobado'; }
   renderGestoria();
-  toast('Gestor desasignado ✓', 'ok');
+  toast('Gestor desasignado — estado vuelto a Aprobado ✓', 'ok');
 }
 
 async function asignarGestoria(id) {
