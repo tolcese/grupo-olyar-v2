@@ -532,6 +532,17 @@
             <option>No</option>
           </select>
         </div>
+        <div class="field col-span-2">
+          <label>Título Completo del Automotor</label>
+          <div class="file-drop" id="fileDropTitulo" onclick="document.getElementById('tituloInput').click()">
+            <input type="file" id="tituloInput" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif" onchange="handleFilesTitulo(this.files)">
+            <div class="file-drop-icon">📃</div>
+            <p><strong>Hacé click para adjuntar archivos</strong><br>
+            PDF, documento o imagen · Máx. 10 MB por archivo · Hasta 5 archivos</p>
+          </div>
+          <div class="file-list" id="fileListTitulo"></div>
+        </div>
+
       </div>
     </div>
 
@@ -603,6 +614,7 @@
 
   // ── File handling ──────────────────────────────────────────────
   let selectedFiles = [];
+  let selectedFilesTitulo = [];
 
   function handleFiles(incoming) {
     for (const f of incoming) {
@@ -614,34 +626,62 @@
     updateProgress();
   }
 
+  function handleFilesTitulo(incoming) {
+    for (const f of incoming) {
+      if (selectedFilesTitulo.length >= 5) { alert('Máximo 5 archivos.'); break; }
+      if (f.size > 10 * 1024 * 1024) { alert(`"${f.name}" supera los 10 MB.`); continue; }
+      selectedFilesTitulo.push(f);
+    }
+    renderFilesTitulo();
+  }
+
   function removeFile(i) {
     selectedFiles.splice(i, 1);
     renderFiles();
     updateProgress();
   }
 
+  function removeFileTitulo(i) {
+    selectedFilesTitulo.splice(i, 1);
+    renderFilesTitulo();
+  }
+
   function renderFiles() {
     const list = document.getElementById('fileList');
     list.innerHTML = selectedFiles.map((f, i) => `
       <div class="file-item">
-        <div class="file-item-name">
-          <span>📄</span>
-          <span title="${f.name}">${f.name}</span>
-        </div>
+        <div class="file-item-name"><span>📄</span><span title="${f.name}">${f.name}</span></div>
         <span class="file-item-size">${(f.size/1024/1024).toFixed(1)} MB</span>
         <button type="button" class="file-remove" onclick="removeFile(${i})" title="Quitar">✕</button>
       </div>
     `).join('');
   }
 
-  // Drag & drop
+  function renderFilesTitulo() {
+    const list = document.getElementById('fileListTitulo');
+    list.innerHTML = selectedFilesTitulo.map((f, i) => `
+      <div class="file-item">
+        <div class="file-item-name"><span>📃</span><span title="${f.name}">${f.name}</span></div>
+        <span class="file-item-size">${(f.size/1024/1024).toFixed(1)} MB</span>
+        <button type="button" class="file-remove" onclick="removeFileTitulo(${i})" title="Quitar">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // Drag & drop DNI
   const dropZone = document.getElementById('fileDrop');
   dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
   dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
   dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    handleFiles(e.dataTransfer.files);
+    e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files);
+  });
+
+  // Drag & drop Título
+  const dropZoneTitulo = document.getElementById('fileDropTitulo');
+  dropZoneTitulo.addEventListener('dragover', e => { e.preventDefault(); dropZoneTitulo.classList.add('dragover'); });
+  dropZoneTitulo.addEventListener('dragleave', () => dropZoneTitulo.classList.remove('dragover'));
+  dropZoneTitulo.addEventListener('drop', e => {
+    e.preventDefault(); dropZoneTitulo.classList.remove('dragover'); handleFilesTitulo(e.dataTransfer.files);
   });
 
   // ── Progress bar ───────────────────────────────────────────────
@@ -719,6 +759,16 @@
 
       btn.textContent = 'Guardando solicitud…';
 
+      // Subir archivos del título
+      const tituloUrls = [];
+      for (const file of selectedFilesTitulo) {
+        const path = `titulo/${timestamp}/${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const { error: upErr } = await db.storage.from('datero-dni').upload(path, file, { upsert: true });
+        if (upErr) throw upErr;
+        const { data: urlData } = db.storage.from('datero-dni').getPublicUrl(path);
+        tituloUrls.push(urlData.publicUrl);
+      }
+
       // 2. Insert into datero table
       const payload = {
         provincia:            getVal('provincia'),
@@ -735,7 +785,6 @@
         archivos_dni:         archivoUrls,
         fecha_ingreso:        getVal('fecha_ingreso'),
         fecha:                new Date().toISOString().split('T')[0],
-        fecha:                new Date().toISOString().split('T')[0],
         domicilio_laboral:    getVal('domicilio_laboral'),
         telefono_laboral:     getVal('telefono_laboral'),
         monto_venta:          parseFloat(getVal('monto_venta')),
@@ -748,6 +797,7 @@
         tipo_tasa:            getVal('tipo_tasa'),
         monto_financiar:      parseFloat(getVal('monto_financiar')),
         cantidad_cuotas:      parseInt(getVal('cantidad_cuotas')),
+        titulo_automotor:     tituloUrls.length ? tituloUrls : null,
       };
 
       const { error: insertErr } = await db.from('datero').insert(payload);
