@@ -1601,7 +1601,8 @@ async function registrarHistorial(entidad, entidad_id, cambios) {
     usuario: ME?.nom || ME?.usr || '—',
     created_at: new Date().toISOString()
   }));
-  SB.from('historial_cambios').insert(rows).then(()=>{}).catch(()=>{});
+  const { error } = await SB.from('historial_cambios').insert(rows);
+  if (error) console.error('Historial error:', error);
 }
 
 function diffObjetos(viejo, nuevo, campos) {
