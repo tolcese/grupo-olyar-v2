@@ -721,7 +721,14 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="card-s" style="margin-bottom:16px">Descarga una copia completa de la planilla en formato Excel (.xlsx) a tu PC</div>
         <button class="btn btn-p" id="btn-backup" onclick="hacerBackupManual()">💾 Hacer backup ahora</button>
         <div id="backup-msg" style="margin-top:14px;font-size:13px;display:none"></div>
+      </div>
 
+      <div class="card" style="max-width:500px;margin-top:16px">
+        <div class="card-t">📂 Convertir backup a Excel</div>
+        <div class="card-s" style="margin-bottom:16px">Subí un archivo JSON de backup y lo convertimos a Excel con una hoja por tabla</div>
+        <input type="file" id="backup-json-input" accept=".json" style="display:none" onchange="convertirBackupJSON(this)">
+        <button class="btn btn-s" onclick="document.getElementById('backup-json-input').click()">📂 Seleccionar archivo JSON</button>
+        <div id="backup-convert-msg" style="margin-top:14px;font-size:13px;display:none"></div>
       </div>
     </div>
 
@@ -5187,6 +5194,52 @@ async function hacerBackupManual() {
   } finally {
     btn.disabled = false;
     btn.textContent = '💾 Hacer backup ahora';
+  }
+}
+
+async function convertirBackupJSON(input) {
+  const msg = document.getElementById('backup-convert-msg');
+  msg.style.display = 'block';
+  msg.style.color = 'var(--muted)';
+  msg.textContent = '⏳ Procesando...';
+
+  const file = input.files[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const backup = JSON.parse(text);
+
+    // Cargar SheetJS
+    if (!window.XLSX) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+
+    const wb = XLSX.utils.book_new();
+    const tablas = Object.keys(backup).filter(k => k !== '_meta' && Array.isArray(backup[k]));
+
+    for (const tabla of tablas) {
+      const data = backup[tabla];
+      if (!data.length) continue;
+      const ws = XLSX.utils.json_to_sheet(data);
+      const nombre = tabla.length > 31 ? tabla.slice(0, 31) : tabla;
+      XLSX.utils.book_append_sheet(wb, ws, nombre);
+    }
+
+    const fecha = backup._meta?.fecha?.slice(0, 10) || new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(wb, `backup_olyar_${fecha}.xlsx`);
+
+    msg.style.color = '#059669';
+    msg.textContent = '✓ Excel generado y descargado correctamente';
+    input.value = '';
+  } catch(e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '✕ Error: ' + e.message;
   }
 }
 
