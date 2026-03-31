@@ -1492,6 +1492,7 @@ async function enterApp() {
   // Heartbeat
   SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
   checkDateroNuevos();
+  if (ME.rol === 'admin') checkAutoBackup();
   loading(false);
   showV('sol');
 }
@@ -3092,6 +3093,31 @@ function closeConcHist() {
 let DATERO_LAST_COUNT = null;
 
 let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
+
+async function checkAutoBackup() {
+  try {
+    const lastBackup = localStorage.getItem('last_auto_backup');
+    const ahora = Date.now();
+    const VEINTICUATRO_HS = 24 * 60 * 60 * 1000;
+    if (lastBackup && ahora - parseInt(lastBackup) < VEINTICUATRO_HS) return;
+
+    const resp = await fetch('https://zohniclbfhvqmurtrhka.supabase.co/functions/v1/auto-backup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+      },
+      body: JSON.stringify({ trigger: 'auto' }),
+    });
+    const data = await resp.json();
+    if (data.ok) {
+      localStorage.setItem('last_auto_backup', ahora.toString());
+      console.log('✅ Backup automático:', data.archivo);
+    }
+  } catch(e) {
+    console.warn('Backup automático falló:', e);
+  }
+}
 
 async function checkDateroNuevos() {
   try {
