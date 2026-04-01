@@ -305,13 +305,13 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
   .fsel{width:100%;font-size:16px;}
 
   /* GESTORIA MODAL */
-  .gestoria-modal{max-height:98vh;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;top:auto;transform:none !important;}
+  .gestoria-modal{max-height:98vh;border-radius:12px;}
 
   /* PRENDAS MODAL */
-  .prendas-modal{max-height:98vh;border-radius:12px 12px 0 0;position:fixed;bottom:0;left:0;right:0;top:auto;transform:none !important;}
+  .prendas-modal{max-height:98vh;border-radius:12px;}
 
   /* CONTABILIDAD MODAL */
-  .cont-modal{max-height:98vh;border-radius:12px 12px 0 0;}
+  .cont-modal{max-height:98vh;border-radius:12px;}
 
   /* SIDEBAR */
   .sidebar{width:85vw;}
@@ -6338,8 +6338,14 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 
 // Auto refresh cada 1 minuto
 // Auto-refresh cada 30 segundos — solo recarga la sección visible
+let _lastScroll = 0;
+window.addEventListener('scroll', () => { _lastScroll = Date.now(); }, { passive: true });
+
 setInterval(() => {
   if (!ME) return;
+  // En móvil, no refrescar si el usuario scrolleó en los últimos 3 segundos
+  if (window.innerWidth <= 768 && Date.now() - _lastScroll < 3000) return;
+
   SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
   checkMantenimiento();
   checkDateroNuevos();
