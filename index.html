@@ -1020,15 +1020,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Fecha</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Provincia</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Concesionaria</th>
-                <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Encargado</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Solicitante</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">DNI</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Teléfono</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Compañía</th>
-                <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Email</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">DNI Foto</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Título Automotor</th>
-                <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Empresa</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Monto venta</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Dominio</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Marca</th>
@@ -1039,7 +1036,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Tipo tasa</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Monto financiar</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Cuotas</th>
-                <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Cuota estimada</th>
               </tr>
             </thead>
             <tbody id="datero-tbody"></tbody>
@@ -3587,15 +3583,12 @@ function renderDatero() {
       <td style="padding:9px 12px;white-space:nowrap;font-size:11.5px">${val(r.fecha)}</td>
       <td style="padding:9px 12px">${val(r.provincia)}</td>
       <td style="padding:9px 12px;font-weight:600">${val(r.concesionaria)}</td>
-      <td style="padding:9px 12px">${val(r.encargado)}</td>
       <td style="padding:9px 12px;font-weight:700">${val(r.solicitante)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.dni)}</td>
       <td style="padding:9px 12px">${val(r.telefono)}</td>
       <td style="padding:9px 12px">${val(r.compania)}</td>
-      <td style="padding:9px 12px">${val(r.email)}</td>
       <td style="padding:9px 12px">${r.fotoDni ? r.fotoDni.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📎 Foto ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
       <td style="padding:9px 12px">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📃 Título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
-      <td style="padding:9px 12px;font-weight:600">${val(r.nombreEmpresa)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.montoVenta)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.dominio)}</td>
       <td style="padding:9px 12px">${val(r.marca)}</td>
@@ -3606,7 +3599,6 @@ function renderDatero() {
       <td style="padding:9px 12px">${val(r.tipoTasa)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.montoFinanciar)}</td>
       <td style="padding:9px 12px;text-align:center">${val(r.cuotas)}</td>
-      <td style="padding:9px 12px;font-family:monospace">${val(r.cuotaEstimada)}</td>
     </tr>`).join('');
   setTimeout(initDateroMirror, 50);
 }
