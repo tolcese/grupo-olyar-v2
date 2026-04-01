@@ -1951,10 +1951,32 @@ function openSidebar() {
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = '';
   document.getElementById('sb-liq-terceros').style.display = ME?.rol === 'admin' ? '' : 'none';
+  if (ME?.rol === 'admin') renderSidebarPV();
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+async function renderSidebarPV() {
+  const container = document.getElementById('sb-pv-items');
+  if (!container) return;
+
+  // Cargar desde Supabase para tener los más actualizados
+  const { data } = await SB.from('punto_de_venta').select('nombre').order('nombre');
+  const pvList = data?.map(r => r.nombre) || LISTS.puntodeventa || [];
+
+  if (!pvList.length) {
+    container.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:4px 0">Sin puntos de venta</div>';
+    return;
+  }
+
+  container.innerHTML = pvList.map(pv => `
+    <div style="display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:7px;background:var(--surface);font-size:12px;color:var(--ink2)">
+      <span style="width:6px;height:6px;border-radius:50%;background:var(--blue);flex-shrink:0"></span>
+      <span style="font-weight:600">${pv}</span>
+    </div>
+  `).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -6730,6 +6752,14 @@ function renderReportes() {
     <button class="sb-item" onclick="closeSidebar();showV('calendario')">
       <span class="sb-icon">📅</span> Calendario
     </button>
+
+    <div class="sb-divider"></div>
+    <div class="sb-section-label admin-only">Puntos de Venta</div>
+    <div id="sb-pv-list" class="admin-only" style="padding:0 12px 8px">
+      <div id="sb-pv-items" style="display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:12px;color:var(--muted);padding:6px 0">Cargando...</div>
+      </div>
+    </div>
 
     <div class="sb-divider"></div>
     <div class="sb-section-label">Cuenta</div>
