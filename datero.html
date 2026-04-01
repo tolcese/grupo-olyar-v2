@@ -454,20 +454,28 @@
           <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);border-bottom:1.5px solid var(--blue-light);padding-bottom:6px">📞 Teléfonos Alternativos</div>
         </div>
         <div class="field">
-          <label>Teléfono Alternativo 1</label>
+          <label>Teléfono Alternativo</label>
           <input type="tel" id="telefono_alt1" placeholder="Ej: 3512345678" inputmode="numeric">
         </div>
         <div class="field">
-          <label>Nombre y Relación (Alt. 1)</label>
-          <input type="text" id="telefono_alt1_relacion" placeholder="Ej: María García - Esposa">
+          <label>Nombre</label>
+          <input type="text" id="telefono_alt1_nombre" placeholder="Ej: María García">
         </div>
         <div class="field">
-          <label>Teléfono Alternativo 2</label>
+          <label>Relación</label>
+          <input type="text" id="telefono_alt1_relacion" placeholder="Ej: Esposa">
+        </div>
+        <div class="field">
+          <label>Teléfono Alternativo</label>
           <input type="tel" id="telefono_alt2" placeholder="Ej: 3512345678" inputmode="numeric">
         </div>
         <div class="field">
-          <label>Nombre y Relación (Alt. 2)</label>
-          <input type="text" id="telefono_alt2_relacion" placeholder="Ej: Juan García - Hijo">
+          <label>Nombre</label>
+          <input type="text" id="telefono_alt2_nombre" placeholder="Ej: Juan García">
+        </div>
+        <div class="field">
+          <label>Relación</label>
+          <input type="text" id="telefono_alt2_relacion" placeholder="Ej: Hijo">
         </div>
 
       </div>
@@ -798,8 +806,10 @@
         telefono:             getVal('telefono'),
         compania_telefono:    getVal('compania_telefono'),
         telefono_alt1:        getVal('telefono_alt1') || null,
+        telefono_alt1_nombre: getVal('telefono_alt1_nombre') || null,
         telefono_alt1_relacion: getVal('telefono_alt1_relacion') || null,
         telefono_alt2:        getVal('telefono_alt2') || null,
+        telefono_alt2_nombre: getVal('telefono_alt2_nombre') || null,
         telefono_alt2_relacion: getVal('telefono_alt2_relacion') || null,
 
         email_cliente:        getVal('email_cliente'),
