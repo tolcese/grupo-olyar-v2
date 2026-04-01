@@ -490,6 +490,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="tb-av" id="tb-av">?</div>
         <div><div class="tb-uname" id="tb-uname">—</div><div class="tb-role" id="tb-role">—</div></div>
       </div>
+      <div id="weather-widget" style="display:none;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--ink2)">
+        <span id="weather-icon">🌤️</span>
+        <span id="weather-temp" style="font-weight:700"></span>
+        <span id="weather-desc" style="color:var(--muted)"></span>
+      </div>
       <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -1781,6 +1786,7 @@ async function enterApp() {
   if (ME.rol === 'invitado') document.body.classList.add('is-invitado');
   else document.body.classList.remove('is-invitado');
   document.getElementById('btn-datero').style.display = ME.rol === 'admin' ? 'none' : '';
+  if (ME.usr === 'claudionieva') loadWeather();
   syncUI('ok');
 
   // Verificar mantenimiento ANTES de mostrar la app
@@ -1804,6 +1810,44 @@ async function enterApp() {
   if (ME.rol === 'admin') checkAutoBackup();
   loading(false);
   showV('sol');
+}
+
+function weatherIcon(code) {
+  if (code === 113) return '☀️';
+  if ([116,119].includes(code)) return '⛅';
+  if ([122,143,248,260].includes(code)) return '🌫️';
+  if ([176,293,296,299,302,305,308,353].includes(code)) return '🌧️';
+  if ([179,182,185,281,284,311,314,317,320,323,326,329,332,335,338,350,368,371,374,377].includes(code)) return '🌨️';
+  if ([200,386,389,392,395].includes(code)) return '⛈️';
+  return '🌤️';
+}
+
+async function loadWeather() {
+  const widget = document.getElementById('weather-widget');
+  if (!widget) return;
+  try {
+    const fetchWeather = async (lat, lon) => {
+      const query = lat ? `${lat},${lon}` : 'Cordoba,Argentina';
+      const res = await fetch(`https://wttr.in/${query}?format=j1`);
+      const data = await res.json();
+      const cur = data.current_condition[0];
+      const temp = cur.temp_C;
+      const code = parseInt(cur.weatherCode);
+      const desc = cur.lang_es?.[0]?.value || cur.weatherDesc[0].value;
+      document.getElementById('weather-icon').textContent = weatherIcon(code);
+      document.getElementById('weather-temp').textContent = `${temp}°C`;
+      document.getElementById('weather-desc').textContent = desc;
+      widget.style.display = 'flex';
+    };
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => fetchWeather(pos.coords.latitude, pos.coords.longitude),
+        ()  => fetchWeather(null, null)
+      );
+    } else {
+      fetchWeather(null, null);
+    }
+  } catch(e) { console.warn('Weather error:', e); }
 }
 
 function doLogout() {
