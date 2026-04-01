@@ -3477,6 +3477,10 @@ async function loadDatero() {
     dni:            r.dni,
     telefono:       r.telefono,
     compania:       r.compania_telefono,
+    telefono_alt1:  r.telefono_alt1,
+    telefono_alt1_relacion: r.telefono_alt1_relacion,
+    telefono_alt2:  r.telefono_alt2,
+    telefono_alt2_relacion: r.telefono_alt2_relacion,
     email:          r.email_cliente,
     fotoDni:        Array.isArray(r.archivos_dni) ? r.archivos_dni.join(', ') : (r.archivos_dni || ''),
     tituloAutomotor: Array.isArray(r.titulo_automotor) ? r.titulo_automotor.join(', ') : (r.titulo_automotor || ''),
@@ -3577,8 +3581,9 @@ function openDateroPanel(idx) {
       <div class="panel-section-t">Datos del solicitante</div>
       <div class="prow"><span class="pl">Nombre</span><span class="pv bold">${val(r.solicitante)}</span></div>
       <div class="prow"><span class="pl">DNI</span><span class="pv mono">${val(r.dni)}</span></div>
-      <div class="prow"><span class="pl">Teléfono</span><span class="pv">${val(r.telefono)}</span></div>
-      <div class="prow"><span class="pl">Compañía</span><span class="pv">${val(r.compania)}</span></div>
+      <div class="prow"><span class="pl">Teléfono</span><span class="pv">${val(r.telefono)} (${val(r.compania)})</span></div>
+      ${r.telefono_alt1 ? `<div class="prow"><span class="pl">Tel. Alt. 1</span><span class="pv">${val(r.telefono_alt1)}${r.telefono_alt1_relacion ? ' — ' + r.telefono_alt1_relacion : ''}</span></div>` : ''}
+      ${r.telefono_alt2 ? `<div class="prow"><span class="pl">Tel. Alt. 2</span><span class="pv">${val(r.telefono_alt2)}${r.telefono_alt2_relacion ? ' — ' + r.telefono_alt2_relacion : ''}</span></div>` : ''}
       <div class="prow"><span class="pl">Email</span><span class="pv">${val(r.email)}</span></div>
       <div class="prow"><span class="pl">Foto DNI</span><span class="pv">${fotoLinks}</span></div>
       <div class="prow"><span class="pl">Título Automotor</span><span class="pv">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📃 Ver título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('<br>') : '—'}</span></div>
