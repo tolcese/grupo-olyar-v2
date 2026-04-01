@@ -1023,6 +1023,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Email</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">DNI Foto</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Título Automotor</th>
+                <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Empresa</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Monto venta</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Dominio</th>
                 <th style="padding:8px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Marca</th>
@@ -3480,6 +3481,7 @@ async function loadDatero() {
     fotoDni:        Array.isArray(r.archivos_dni) ? r.archivos_dni.join(', ') : (r.archivos_dni || ''),
     tituloAutomotor: Array.isArray(r.titulo_automotor) ? r.titulo_automotor.join(', ') : (r.titulo_automotor || ''),
     fechaIngreso:   r.fecha_ingreso,
+    nombreEmpresa:  r.nombre_empresa,
     domicilioLaboral: r.domicilio_laboral,
     telefonoLaboral:  r.telefono_laboral,
     montoVenta:     r.monto_venta,
@@ -3535,6 +3537,7 @@ function renderDatero() {
       <td style="padding:9px 12px">${val(r.email)}</td>
       <td style="padding:9px 12px">${r.fotoDni ? r.fotoDni.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📎 Foto ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
       <td style="padding:9px 12px">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📃 Título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
+      <td style="padding:9px 12px;font-weight:600">${val(r.nombreEmpresa)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.montoVenta)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.dominio)}</td>
       <td style="padding:9px 12px">${val(r.marca)}</td>
@@ -3579,6 +3582,13 @@ function openDateroPanel(idx) {
       <div class="prow"><span class="pl">Email</span><span class="pv">${val(r.email)}</span></div>
       <div class="prow"><span class="pl">Foto DNI</span><span class="pv">${fotoLinks}</span></div>
       <div class="prow"><span class="pl">Título Automotor</span><span class="pv">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📃 Ver título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('<br>') : '—'}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Información Laboral</div>
+      <div class="prow"><span class="pl">Empresa</span><span class="pv bold">${val(r.nombreEmpresa)}</span></div>
+      <div class="prow"><span class="pl">Fecha ingreso</span><span class="pv">${val(r.fechaIngreso)}</span></div>
+      <div class="prow"><span class="pl">Domicilio laboral</span><span class="pv">${val(r.domicilioLaboral)}</span></div>
+      <div class="prow"><span class="pl">Teléfono laboral</span><span class="pv">${val(r.telefonoLaboral)}</span></div>
     </div>
     <div class="panel-section">
       <div class="panel-section-t">Datos del vehículo</div>
