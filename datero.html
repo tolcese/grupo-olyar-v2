@@ -442,13 +442,24 @@
             <option>Otra</option>
           </select>
         </div>
-        <div class="field">
-          <label>Teléfono Alternativo 1 (Nombre y Relación)</label>
-          <input type="text" id="telefono_alt1" placeholder="Ej: María García - Esposa" >
+        <div class="field col-span-2" style="margin-top:8px">
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);border-bottom:1.5px solid var(--blue-light);padding-bottom:6px">📞 Teléfonos Alternativos</div>
         </div>
         <div class="field">
-          <label>Teléfono Alternativo 2 (Nombre y Relación)</label>
-          <input type="text" id="telefono_alt2" placeholder="Ej: Juan García - Hijo" >
+          <label>Teléfono Alternativo 1</label>
+          <input type="tel" id="telefono_alt1" placeholder="Ej: 3512345678" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Nombre y Relación (Alt. 1)</label>
+          <input type="text" id="telefono_alt1_relacion" placeholder="Ej: María García - Esposa">
+        </div>
+        <div class="field">
+          <label>Teléfono Alternativo 2</label>
+          <input type="tel" id="telefono_alt2" placeholder="Ej: 3512345678" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label>Nombre y Relación (Alt. 2)</label>
+          <input type="text" id="telefono_alt2_relacion" placeholder="Ej: Juan García - Hijo">
         </div>
 
         <div class="field col-span-2">
@@ -783,7 +794,9 @@
         telefono:             getVal('telefono'),
         compania_telefono:    getVal('compania_telefono'),
         telefono_alt1:        getVal('telefono_alt1') || null,
+        telefono_alt1_relacion: getVal('telefono_alt1_relacion') || null,
         telefono_alt2:        getVal('telefono_alt2') || null,
+        telefono_alt2_relacion: getVal('telefono_alt2_relacion') || null,
 
         email_cliente:        getVal('email_cliente'),
         archivos_dni:         archivoUrls,
