@@ -482,6 +482,10 @@
       </div>
       <div class="grid grid-2">
         <div class="field">
+          <label>Nombre de la Empresa <span class="req">*</span></label>
+          <input type="text" id="nombre_empresa" required placeholder="Ej: Empresa S.A.">
+        </div>
+        <div class="field">
           <label>Fecha de Ingreso <span class="req">*</span></label>
           <input type="date" id="fecha_ingreso" required>
         </div>
@@ -688,7 +692,7 @@
   const requiredIds = [
     'provincia','nombre_concesionaria','encargado_operacion',
     'nombre_apellido','dni','telefono','compania_telefono','email_cliente',
-    'fecha_ingreso','domicilio_laboral','telefono_laboral',
+    'fecha_ingreso','nombre_empresa','domicilio_laboral','telefono_laboral',
     'monto_venta','dominio','marca','modelo_version','anio','equipo_gnc',
     'entidad_bancaria','tipo_tasa','monto_financiar','cantidad_cuotas'
   ];
@@ -784,6 +788,7 @@
         email_cliente:        getVal('email_cliente'),
         archivos_dni:         archivoUrls,
         fecha_ingreso:        getVal('fecha_ingreso'),
+        nombre_empresa:       getVal('nombre_empresa'),
         fecha:                new Date().toISOString().split('T')[0],
         domicilio_laboral:    getVal('domicilio_laboral'),
         telefono_laboral:     getVal('telefono_laboral'),
