@@ -490,6 +490,13 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="tb-av" id="tb-av">?</div>
         <div><div class="tb-uname" id="tb-uname">—</div><div class="tb-role" id="tb-role">—</div></div>
       </div>
+      <div id="weather-widget" style="display:none;align-items:center;gap:6px;background:var(--bg2,#f8fafc);border:1px solid var(--line,#e2e8f0);border-radius:8px;padding:4px 10px;font-size:12px;color:var(--text,#1e293b);cursor:default" title="Clima actual">
+        <span id="weather-icon" style="font-size:18px">⛅</span>
+        <div style="display:flex;flex-direction:column;line-height:1.2">
+          <span id="weather-temp" style="font-weight:700;font-size:13px">--°C</span>
+          <span id="weather-desc" style="font-size:10px;color:var(--muted,#94a3b8)">cargando...</span>
+        </div>
+      </div>
       <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="doLogout()">Salir</button>
     </div>
   </div>
@@ -1756,6 +1763,7 @@ async function enterApp() {
   document.getElementById('tb-av').textContent = ME.nom[0].toUpperCase();
   document.getElementById('tb-uname').textContent = ME.nom;
   document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : '👤 Usuario';
+  if (ME.usr === 'claudionieva') loadWeather();
   if (ME.rol === 'admin') {
     document.getElementById('sb-usuarios').style.display = '';
     document.getElementById('th-acc').style.display = '';
@@ -6264,6 +6272,53 @@ setInterval(() => {
 setInterval(() => {
   if (ME) SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
 }, 30000);
+
+async function loadWeather() {
+  const widget = document.getElementById('weather-widget');
+  if (!widget) return;
+  widget.style.display = 'flex';
+  try {
+    if (!navigator.geolocation) throw new Error('no geo');
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      const res = await fetch(`https://wttr.in/${lat},${lon}?format=j1`);
+      const data = await res.json();
+      const cur = data.current_condition[0];
+      const temp = cur.temp_C;
+      const desc = cur.lang_es ? cur.lang_es[0].value : cur.weatherDesc[0].value;
+      const code = parseInt(cur.weatherCode);
+      const icon = weatherIcon(code, desc);
+      document.getElementById('weather-temp').textContent = temp + '°C';
+      document.getElementById('weather-desc').textContent = desc;
+      document.getElementById('weather-icon').textContent = icon;
+    }, async () => {
+      // fallback: Córdoba
+      const res = await fetch('https://wttr.in/Cordoba,Argentina?format=j1');
+      const data = await res.json();
+      const cur = data.current_condition[0];
+      const temp = cur.temp_C;
+      const desc = cur.lang_es ? cur.lang_es[0].value : cur.weatherDesc[0].value;
+      const icon = weatherIcon(parseInt(cur.weatherCode), desc);
+      document.getElementById('weather-temp').textContent = temp + '°C';
+      document.getElementById('weather-desc').textContent = desc;
+      document.getElementById('weather-icon').textContent = icon;
+    });
+  } catch(e) {
+    document.getElementById('weather-desc').textContent = 'sin datos';
+  }
+}
+
+function weatherIcon(code, desc) {
+  if (code === 113) return '☀️';
+  if (code === 116) return '⛅';
+  if (code === 119 || code === 122) return '☁️';
+  if ([143,248,260].includes(code)) return '🌫️';
+  if ([176,263,266,293,296].includes(code)) return '🌦️';
+  if ([299,302,305,308].includes(code)) return '🌧️';
+  if ([200,386,389,392,395].includes(code)) return '⛈️';
+  if ([179,182,185,227,230,281,284,311,314,317,320,323,326,329,332,335,338,350,362,365,368,371,374,377].includes(code)) return '🌨️';
+  return '🌡️';
+}
 </script>
 
 <!-- SLIDE PANEL GESTORES -->
