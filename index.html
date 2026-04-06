@@ -1979,7 +1979,7 @@ function openSidebar() {
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-contabilidad').style.display = '';
+  document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-liq-terceros').style.display = ME?.rol === 'admin' ? '' : 'none';
   if (ME?.rol === 'admin') renderSidebarPV();
 }
@@ -4621,6 +4621,7 @@ document.getElementById('l-u').addEventListener('keydown', e => { if(e.key==='En
 function showV(v) {
   if (v === 'nueva' && !canEdit()) { toast('No tenés permisos para crear solicitudes', 'warn'); return; }
   if ((v === 'contabilidad' || v === 'bancos') && !canEdit()) { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
+  if (v === 'contabilidad' && ME?.rol !== 'admin') { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
   if (v === 'reportes') {
     const isAdmin = ME?.rol === 'admin';
     // Tabs solo para admin
