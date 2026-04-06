@@ -1021,6 +1021,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th>Comisión operativo</th>
                 <th>Comisión gestor</th>
                 <th>Retribución banco</th>
+                <th>Fecha pago banco</th>
                 <th>Ganancia LUKAYA</th>
                 <th>Pagado</th>
                 <th>Fecha pagado</th>
@@ -3845,6 +3846,7 @@ async function loadContabilidad() {
         comGestora:     c.com_gestora,
         retribBanco:    c.retrib_banco,
         ganancia:       c.ganancia,
+        fechaPagoBanco: c.fecha_pago_banco,
         pagado:         c.pagado,
         fechaPagado:    c.fecha_pagado,
         pagoGest:       c.pago_gest,
@@ -3853,6 +3855,15 @@ async function loadContabilidad() {
       };
     });
   } catch(e) {}
+}
+
+async function saveContFechaPagoBanco(id, fecha) {
+  const val = fecha || null;
+  const { error } = await SB.from('contabilidad').update({ fecha_pago_banco: val }).eq('solicitud_id', id);
+  if (error) { toast('Error al guardar fecha', 'er'); return; }
+  if (CONT_DATA[id]) CONT_DATA[id].fechaPagoBanco = val;
+  if (LT_DATA[id]) LT_DATA[id].fechaPagoBanco = val;
+  toast('Fecha guardada ✓', 'ok');
 }
 
 function limpiarFiltrosCont() {
@@ -3930,7 +3941,8 @@ function renderContabilidad() {
       <td style="font-family:monospace">${mon(c.comOperativo)}</td>
       <td style="font-family:monospace">${mon(c.comGestora)}</td>
       <td style="font-family:monospace">${mon(c.retribBanco)}</td>
-      <td style="font-family:monospace;color:var(--green);font-weight:600">${mon(c.ganancia)}</td>
+      <td style="font-family:monospace">${mon(c.retribBanco)}</td>
+      <td><input type="date" value="${c.fechaPagoBanco||''}" style="font-size:11px;padding:3px 6px;border:1.5px solid var(--line);border-radius:6px;font-family:Inter,sans-serif;cursor:pointer" onchange="saveContFechaPagoBanco('${r.id}',this.value)" onclick="event.stopPropagation()"></td>
       <td class="chk">${chkV(c.pagado)}</td>
       <td>${fmtD(c.fechaPagado)}</td>
       <td class="chk">${chkV(c.pagoGest)}</td>
@@ -4227,6 +4239,7 @@ async function saveContEdit(silent = false) {
     com_operativo:   n(document.getElementById('cont-com-operativo').value),
     com_gestora:     n(document.getElementById('cont-com-gestora').value),
     retrib_banco:    n(document.getElementById('cont-retrib-banco').value),
+    fecha_pago_banco: document.getElementById('cont-fecha-pago-banco')?.value || null,
     ganancia:        n(document.getElementById('cont-ganancia').value),
     pagado:          document.getElementById('cont-pagado').checked,
     fecha_pagado:    document.getElementById('cont-fecha-pagado').value || null,
@@ -5425,6 +5438,7 @@ function renderLiqTerceros() {
       <td style="font-family:monospace">${mon(c.comOperativo)}</td>
       <td style="font-family:monospace">${mon(c.comGestora)}</td>
       <td style="font-family:monospace">${mon(c.retribBanco)}</td>
+      <td><input type="date" value="${c.fechaPagoBanco||''}" style="font-size:11px;padding:3px 6px;border:1.5px solid var(--line);border-radius:6px;font-family:Inter,sans-serif;cursor:pointer" onchange="saveContFechaPagoBanco('${r.id}',this.value)" onclick="event.stopPropagation()"></td>
       <td style="font-family:monospace;color:var(--green);font-weight:600">${mon(c.ganancia)}</td>
       <td class="chk">${chkV(c.pagado)}</td>
       <td>${fmtD(c.fechaPagado)}</td>
