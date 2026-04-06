@@ -5577,6 +5577,8 @@ async function saveLTEdit() {
     toast('Guardado ✓', 'ok');
     closeLTEdit();
     renderLiqTerceros();
+    // Sincronizar contabilidad con los datos actualizados
+    renderContabilidad();
     if (currentLTId === id) openLTPanel(id);
   } catch(e) { toast('Error: ' + e.message, 'er'); }
 }
