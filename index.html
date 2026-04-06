@@ -3941,8 +3941,8 @@ function renderContabilidad() {
       <td style="font-family:monospace">${mon(c.comOperativo)}</td>
       <td style="font-family:monospace">${mon(c.comGestora)}</td>
       <td style="font-family:monospace">${mon(c.retribBanco)}</td>
-      <td style="font-family:monospace">${mon(c.retribBanco)}</td>
       <td><input type="date" value="${c.fechaPagoBanco||''}" style="font-size:11px;padding:3px 6px;border:1.5px solid var(--line);border-radius:6px;font-family:Inter,sans-serif;cursor:pointer" onchange="saveContFechaPagoBanco('${r.id}',this.value)" onclick="event.stopPropagation()"></td>
+      <td style="font-family:monospace;color:var(--green);font-weight:600">${mon(c.ganancia)}</td>
       <td class="chk">${chkV(c.pagado)}</td>
       <td>${fmtD(c.fechaPagado)}</td>
       <td class="chk">${chkV(c.pagoGest)}</td>
