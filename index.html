@@ -3341,10 +3341,18 @@ function cerrarRecordatorioCreditos() {
   document.getElementById('cred-recordatorio-overlay').classList.remove('open');
 }
 
-function checkRecordatoriosCreditos() {
+async function checkRecordatoriosCreditos() {
+  // Solo para usuarios (no admin)
+  if (!ME || ME.rol === 'admin') return;
   if (!CREDITOS_CACHE.length) return;
+
   const hoy = new Date();
   hoy.setHours(0,0,0,0);
+  const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+
+  // Cargar recordatorios ya enviados este mes
+  const { data: enviados } = await SB.from('recordatorios_enviados').select('credito_id,mes');
+  const yaEnviados = new Set((enviados||[]).map(e => `${e.credito_id}_${e.mes}`));
 
   const pendientes = CREDITOS_CACHE.filter(c => {
     if (c.estado !== 'Activo') return false;
@@ -3352,7 +3360,9 @@ function checkRecordatoriosCreditos() {
     if (!venc) return false;
     const recordatorio = diasHabilesAtras(venc, 7);
     recordatorio.setHours(0,0,0,0);
-    return recordatorio <= hoy && hoy <= venc;
+    const enRango = recordatorio <= hoy && hoy <= venc;
+    const vencMes = `${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}`;
+    return enRango && !yaEnviados.has(`${c.id}_${vencMes}`);
   });
 
   const badge = document.getElementById('cred-recordatorio-badge');
@@ -3364,6 +3374,7 @@ function checkRecordatoriosCreditos() {
     if (lista) {
       lista.innerHTML = pendientes.map(c => {
         const venc = proximoVencimientoCuota(c);
+        const vencMes = `${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}`;
         const cd = CLIENTES_DATA[c.dni] || {};
         const telRaw = cd.telefono || '';
         const telLimpio = telRaw.replace(/\D/g,'');
@@ -3379,7 +3390,7 @@ function checkRecordatoriosCreditos() {
             <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">${c.cliente||'—'}</div>
             <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b></div>
             ${waUrl
-              ? `<a href="${waUrl}" target="_blank" style="text-decoration:none"><button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button></a>`
+              ? `<a href="${waUrl}" target="_blank" style="text-decoration:none" onclick="marcarRecordatorioEnviado('${c.id}','${vencMes}')"><button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button></a>`
               : `<div style="font-size:11px;color:var(--muted)">Sin teléfono cargado</div>`
             }
           </div>`;
@@ -3387,6 +3398,13 @@ function checkRecordatoriosCreditos() {
     }
     document.getElementById('cred-recordatorio-overlay').classList.add('open');
   }
+}
+
+async function marcarRecordatorioEnviado(creditoId, mes) {
+  await SB.from('recordatorios_enviados').upsert({ credito_id: creditoId, mes, enviado_por: ME?.usr || '—' }, { onConflict: 'credito_id,mes' });
+  // Quitar el badge
+  const badge = document.getElementById('cred-recordatorio-badge');
+  if (badge) badge.style.display = 'none';
 }
 
 function enviarRecordatorioWA(id) {
