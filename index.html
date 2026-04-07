@@ -3714,10 +3714,18 @@ let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
 
 async function checkAutoBackup() {
   try {
-    const lastBackup = localStorage.getItem('last_auto_backup');
+    // Verificar último backup en Supabase Storage
+    const { data: archivos } = await SB.storage.from('backups').list('', { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
     const ahora = Date.now();
     const VEINTICUATRO_HS = 24 * 60 * 60 * 1000;
-    if (lastBackup && ahora - parseInt(lastBackup) < VEINTICUATRO_HS) return;
+
+    if (archivos && archivos.length) {
+      const ultimoBackup = new Date(archivos[0].created_at).getTime();
+      if (ahora - ultimoBackup < VEINTICUATRO_HS) {
+        console.log('⏭️ Backup reciente, no es necesario:', archivos[0].name);
+        return;
+      }
+    }
 
     const resp = await fetch('https://zohniclbfhvqmurtrhka.supabase.co/functions/v1/auto-backup', {
       method: 'POST',
@@ -3729,8 +3737,9 @@ async function checkAutoBackup() {
     });
     const data = await resp.json();
     if (data.ok) {
-      localStorage.setItem('last_auto_backup', ahora.toString());
       console.log('✅ Backup automático:', data.archivo);
+    } else {
+      console.warn('Backup falló:', data.error);
     }
   } catch(e) {
     console.warn('Backup automático falló:', e);
