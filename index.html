@@ -2953,6 +2953,7 @@ async function loadCreditos() {
       id: q.id, creditoId: q.credito_id, nro: q.nro,
       vencimiento: q.vencimiento, monto: q.monto, estado: q.estado
     }));
+    setTimeout(checkRecordatoriosCreditos, 500);
   } catch(e) {}
 }
 
@@ -3308,6 +3309,80 @@ function editCredito(id) {
   document.getElementById('cred-estado').value = c.estado || 'Activo';
   document.getElementById('cred-obs').value = c.obs || '';
   document.getElementById('cred-nuevo-overlay').classList.add('open');
+}
+
+// ══════════════════════════════════════════════
+// RECORDATORIOS DE CRÉDITOS
+// ══════════════════════════════════════════════
+function diasHabilesAtras(fecha, dias) {
+  // Resta N días hábiles (sin sábado ni domingo) desde una fecha
+  let d = new Date(fecha);
+  let restantes = dias;
+  while (restantes > 0) {
+    d.setDate(d.getDate() - 1);
+    const dow = d.getDay();
+    if (dow !== 0 && dow !== 6) restantes--;
+  }
+  return d;
+}
+
+function proximoVencimientoCuota(c) {
+  if (!c.fechaInicio) return null;
+  const hoy = new Date();
+  const partes = c.fechaInicio.split('-');
+  const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+  const cant = parseInt(c.cantCuotas) || 0;
+  const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
+  const cuotaActual = Math.min(Math.max(meses + 1, 1), cant);
+  return new Date(parseInt(partes[0]), parseInt(partes[1])-1 + (cuotaActual - 1), parseInt(partes[2]));
+}
+
+function checkRecordatoriosCreditos() {
+  if (!CREDITOS_CACHE.length) return;
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+
+  const pendientes = CREDITOS_CACHE.filter(c => {
+    if (c.estado !== 'Activo') return false;
+    const venc = proximoVencimientoCuota(c);
+    if (!venc) return false;
+    const recordatorio = diasHabilesAtras(venc, 7);
+    recordatorio.setHours(0,0,0,0);
+    return recordatorio <= hoy && hoy <= venc;
+  });
+
+  const badge = document.getElementById('cred-recordatorio-badge');
+  if (badge) badge.style.display = pendientes.length ? '' : 'none';
+
+  if (pendientes.length) {
+    const fmtF = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+    const lista = document.getElementById('cred-recordatorio-lista');
+    if (lista) {
+      lista.innerHTML = pendientes.map(c => {
+        const venc = proximoVencimientoCuota(c);
+        const cd = CLIENTES_DATA[c.dni] || {};
+        const telRaw = cd.telefono || '';
+        const telLimpio = telRaw.replace(/\D/g,'');
+        const tel = telLimpio.startsWith('54') ? telLimpio : '549' + telLimpio;
+        const sol = RECORDS.find(r => r.id === c.solicitudId) || {};
+        const vehiculo = sol.descripcion || sol.marca || 'su vehículo';
+        const hora = new Date().getHours();
+        const saludo = hora < 13 ? 'Buenos días' : 'Buenas tardes';
+        const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
+        const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(msg)}` : '';
+        return `
+          <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px">
+            <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">${c.cliente||'—'}</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b></div>
+            ${waUrl
+              ? `<a href="${waUrl}" target="_blank" style="text-decoration:none"><button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button></a>`
+              : `<div style="font-size:11px;color:var(--muted)">Sin teléfono cargado</div>`
+            }
+          </div>`;
+      }).join('');
+    }
+    document.getElementById('cred-recordatorio-overlay').classList.add('open');
+  }
 }
 
 function enviarRecordatorioWA(id) {
@@ -6866,8 +6941,9 @@ function renderReportes() {
     <button class="sb-item" onclick="closeSidebar();openPrendas()">
       <span class="sb-icon">📌</span> Prendas pendientes
     </button>
-    <button class="sb-item" onclick="closeSidebar();showV('creditos')">
+    <button class="sb-item" onclick="closeSidebar();showV('creditos')" style="position:relative">
       <span class="sb-icon">💳</span> Sistema de créditos
+      <span id="cred-recordatorio-badge" style="display:none;position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)"></span>
     </button>
     <button class="sb-item" onclick="closeSidebar();openPrendasEntregadas()">
       <span class="sb-icon">✅</span> Prendas entregadas
@@ -7699,6 +7775,23 @@ function renderReportes() {
         <div style="font-size:32px;margin-bottom:8px">📭</div>
         <div>Sin operaciones para este punto de venta</div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RECORDATORIOS CRÉDITOS -->
+<div class="overlay" id="cred-recordatorio-overlay" style="z-index:800">
+  <div class="modal" style="max-width:560px;max-height:85vh;display:flex;flex-direction:column;padding:0">
+    <div class="mh" style="padding:18px 24px;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--red-soft)">
+      <div>
+        <div class="mh-t" style="color:var(--red)">🔔 Recordatorios de cuotas</div>
+        <div style="font-size:12px;color:var(--red);opacity:.8;margin-top:2px">Estos créditos vencen en los próximos 7 días hábiles</div>
+      </div>
+      <button class="xbtn" onclick="document.getElementById(\'cred-recordatorio-overlay\').classList.remove(\'open\')">×</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:10px" id="cred-recordatorio-lista"></div>
+    <div style="padding:12px 20px;border-top:1.5px solid var(--line);text-align:right;flex-shrink:0">
+      <button class="btn btn-s" onclick="document.getElementById(\'cred-recordatorio-overlay\').classList.remove(\'open\')">Cerrar</button>
     </div>
   </div>
 </div>
