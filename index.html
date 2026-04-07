@@ -3337,6 +3337,10 @@ function proximoVencimientoCuota(c) {
   return new Date(parseInt(partes[0]), parseInt(partes[1])-1 + (cuotaActual - 1), parseInt(partes[2]));
 }
 
+function cerrarRecordatorioCreditos() {
+  document.getElementById('cred-recordatorio-overlay').classList.remove('open');
+}
+
 function checkRecordatoriosCreditos() {
   if (!CREDITOS_CACHE.length) return;
   const hoy = new Date();
@@ -7787,11 +7791,11 @@ function renderReportes() {
         <div class="mh-t" style="color:var(--red)">🔔 Recordatorios de cuotas</div>
         <div style="font-size:12px;color:var(--red);opacity:.8;margin-top:2px">Estos créditos vencen en los próximos 7 días hábiles</div>
       </div>
-      <button class="xbtn" onclick="document.getElementById(\'cred-recordatorio-overlay\').classList.remove(\'open\')">×</button>
+      <button class="xbtn" onclick="cerrarRecordatorioCreditos()">×</button>
     </div>
     <div style="overflow-y:auto;flex:1;padding:16px 20px;display:flex;flex-direction:column;gap:10px" id="cred-recordatorio-lista"></div>
     <div style="padding:12px 20px;border-top:1.5px solid var(--line);text-align:right;flex-shrink:0">
-      <button class="btn btn-s" onclick="document.getElementById(\'cred-recordatorio-overlay\').classList.remove(\'open\')">Cerrar</button>
+      <button class="btn btn-s" onclick="cerrarRecordatorioCreditos()">Cerrar</button>
     </div>
   </div>
 </div>
