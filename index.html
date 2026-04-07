@@ -2953,7 +2953,6 @@ async function loadCreditos() {
       id: q.id, creditoId: q.credito_id, nro: q.nro,
       vencimiento: q.vencimiento, monto: q.monto, estado: q.estado
     }));
-    setTimeout(checkRecordatoriosCreditos, 500);
   } catch(e) {}
 }
 
@@ -4750,7 +4749,7 @@ function showV(v) {
     else loadDatero();
   }
   if (v==='calendario') { loadCalendario(); }
-  if (v==='creditos')     { showCredTab('creditos'); }
+  if (v==='creditos') { showCredTab('creditos'); setTimeout(checkRecordatoriosCreditos, 300); }
   // Cerrar panel lateral de créditos al salir
   if (v !== 'creditos') {
     document.getElementById('cred-panel-overlay').classList.remove('open');
