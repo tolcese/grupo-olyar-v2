@@ -1179,6 +1179,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:2px solid var(--line);padding-bottom:0">
         <button id="cred-tab-btn-creditos" onclick="showCredTab('creditos')" style="padding:10px 22px;border:none;border-bottom:3px solid var(--blue);background:none;cursor:pointer;font-size:13px;font-weight:700;color:var(--blue);margin-bottom:-2px">💳 Créditos</button>
         <button id="cred-tab-btn-cuotas" onclick="showCredTab('cuotas')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">📅 Cuotas</button>
+        <button id="cred-tab-btn-recordatorios" onclick="showCredTab('recordatorios')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">🔔 Recordatorio Vencimiento Cuota (WA)</button>
       </div>
 
       <!-- TAB CRÉDITOS -->
@@ -1201,6 +1202,19 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
 
       <!-- TAB CUOTAS -->
+      <div id="cred-tab-recordatorios" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div style="font-size:13px;color:var(--muted)" id="rec-wa-count">—</div>
+          <button class="btn btn-s" onclick="renderRecordatoriosWA()">🔄 Actualizar</button>
+        </div>
+        <div id="rec-wa-lista" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px"></div>
+        <div id="rec-wa-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+          <div style="font-size:48px;margin-bottom:12px">✅</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink2)">Sin recordatorios pendientes</div>
+          <div style="font-size:13px;margin-top:6px">Todos los mensajes fueron enviados o no hay vencimientos próximos</div>
+        </div>
+      </div>
+
       <div id="cred-tab-cuotas" style="display:none">
         <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
           <div class="searchbox" style="min-width:240px">
@@ -2923,7 +2937,7 @@ let CUOTAS_CACHE   = [];
 let CRED_SOL_SEL   = null; // solicitud seleccionada
 
 function showCredTab(tab) {
-  ['creditos','cuotas'].forEach(t => {
+  ['creditos','cuotas','recordatorios'].forEach(t => {
     const el = document.getElementById('cred-tab-'+t);
     if (el) el.style.display = t === tab ? '' : 'none';
     const btn = document.getElementById('cred-tab-btn-'+t);
@@ -2935,6 +2949,79 @@ function showCredTab(tab) {
   });
   if (tab === 'creditos') renderCreditos();
   if (tab === 'cuotas')   renderCuotas();
+  if (tab === 'recordatorios') renderRecordatoriosWA();
+}
+
+async function renderRecordatoriosWA() {
+  const lista = document.getElementById('rec-wa-lista');
+  const empty = document.getElementById('rec-wa-empty');
+  const count = document.getElementById('rec-wa-count');
+  if (!lista) return;
+
+  lista.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:20px">Cargando...</div>';
+
+  const hoy = new Date();
+  hoy.setHours(0,0,0,0);
+
+  // Cargar recordatorios ya enviados
+  const { data: enviados } = await SB.from('recordatorios_enviados').select('credito_id,mes');
+  const yaEnviados = new Set((enviados||[]).map(e => `${e.credito_id}_${e.mes}`));
+
+  const pendientes = CREDITOS_CACHE.filter(c => {
+    if (c.estado !== 'Activo') return false;
+    const venc = proximoVencimientoCuota(c);
+    if (!venc) return false;
+    const recordatorio = diasHabilesAtras(venc, 7);
+    recordatorio.setHours(0,0,0,0);
+    const enRango = recordatorio <= hoy && hoy <= venc;
+    const vencMes = `${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}`;
+    return enRango && !yaEnviados.has(`${c.id}_${vencMes}`);
+  });
+
+  const enviadosMes = CREDITOS_CACHE.filter(c => {
+    if (c.estado !== 'Activo') return false;
+    const venc = proximoVencimientoCuota(c);
+    if (!venc) return false;
+    const vencMes = `${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}`;
+    return yaEnviados.has(`${c.id}_${vencMes}`);
+  });
+
+  count.innerHTML = `<span style="color:var(--red);font-weight:700">${pendientes.length} pendiente${pendientes.length!==1?'s':''}</span> · <span style="color:var(--green)">${enviadosMes.length} enviado${enviadosMes.length!==1?'s':''}</span>`;
+
+  if (!pendientes.length) {
+    lista.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const fmtF = d => `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+
+  lista.innerHTML = pendientes.map(c => {
+    const venc = proximoVencimientoCuota(c);
+    const vencMes = `${venc.getFullYear()}-${String(venc.getMonth()+1).padStart(2,'0')}`;
+    const cd = CLIENTES_DATA[c.dni] || {};
+    const telRaw = cd.telefono || '';
+    const telLimpio = telRaw.replace(/\D/g,'');
+    const tel = telLimpio.startsWith('54') ? telLimpio : '549' + telLimpio;
+    const sol = RECORDS.find(r => r.id === c.solicitudId) || {};
+    const vehiculo = sol.descripcion || sol.marca || 'su vehículo';
+    const hora = new Date().getHours();
+    const saludo = hora < 13 ? 'Buenos días' : 'Buenas tardes';
+    const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
+    const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(msg)}` : '';
+    return `
+      <div style="background:#fff;border:1.5px solid var(--red);border-radius:12px;padding:14px 16px">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px">${c.cliente||'—'}</div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b></div>
+        ${waUrl
+          ? `<a href="${waUrl}" target="_blank" style="text-decoration:none" onclick="marcarRecordatorioEnviado('${c.id}','${vencMes}');setTimeout(renderRecordatoriosWA,500)">
+               <button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button>
+             </a>`
+          : `<div style="font-size:11px;color:var(--muted);padding:6px 0">Sin teléfono cargado</div>`
+        }
+      </div>`;
+  }).join('');
 }
 
 async function loadCreditos() {
