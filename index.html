@@ -4961,6 +4961,7 @@ async function loadRecords() {
       enProceso: r.en_proceso, presentada: r.presentada, finalizada: r.finalizada,
       fechaEntregada: r.fecha_entregada, puntodeventa: r.punto_de_venta || ''
     }));
+    renderTable._keepPage = true;
     renderTable();
     renderStats();
     const tab = document.getElementById('rep-prendas-pend');
@@ -5278,6 +5279,7 @@ async function saveRecord() {
     const wasEdit = !!editId;
     const savedPage = CURRENT_PAGE;
     editId = null;
+    if (wasEdit) renderTable._keepPage = true;
     showV('sol');
     if (wasEdit) { CURRENT_PAGE = savedPage; renderTablePage(); }
   } catch(e) {
@@ -5393,7 +5395,9 @@ function renderTable() {
   }
 
   FILTERED_RECORDS = data;
-  CURRENT_PAGE = 1;
+  // Solo resetear a página 1 si el usuario aplicó un filtro nuevo (no en auto-refresh)
+  if (!renderTable._keepPage) CURRENT_PAGE = 1;
+  renderTable._keepPage = false;
   renderTablePage();
   document.getElementById('ph-count').textContent=`${data.length} registro${data.length!==1?'s':''}`;
   renderStats(data);
