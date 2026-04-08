@@ -450,6 +450,59 @@
           <label>Código Postal <span class="req">*</span></label>
           <input type="text" id="codigo_postal" required placeholder="Ej: 5000" inputmode="numeric">
         </div>
+        <div class="field">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="estado_civil" required>
+            <option value="">Seleccioná...</option>
+            <option>Soltero/a</option>
+            <option>Casado/a</option>
+            <option>Viudo/a</option>
+            <option>Divorciado/a</option>
+          </select>
+        </div>
+
+        <!-- DATOS DEL CÓNYUGE -->
+        <div class="field col-span-2" style="margin-top:8px" id="conyuge-section" style="display:none">
+          <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);border-bottom:1.5px solid var(--blue-light);padding-bottom:6px">💍 Datos del Cónyuge (en caso de ser casado/a)</div>
+        </div>
+        <div id="conyuge-fields" class="field col-span-2" style="display:none">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="field">
+              <label>Nombre y Apellido</label>
+              <input type="text" id="conyuge_nombre" placeholder="Nombre completo">
+            </div>
+            <div class="field">
+              <label>CUIT/CUIL</label>
+              <input type="text" id="conyuge_cuit" placeholder="Ej: 20-12345678-9" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label>Género</label>
+              <select id="conyuge_genero">
+                <option value="">Seleccioná...</option>
+                <option>Masculino</option>
+                <option>Femenino</option>
+                <option>No binario</option>
+                <option>Prefiero no decir</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Nacionalidad</label>
+              <input type="text" id="conyuge_nacionalidad" placeholder="Ej: Argentina">
+            </div>
+            <div class="field">
+              <label>Fecha de Nacimiento</label>
+              <input type="date" id="conyuge_fecha_nacimiento">
+            </div>
+            <div class="field">
+              <label>Actividad</label>
+              <input type="text" id="conyuge_actividad" placeholder="Ej: Empleado/a, Comerciante...">
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" id="conyuge_telefono" placeholder="Ej: 3512345678" inputmode="numeric">
+            </div>
+          </div>
+        </div>
         <div class="field col-span-2" style="margin-top:8px">
           <div style="font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);border-bottom:1.5px solid var(--blue-light);padding-bottom:6px">📞 Teléfonos Alternativos</div>
         </div>
@@ -722,7 +775,7 @@
   // ── Progress bar ───────────────────────────────────────────────
   const requiredIds = [
     'provincia','nombre_concesionaria','encargado_operacion',
-    'nombre_apellido','dni','telefono','compania_telefono','email_cliente','codigo_postal',
+    'nombre_apellido','dni','telefono','compania_telefono','email_cliente','codigo_postal','estado_civil',
     'fecha_ingreso','nombre_empresa','domicilio_laboral','telefono_laboral',
     'monto_venta','dominio','marca','modelo_version','anio','equipo_gnc',
     'entidad_bancaria','tipo_tasa','monto_financiar','cantidad_cuotas'
@@ -761,6 +814,12 @@
   }
 
   function getVal(id) { return document.getElementById(id).value.trim(); }
+
+  document.getElementById('estado_civil').addEventListener('change', function() {
+    const show = this.value === 'Casado/a';
+    document.getElementById('conyuge-section').style.display = show ? '' : 'none';
+    document.getElementById('conyuge-fields').style.display = show ? '' : 'none';
+  });
 
   function fmt(n) { return Number(n).toLocaleString('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }); }
 
@@ -822,6 +881,14 @@
 
         email_cliente:        getVal('email_cliente'),
         codigo_postal:        getVal('codigo_postal'),
+        estado_civil:         getVal('estado_civil'),
+        conyuge_nombre:       getVal('conyuge_nombre') || null,
+        conyuge_cuit:         getVal('conyuge_cuit') || null,
+        conyuge_genero:       getVal('conyuge_genero') || null,
+        conyuge_nacionalidad: getVal('conyuge_nacionalidad') || null,
+        conyuge_fecha_nacimiento: document.getElementById('conyuge_fecha_nacimiento').value || null,
+        conyuge_actividad:    getVal('conyuge_actividad') || null,
+        conyuge_telefono:     getVal('conyuge_telefono') || null,
         archivos_dni:         archivoUrls,
         fecha_ingreso:        getVal('fecha_ingreso'),
         nombre_empresa:       getVal('nombre_empresa'),
