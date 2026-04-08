@@ -3941,6 +3941,14 @@ async function loadDatero() {
     telefono_alt2_relacion: r.telefono_alt2_relacion,
     email:          r.email_cliente,
     codigoPostal:   r.codigo_postal,
+    estadoCivil:    r.estado_civil,
+    conyugeNombre:  r.conyuge_nombre,
+    conyugeCuit:    r.conyuge_cuit,
+    conyugeGenero:  r.conyuge_genero,
+    conyugeNacionalidad: r.conyuge_nacionalidad,
+    conyugeFechaNac: r.conyuge_fecha_nacimiento,
+    conyugeActividad: r.conyuge_actividad,
+    conyugeTelefono: r.conyuge_telefono,
     fotoDni:        Array.isArray(r.archivos_dni) ? r.archivos_dni.join(', ') : (r.archivos_dni || ''),
     tituloAutomotor: Array.isArray(r.titulo_automotor) ? r.titulo_automotor.join(', ') : (r.titulo_automotor || ''),
     fechaIngreso:   r.fecha_ingreso,
@@ -4041,6 +4049,17 @@ function openDateroPanel(idx) {
       ${r.telefono_alt2 ? `<div class="prow"><span class="pl">Tel. Alt.</span><span class="pv">${val(r.telefono_alt2)}${r.telefono_alt2_nombre ? ' — ' + r.telefono_alt2_nombre : ''}${r.telefono_alt2_relacion ? ' (' + r.telefono_alt2_relacion + ')' : ''}</span></div>` : ''}
       <div class="prow"><span class="pl">Email</span><span class="pv">${val(r.email)}</span></div>
       <div class="prow"><span class="pl">Código Postal</span><span class="pv">${val(r.codigoPostal)}</span></div>
+      <div class="prow"><span class="pl">Estado Civil</span><span class="pv">${val(r.estadoCivil)}</span></div>
+      ${r.estadoCivil === 'Casado/a' ? `
+      <div class="panel-section-t" style="margin-top:8px">💍 Datos del Cónyuge</div>
+      <div class="prow"><span class="pl">Nombre</span><span class="pv bold">${val(r.conyugeNombre)}</span></div>
+      <div class="prow"><span class="pl">CUIT/CUIL</span><span class="pv mono">${val(r.conyugeCuit)}</span></div>
+      <div class="prow"><span class="pl">Género</span><span class="pv">${val(r.conyugeGenero)}</span></div>
+      <div class="prow"><span class="pl">Nacionalidad</span><span class="pv">${val(r.conyugeNacionalidad)}</span></div>
+      <div class="prow"><span class="pl">Fecha Nac.</span><span class="pv">${r.conyugeFechaNac ? r.conyugeFechaNac.split('-').reverse().join('/') : '—'}</span></div>
+      <div class="prow"><span class="pl">Actividad</span><span class="pv">${val(r.conyugeActividad)}</span></div>
+      <div class="prow"><span class="pl">Teléfono</span><span class="pv">${val(r.conyugeTelefono)}</span></div>
+      ` : ''}
       <div class="prow"><span class="pl">Foto DNI</span><span class="pv">${fotoLinks}</span></div>
       <div class="prow"><span class="pl">Título Automotor</span><span class="pv">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📃 Ver título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('<br>') : '—'}</span></div>
     </div>
