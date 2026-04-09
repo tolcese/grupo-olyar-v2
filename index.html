@@ -5489,6 +5489,9 @@ async function saveRecord() {
           const data = { solicitud_id: rec.id, a_liquidar: aLiquidar, imp_credito: impCredito, com_lukaya: comLukaya, com_gestora: comGestora, retrib_banco: retribBanco, ganancia };
           SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' }).then(()=>{}).catch(()=>{});
           CONT_DATA[rec.id] = { ...c, aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
+          if (LT_DATA[rec.id]) LT_DATA[rec.id] = { ...LT_DATA[rec.id], aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
+          renderContabilidad();
+          renderLiqTerceros();
         }
       } else {
         autoCalcContabilidad();
