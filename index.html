@@ -6100,12 +6100,23 @@ function editLT(id) {
   document.getElementById('lt-obs').value             = c.obs            || '';
 
   if (c.impCredito || c.comLukaya || c.aLiquidar) {
-    document.getElementById('lt-imp-credito').value  = c.impCredito  || '';
-    document.getElementById('lt-com-lukaya').value   = c.comLukaya   || '';
-    document.getElementById('lt-com-gestora').value  = c.comGestora  || '';
-    document.getElementById('lt-retrib-banco').value = c.retribBanco || '';
-    document.getElementById('lt-ganancia').value     = c.ganancia    || '';
-    document.getElementById('lt-a-liquidar').value   = c.aLiquidar   || '';
+    // Recalcular desde el importe actual de la solicitud
+    const importe = parseFloat(String(r?.importe||0).replace(/[$,]/g,'')) || 0;
+    const impCredito = importe ? Math.round(importe * COEFICIENTES.impCredito / 100) : (c.impCredito || 0);
+    const comLukaya  = importe ? Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito) : (c.comLukaya || 0);
+    const comGestora = importe ? Math.round(importe * COEFICIENTES.comGestor / 100) : (c.comGestora || 0);
+    const retribBanco = importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : (c.retribBanco || 0);
+    const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
+    const comComercial = parseFloat(String(c.comComercial||0)) || 0;
+    const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
+    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+    const aLiquidar   = importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : (c.aLiquidar || 0);
+    document.getElementById('lt-imp-credito').value  = impCredito  || '';
+    document.getElementById('lt-com-lukaya').value   = comLukaya   || '';
+    document.getElementById('lt-com-gestora').value  = comGestora  || '';
+    document.getElementById('lt-retrib-banco').value = retribBanco || '';
+    document.getElementById('lt-ganancia').value     = ganancia    || '';
+    document.getElementById('lt-a-liquidar').value   = aLiquidar   || '';
   } else {
     setTimeout(calcLTLiquidar, 50);
   }
