@@ -1954,8 +1954,8 @@ async function enterApp() {
   document.getElementById('sc-imp').style.display = ME.rol === 'admin' ? '' : 'none';
   document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
   document.getElementById('tn-reportes').style.display = '';
-  document.getElementById('tn-pe').style.display = ME.rol === 'admin' ? '' : 'none';
-  document.getElementById('tn-pf').style.display = ME.rol === 'admin' ? '' : 'none';
+  document.getElementById('tn-pe').style.display = ME.rol !== 'invitado' ? '' : 'none';
+  document.getElementById('tn-pf').style.display = ME.rol !== 'invitado' ? '' : 'none';
   if (ME.rol === 'admin') document.body.classList.add('is-admin');
   else document.body.classList.remove('is-admin');
   if (ME.rol === 'invitado') document.body.classList.add('is-invitado');
@@ -2638,6 +2638,7 @@ function renderPrendasEntregadas() {
       <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
         <div class="abtns">
           <button class="ibtn" onclick="editPERecord('${r.id}')" title="Editar">✏️</button>
+          <button class="ibtn" onclick="abrirAcuse('${r.id}')" title="Generar acuse">📄</button>
           ${isAdmin ? `<button class="ibtn del" onclick="delPERecord('${r.id}')" title="Eliminar">🗑️</button>` : ''}
           ${isAdmin ? `<button class="ibtn" onclick="closePrendasEntregadas();openHistorial('${r.id}')" title="Historial">🕐</button>` : ''}
         </div>
@@ -3582,6 +3583,89 @@ function proximoVencimientoCuota(c) {
   const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
   const cuotaActual = Math.min(Math.max(meses + 1, 1), cant);
   return new Date(parseInt(partes[0]), parseInt(partes[1])-1 + (cuotaActual - 1), parseInt(partes[2]));
+}
+
+// ══════════════════════════════════════════════
+// ACUSE DE RECIBO
+// ══════════════════════════════════════════════
+let _acuseEditMode = false;
+
+function abrirAcuse(id) {
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  // Cargar datos en el preview
+  document.getElementById('acuse-nombre-view').textContent = r.nombrecliente || '—';
+  document.getElementById('acuse-dni-view').textContent    = r.dni || '—';
+  document.getElementById('acuse-nombre-input').value      = r.nombrecliente || '';
+  document.getElementById('acuse-dni-input').value         = r.dni || '';
+  // Resetear a vista previa
+  _acuseEditMode = false;
+  document.getElementById('acuse-preview').style.display = '';
+  document.getElementById('acuse-edit').style.display    = 'none';
+  document.getElementById('acuse-overlay').classList.add('open');
+}
+
+function cerrarAcuse() {
+  document.getElementById('acuse-overlay').classList.remove('open');
+}
+
+function toggleEditAcuse() {
+  _acuseEditMode = !_acuseEditMode;
+  if (_acuseEditMode) {
+    document.getElementById('acuse-preview').style.display = 'none';
+    document.getElementById('acuse-edit').style.display    = '';
+  } else {
+    // Aplicar cambios al preview
+    document.getElementById('acuse-nombre-view').textContent = document.getElementById('acuse-nombre-input').value || '—';
+    document.getElementById('acuse-dni-view').textContent    = document.getElementById('acuse-dni-input').value    || '—';
+    document.getElementById('acuse-preview').style.display = '';
+    document.getElementById('acuse-edit').style.display    = 'none';
+  }
+}
+
+function imprimirAcuse() {
+  // Si está en modo edición, aplicar cambios primero
+  if (_acuseEditMode) toggleEditAcuse();
+
+  const nombre = document.getElementById('acuse-nombre-view').textContent;
+  const dni    = document.getElementById('acuse-dni-view').textContent;
+  const hoy    = new Date();
+  const fecha  = String(hoy.getDate()).padStart(2,'0') + '/' + String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
+
+  const html = `
+    <html><head><title>Acuse de recibo</title>
+    <style>
+      @media print { body { margin: 0; } }
+      body { font-family: Arial, sans-serif; padding: 48px; color: #000; }
+      .titulo { text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 28px; line-height: 1.5; }
+      .datos { margin-bottom: 6px; font-size: 13px; }
+      .fecha { text-align: right; font-size: 12px; margin-bottom: 24px; color: #444; }
+      .subtitulo { font-size: 13px; font-weight: bold; text-decoration: underline; margin: 24px 0 12px; }
+      .item { font-size: 13px; margin-bottom: 8px; }
+      .firma-linea { border-top: 1px solid #000; width: 240px; margin-top: 80px; padding-top: 6px; font-size: 12px; color: #555; }
+    </style></head>
+    <body>
+      <div class="fecha">Fecha: ${fecha}</div>
+      <div class="titulo">Prendas para contabilizar de<br>Gestoria Olcese SRL</div>
+      <div class="datos"><b>Nombre y Apellido:</b> ${nombre}</div>
+      <div class="datos"><b>DNI:</b> ${dni}</div>
+      <div class="subtitulo">DOCUMENTACIÓN ENTREGADA</div>
+      <div class="item">☐ &nbsp;TITULO</div>
+      <div class="item">☐ &nbsp;SELLADO</div>
+      <div class="item">☐ &nbsp;PRENDA</div>
+      <div class="item">☐ &nbsp;FIANZA</div>
+      <div class="item">☐ &nbsp;F051 - SOLICITUD DE CRÉDITO</div>
+      <div class="item">☐ &nbsp;F044 - REGISTRO DE FIRMAS</div>
+      <div class="item">☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
+      <div class="item">☐ &nbsp;ALTA DE CLIENTE</div>
+      <div class="firma-linea">Firma del que recibe</div>
+    </body></html>`;
+
+  const win = window.open('', '_blank', 'width=700,height=900');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 300);
 }
 
 function cerrarRecordatorioCreditos() {
@@ -8296,6 +8380,57 @@ function renderReportes() {
       <button class="btn btn-s" onclick="cerrarRecordatorioCreditos()">Cerrar</button>
     </div>
   </div>
+</div>
+
+<!-- MODAL ACUSE -->
+<div class="overlay" id="acuse-overlay" style="z-index:900;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;max-width:620px;width:95%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.18)">
+    <!-- Header -->
+    <div style="padding:18px 24px;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div style="font-size:15px;font-weight:700;color:var(--ink)">📄 Acuse de recibo</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s" onclick="toggleEditAcuse()">✏️ Editar</button>
+        <button class="btn btn-p" onclick="imprimirAcuse()">🖨️ Imprimir</button>
+        <button class="xbtn" onclick="cerrarAcuse()">×</button>
+      </div>
+    </div>
+    <!-- Preview / Edit -->
+    <div style="overflow-y:auto;flex:1;padding:24px">
+      <!-- VISTA PREVIA -->
+      <div id="acuse-preview">
+        <div style="border:1.5px solid var(--line);border-radius:10px;padding:32px;font-family:Arial,sans-serif">
+          <div style="text-align:center;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:24px;line-height:1.4">Prendas para contabilizar de<br>Gestoria Olcese SRL</div>
+          <div style="margin-bottom:6px;font-size:13px"><b>Nombre y Apellido:</b> <span id="acuse-nombre-view"></span></div>
+          <div style="margin-bottom:24px;font-size:13px"><b>DNI:</b> <span id="acuse-dni-view"></span></div>
+          <div style="font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:12px">DOCUMENTACIÓN ENTREGADA</div>
+          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:48px">
+            <div>☐ &nbsp;TITULO</div>
+            <div>☐ &nbsp;SELLADO</div>
+            <div>☐ &nbsp;PRENDA</div>
+            <div>☐ &nbsp;FIANZA</div>
+            <div>☐ &nbsp;F051 - SOLICITUD DE CRÉDITO</div>
+            <div>☐ &nbsp;F044 - REGISTRO DE FIRMAS</div>
+            <div>☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
+            <div>☐ &nbsp;ALTA DE CLIENTE</div>
+          </div>
+          <div style="margin-top:60px;border-top:1px solid #000;width:240px;padding-top:6px;font-size:12px;color:#555">Firma del que recibe</div>
+        </div>
+      </div>
+      <!-- MODO EDICIÓN -->
+      <div id="acuse-edit" style="display:none">
+        <div class="fg" style="gap:12px">
+          <div class="fc span2"><label>Nombre y Apellido</label><input type="text" id="acuse-nombre-input" style="font-size:14px"></div>
+          <div class="fc span2"><label>DNI</label><input type="text" id="acuse-dni-input" style="font-size:14px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOJA DE IMPRESIÓN ACUSE -->
+<div id="acuse-print-sheet" style="display:none">
+  <style id="acuse-print-style"></style>
+  <div id="acuse-print-content"></div>
 </div>
 
 </body>
