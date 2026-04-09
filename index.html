@@ -2551,6 +2551,7 @@ function renderPrendasFinalizadas() {
       <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
         <div class="abtns">
           <button class="ibtn" onclick="editPrenda('${r.id}')" title="Editar">✏️</button>
+          <button class="ibtn" onclick="abrirAcuse('${r.id}')" title="Generar acuse">📄</button>
           ${isAdmin ? `<button class="ibtn" onclick="closePrendasFinalizadas();openHistorial('${r.id}')" title="Historial">🕐</button>` : ''}
         </div>
       </td>
@@ -2638,7 +2639,6 @@ function renderPrendasEntregadas() {
       <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
         <div class="abtns">
           <button class="ibtn" onclick="editPERecord('${r.id}')" title="Editar">✏️</button>
-          <button class="ibtn" onclick="abrirAcuse('${r.id}')" title="Generar acuse">📄</button>
           ${isAdmin ? `<button class="ibtn del" onclick="delPERecord('${r.id}')" title="Eliminar">🗑️</button>` : ''}
           ${isAdmin ? `<button class="ibtn" onclick="closePrendasEntregadas();openHistorial('${r.id}')" title="Historial">🕐</button>` : ''}
         </div>
