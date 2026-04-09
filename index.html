@@ -2523,8 +2523,8 @@ function renderPrendasEntregadas() {
   const q = (document.getElementById('pe-srch')?.value || '').toLowerCase();
   const isAdmin = ME?.rol === 'admin';
 
-  // Solo registros con fecha finalizada
-  let data = RECORDS.filter(r => r.gestorAsignado && r.finalizada && r.finalizada.trim() !== '');
+  // Solo registros marcados como entregados
+  let data = RECORDS.filter(r => r.gestorAsignado && r.entregada);
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.banco, r.concesionaria, r.provincia, r.localidad, r.gestorAsignado].some(v => (v||'').toLowerCase().includes(q))
   );
@@ -4752,6 +4752,7 @@ function editPrenda(id) {
   document.getElementById('prenda-en-proceso').checked = r.enProceso || false;
   document.getElementById('prenda-presentada').checked = r.presentada || false;
   document.getElementById('prenda-finalizada').value   = r.finalizada || '';
+  document.getElementById('prenda-entregada').checked  = r.entregada || false;
   document.getElementById('prenda-cliente').textContent = r.nombrecliente || id;
   document.getElementById('prendas-edit-overlay').classList.add('open');
 }
@@ -4762,13 +4763,14 @@ async function savePrenda() {
   const enProceso  = document.getElementById('prenda-en-proceso').checked;
   const presentada = document.getElementById('prenda-presentada').checked;
   const finalizada = document.getElementById('prenda-finalizada').value;
+  const entregada  = document.getElementById('prenda-entregada').checked;
   try {
     const r = RECORDS.find(x => x.id === id);
-    const viejaPrenda = r ? { enProceso: r.enProceso, presentada: r.presentada, finalizada: r.finalizada } : {};
-    const { error } = await SB.from('solicitudes').update({ en_proceso: enProceso, presentada, finalizada: finalizada || null }).eq('id', id);
+    const viejaPrenda = r ? { enProceso: r.enProceso, presentada: r.presentada, finalizada: r.finalizada, entregada: r.entregada } : {};
+    const { error } = await SB.from('solicitudes').update({ en_proceso: enProceso, presentada, finalizada: finalizada || null, entregada }).eq('id', id);
     if (error) throw error;
-    if (r) { r.enProceso = enProceso; r.presentada = presentada; r.finalizada = finalizada; }
-    const cambiosPrenda = diffObjetos(viejaPrenda, { enProceso, presentada, finalizada }, ['enProceso','presentada','finalizada']);
+    if (r) { r.enProceso = enProceso; r.presentada = presentada; r.finalizada = finalizada; r.entregada = entregada; }
+    const cambiosPrenda = diffObjetos(viejaPrenda, { enProceso, presentada, finalizada, entregada }, ['enProceso','presentada','finalizada','entregada']);
     registrarHistorial('prenda', id, cambiosPrenda);
     toast('Prenda actualizada ✓', 'ok');
     closePrendaEdit();
@@ -4989,6 +4991,7 @@ async function loadRecords() {
       tasa: r.tasa, obs: r.obs, comision: r.comision, usuario: r.usuario,
       fechaReg: r.fecha_reg, gestorAsignado: r.gestor_asignado, gestorId: r.gestor_id,
       enProceso: r.en_proceso, presentada: r.presentada, finalizada: r.finalizada,
+      entregada: r.entregada || false,
       fechaEntregada: r.fecha_entregada, puntodeventa: r.punto_de_venta || ''
     }));
     renderTable._keepPage = true;
@@ -7838,6 +7841,12 @@ function renderReportes() {
         <div class="fc span2">
           <label>Finalizada (fecha)</label>
           <input type="date" id="prenda-finalizada">
+        </div>
+        <div class="fc span2">
+          <label>Entregada</label>
+          <div class="chk-grid" style="grid-template-columns:1fr">
+            <label class="chk-row"><input type="checkbox" id="prenda-entregada"> Sí, fue entregada al cliente</label>
+          </div>
         </div>
       </div>
       <div class="mfoot">
