@@ -536,6 +536,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button class="tn" id="tn-reportes" style="display:none" onclick="showV('reportes')">📊 Reportes</button>
         <button class="tn" id="tn-gestoria" onclick="openGestoria()">📁 Gestoría</button>
         <button class="tn" id="tn-prendas" onclick="openPrendas()">📌 Prendas pendientes</button>
+        <button class="tn" id="tn-pf" onclick="openPrendasFinalizadas()" style="display:none">🏁 Prendas finalizadas</button>
         <button class="tn" id="tn-pe" onclick="openPrendasEntregadas()" style="display:none">✅ Prendas entregadas</button>
         <button class="tn" onclick="showV('datero')" id="tn-datero" style="position:relative">
           📨 Datero
@@ -1954,6 +1955,7 @@ async function enterApp() {
   document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
   document.getElementById('tn-reportes').style.display = '';
   document.getElementById('tn-pe').style.display = ME.rol === 'admin' ? '' : 'none';
+  document.getElementById('tn-pf').style.display = ME.rol === 'admin' ? '' : 'none';
   if (ME.rol === 'admin') document.body.classList.add('is-admin');
   else document.body.classList.remove('is-admin');
   if (ME.rol === 'invitado') document.body.classList.add('is-invitado');
@@ -2509,6 +2511,82 @@ async function syncGestoriaSheet() {
 // ══════════════════════════════════════════════
 // PRENDAS ENTREGADAS
 // ══════════════════════════════════════════════
+function openPrendasFinalizadas() {
+  document.getElementById('pf-overlay').classList.add('open');
+  renderPrendasFinalizadas();
+  setTimeout(initPFMirror, 150);
+}
+
+function closePrendasFinalizadas() {
+  document.getElementById('pf-overlay').classList.remove('open');
+}
+
+function renderPrendasFinalizadas() {
+  const q = (document.getElementById('pf-srch')?.value || '').toLowerCase();
+  const isAdmin = ME?.rol === 'admin';
+
+  let data = RECORDS.filter(r => r.gestorAsignado && r.finalizada && r.finalizada.trim() !== '' && !r.entregada);
+  if (q) data = data.filter(r =>
+    [r.nombrecliente, r.banco, r.concesionaria, r.provincia, r.localidad, r.gestorAsignado].some(v => (v||'').toLowerCase().includes(q))
+  );
+
+  const tbody = document.getElementById('pf-tbody');
+  const empty = document.getElementById('pf-empty');
+  const count = document.getElementById('pf-count');
+  count.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; setTimeout(initPFMirror, 50); return; }
+  empty.style.display = 'none';
+
+  const val = v => v || '—';
+  const fmtFin = v => {
+    if (!v) return '—';
+    if (v.includes('/')) return v;
+    const p = v.split('-');
+    return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : v;
+  };
+
+  tbody.innerHTML = data.map((r, i) => `
+    <tr style="cursor:pointer" onclick="openPFPanel('${r.id}')">
+      <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
+        <div class="abtns">
+          <button class="ibtn" onclick="editPrenda('${r.id}')" title="Editar">✏️</button>
+          ${isAdmin ? `<button class="ibtn" onclick="closePrendasFinalizadas();openHistorial('${r.id}')" title="Historial">🕐</button>` : ''}
+        </div>
+      </td>
+      <td style="color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="white-space:nowrap;color:var(--green);font-weight:600">${fmtFin(r.finalizada)}</td>
+      <td style="font-weight:700;color:var(--blue)">${val(r.gestorAsignado)}</td>
+      <td>${val(r.anio)}</td>
+      <td style="font-weight:700;min-width:130px">${val(r.nombrecliente)}</td>
+      <td style="font-weight:600">${val(r.banco)}</td>
+      <td>${val(r.concesionaria)}</td>
+      <td>${val(r.localidad)}</td>
+      <td>${val(r.provincia)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${r.descripcion||''}">${val(r.descripcion)}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis" title="${r.obs||''}">${val(r.obs)}</td>
+    </tr>`).join('');
+
+  setTimeout(initPFMirror, 50);
+}
+
+function openPFPanel(id) {
+  closePrendasFinalizadas();
+  openHistorial(id);
+}
+
+function initPFMirror() {
+  const scroll = document.getElementById('pf-scroll');
+  const mirror = document.getElementById('pf-mirror');
+  const inner  = document.getElementById('pf-mirror-inner');
+  if (!scroll || !mirror || !inner) return;
+  inner.style.width = scroll.scrollWidth + 'px';
+  mirror.style.display = scroll.scrollWidth > scroll.clientWidth + 2 ? 'block' : 'none';
+  let syncing = false;
+  scroll.onscroll = () => { if (syncing) return; syncing = true; mirror.scrollLeft = scroll.scrollLeft; syncing = false; };
+  mirror.onscroll = () => { if (syncing) return; syncing = true; scroll.scrollLeft = mirror.scrollLeft; syncing = false; };
+}
+
 function openPrendasEntregadas() {
   document.getElementById('pe-overlay').classList.add('open');
   renderPrendasEntregadas();
@@ -7309,6 +7387,9 @@ function renderReportes() {
       <span class="sb-icon">💳</span> Sistema de créditos
       <span id="cred-recordatorio-badge" style="display:none;position:absolute;top:6px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--red);box-shadow:0 0 6px var(--red)"></span>
     </button>
+    <button class="sb-item" onclick="closeSidebar();openPrendasFinalizadas()">
+      <span class="sb-icon">🏁</span> Prendas finalizadas
+    </button>
     <button class="sb-item" onclick="closeSidebar();openPrendasEntregadas()">
       <span class="sb-icon">✅</span> Prendas entregadas
     </button>
@@ -7487,6 +7568,56 @@ function renderReportes() {
 </div>
 
 <!-- MODAL PRENDAS ENTREGADAS -->
+<!-- PRENDAS FINALIZADAS -->
+<div class="pe-overlay" id="pf-overlay" onclick="if(event.target===this)closePrendasFinalizadas()">
+  <div class="pe-modal" onclick="event.stopPropagation()">
+    <div class="pe-head">
+      <div>
+        <div style="font-size:17px;font-weight:800;color:var(--ink)">🏁 Prendas finalizadas</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px" id="pf-count">—</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="searchbox" style="min-width:220px">
+          <span style="color:var(--muted)">🔍</span>
+          <input id="pf-srch" placeholder="Buscar cliente, banco, gestor..." oninput="renderPrendasFinalizadas()">
+        </div>
+        <button class="xbtn" onclick="closePrendasFinalizadas()" style="width:34px;height:34px;font-size:18px">×</button>
+      </div>
+    </div>
+    <div class="pe-body">
+      <div class="pe-scroll-x" id="pf-scroll">
+        <table class="pe-table">
+          <thead>
+            <tr>
+              <th>Acciones</th>
+              <th>#</th>
+              <th>Fecha finalizada</th>
+              <th>Gestor asignado</th>
+              <th>Año</th>
+              <th>Cliente</th>
+              <th>Banco</th>
+              <th>Concesionaria</th>
+              <th>Localidad</th>
+              <th>Provincia</th>
+              <th>Descripción vehículo</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody id="pf-tbody"></tbody>
+        </table>
+      </div>
+      <div id="pf-empty" class="empty-state" style="display:none">
+        <div class="ei">🏁</div>
+        <h3>Sin prendas finalizadas</h3>
+        <p>Aparecen acá los registros con fecha de finalización pero aún no entregados</p>
+      </div>
+    </div>
+    <div class="pe-scroll-mirror" id="pf-mirror">
+      <div class="pe-scroll-mirror-inner" id="pf-mirror-inner"></div>
+    </div>
+  </div>
+</div>
+
 <div class="pe-overlay" id="pe-overlay" onclick="if(event.target===this)closePrendasEntregadas()">
   <div class="pe-modal" onclick="event.stopPropagation()">
     <div class="pe-head">
