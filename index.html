@@ -1982,9 +1982,11 @@ async function enterApp() {
   // Heartbeat
   SB.from('usuarios').update({ last_seen: new Date().toISOString() }).eq('usr', ME.usr).then(()=>{}).catch(()=>{});
   checkDateroNuevos();
-  if (ME.rol === 'admin') checkAutoBackup();
+  if (ME.rol === 'admin') setTimeout(() => checkAutoBackup(), 2000);
   loading(false);
   showV('sol');
+  // AutoCalc después de que la UI está estable para evitar titileo
+  setTimeout(() => autoCalcContabilidad(), 1500);
 }
 
 function weatherIcon(code) {
@@ -5165,7 +5167,7 @@ async function loadRecords() {
     if (tab && tab.style.display !== 'none') renderPrendasPendientes();
     const vLT = document.getElementById('v-liq-terceros');
     if (vLT && vLT.style.display !== 'none') renderLiqTerceros();
-    autoCalcContabilidad();
+    setTimeout(() => autoCalcContabilidad(), 800);
     syncUI('ok');
   } catch(e) { syncUI('err'); toast('Error cargando registros: '+e.message,'er'); }
 }
