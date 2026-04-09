@@ -2589,6 +2589,7 @@ function editPERecord(id) {
   document.getElementById('pe-edit-id').value = id;
   document.getElementById('pe-edit-nombre').textContent = r.nombrecliente || id;
   document.getElementById('pe-edit-obs').value = r.obs || '';
+  document.getElementById('pe-edit-finalizada').value = r.finalizada || '';
   document.getElementById('pe-edit-fecha-entregada').value = r.fechaEntregada || '';
   document.getElementById('pe-edit-overlay').classList.add('open');
 }
@@ -2600,12 +2601,13 @@ function closePEEdit() {
 async function savePEEdit() {
   const id             = document.getElementById('pe-edit-id').value;
   const obs            = document.getElementById('pe-edit-obs').value.trim();
+  const finalizada     = document.getElementById('pe-edit-finalizada').value;
   const fechaEntregada = document.getElementById('pe-edit-fecha-entregada').value;
   try {
-    const { error } = await SB.from('solicitudes').update({ obs, fecha_entregada: fechaEntregada || null }).eq('id', id);
+    const { error } = await SB.from('solicitudes').update({ obs, finalizada: finalizada || null, fecha_entregada: fechaEntregada || null }).eq('id', id);
     if (error) throw error;
     const r = RECORDS.find(x => x.id === id);
-    if (r) { r.obs = obs; r.fechaEntregada = fechaEntregada; }
+    if (r) { r.obs = obs; r.finalizada = finalizada; r.fechaEntregada = fechaEntregada; }
     toast('Guardado ✓', 'ok');
     closePEEdit();
     renderPrendasEntregadas();
@@ -7545,6 +7547,7 @@ function renderReportes() {
     </div>
     <input type="hidden" id="pe-edit-id">
     <div class="fg" style="grid-template-columns:1fr;gap:14px">
+      <div class="fc"><label>Fecha finalizada</label><input type="date" id="pe-edit-finalizada"></div>
       <div class="fc"><label>Fecha entregada</label><input type="date" id="pe-edit-fecha-entregada"></div>
       <div class="fc"><label>Observaciones</label><textarea id="pe-edit-obs" style="min-height:80px"></textarea></div>
     </div>
