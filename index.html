@@ -4595,14 +4595,24 @@ function editCont(id) {
   document.getElementById('cont-fecha-pago-gest').value = c.fechaPagoGest || '';
   document.getElementById('cont-obs').value           = c.obs          || '';
 
-  // Si ya tiene valores guardados, mostrarlos; si no, calcular desde coeficientes
+  // Recalcular desde el importe actual de la solicitud
   if (c.impCredito || c.comLukaya || c.ganancia || c.aLiquidar) {
-    document.getElementById('cont-imp-credito').value  = c.impCredito  || '';
-    document.getElementById('cont-com-lukaya').value   = c.comLukaya   || '';
-    document.getElementById('cont-com-gestora').value  = c.comGestora  || '';
-    document.getElementById('cont-retrib-banco').value = c.retribBanco || '';
-    document.getElementById('cont-ganancia').value     = c.ganancia    || '';
-    document.getElementById('cont-a-liquidar').value   = c.aLiquidar   || '';
+    const importe = parseFloat(String(r?.importe||0).replace(/[$,]/g,'')) || 0;
+    const impCredito  = importe ? Math.round(importe * COEFICIENTES.impCredito / 100) : (c.impCredito || 0);
+    const comLukaya   = importe ? Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito) : (c.comLukaya || 0);
+    const comGestora  = importe ? Math.round(importe * COEFICIENTES.comGestor / 100) : (c.comGestora || 0);
+    const retribBanco = importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : (c.retribBanco || 0);
+    const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
+    const comComercial = parseFloat(String(c.comComercial||0)) || 0;
+    const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
+    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+    const aLiquidar   = importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : (c.aLiquidar || 0);
+    document.getElementById('cont-imp-credito').value  = impCredito  || '';
+    document.getElementById('cont-com-lukaya').value   = comLukaya   || '';
+    document.getElementById('cont-com-gestora').value  = comGestora  || '';
+    document.getElementById('cont-retrib-banco').value = retribBanco || '';
+    document.getElementById('cont-ganancia').value     = ganancia    || '';
+    document.getElementById('cont-a-liquidar').value   = aLiquidar   || '';
   } else {
     // Registro nuevo sin datos contables — calcular y guardar automáticamente
     setTimeout(() => { calcContLiquidar(); saveContEdit(true); }, 100);
