@@ -802,6 +802,33 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button class="btn btn-s" onclick="document.getElementById('backup-json-input').click()">📂 Seleccionar archivo JSON</button>
         <div id="backup-convert-msg" style="margin-top:14px;font-size:13px;display:none"></div>
       </div>
+
+      <!-- GESTOR DE BACKUPS -->
+      <div class="card" style="margin-top:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="card-t">🗂️ Administrar backups</div>
+            <div class="card-s">Seleccioná los backups que querés eliminar para liberar espacio</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-s" onclick="loadBackupList()">🔄 Actualizar</button>
+            <button class="btn btn-d" id="btn-delete-backups" onclick="eliminarBackupsSeleccionados()" style="display:none">🗑️ Eliminar seleccionados</button>
+          </div>
+        </div>
+        <div id="backup-list-loading" style="color:var(--muted);font-size:13px;padding:20px 0">Cargando backups...</div>
+        <div id="backup-list-empty" style="display:none;color:var(--muted);font-size:13px;padding:20px 0;text-align:center">
+          <div style="font-size:32px;margin-bottom:8px">📭</div>
+          <div>No hay backups guardados</div>
+        </div>
+        <div id="backup-list-container" style="display:none">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding:8px 12px;background:var(--surface);border-radius:8px">
+            <input type="checkbox" id="backup-select-all" onchange="toggleSelectAllBackups(this.checked)" style="width:16px;height:16px;cursor:pointer">
+            <label for="backup-select-all" style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;cursor:pointer">Seleccionar todos</label>
+            <span id="backup-sel-count" style="margin-left:auto;font-size:12px;color:var(--muted)"></span>
+          </div>
+          <div id="backup-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
+      </div>
     </div>
 
     <!-- CALENDARIO -->
@@ -4915,6 +4942,7 @@ function showV(v) {
   if (v==='nueva' && !editId) { resetForm(); document.getElementById('form-title').textContent='Nueva solicitud'; document.getElementById('save-btn').textContent='💾 Guardar solicitud'; }
   if (v==='usuarios') loadUsers();
   if (v==='config')   { loadMantenimientoStatus(); }
+  if (v==='backup')   { loadBackupList(); }
   if (v==='datero') {
     markDateroSeen();
     if (DATERO_CACHE.length) { renderDatero(); loadDatero(); }
@@ -6245,6 +6273,100 @@ function exportCSV() {
 // ══════════════════════════════════════════════
 // BACKUP
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// GESTOR DE BACKUPS
+// ══════════════════════════════════════════════
+let BACKUP_LIST_CACHE = [];
+
+async function loadBackupList() {
+  const loading = document.getElementById('backup-list-loading');
+  const empty   = document.getElementById('backup-list-empty');
+  const container = document.getElementById('backup-list-container');
+  const lista   = document.getElementById('backup-list');
+  if (!loading) return;
+
+  loading.style.display = '';
+  empty.style.display = 'none';
+  container.style.display = 'none';
+
+  const { data, error } = await SB.storage.from('backups').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' } });
+  loading.style.display = 'none';
+
+  if (error || !data || !data.length) {
+    empty.style.display = '';
+    return;
+  }
+
+  BACKUP_LIST_CACHE = data;
+  container.style.display = '';
+  document.getElementById('backup-sel-count').textContent = '';
+
+  const fmtSize = bytes => {
+    if (!bytes) return '—';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(2) + ' MB';
+  };
+
+  const fmtDate = str => {
+    if (!str) return '—';
+    const d = new Date(str);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  };
+
+  lista.innerHTML = data.map((f, i) => `
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff" id="backup-row-${i}">
+      <input type="checkbox" class="backup-chk" data-name="${f.name}" onchange="updateBackupSelection()" style="width:16px;height:16px;cursor:pointer;flex-shrink:0">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${f.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${fmtDate(f.created_at)} · ${fmtSize(f.metadata?.size)}</div>
+      </div>
+      <button class="btn btn-s" style="font-size:11px;padding:4px 10px;flex-shrink:0" onclick="descargarBackup('${f.name}')">⬇️ Bajar</button>
+    </div>
+  `).join('');
+}
+
+function updateBackupSelection() {
+  const chks = document.querySelectorAll('.backup-chk');
+  const sel = [...chks].filter(c => c.checked).length;
+  const btnDel = document.getElementById('btn-delete-backups');
+  const count = document.getElementById('backup-sel-count');
+  btnDel.style.display = sel > 0 ? '' : 'none';
+  btnDel.textContent = `🗑️ Eliminar (${sel})`;
+  count.textContent = sel > 0 ? `${sel} seleccionado${sel !== 1 ? 's' : ''}` : '';
+  document.getElementById('backup-select-all').checked = sel === chks.length && chks.length > 0;
+}
+
+function toggleSelectAllBackups(checked) {
+  document.querySelectorAll('.backup-chk').forEach(c => c.checked = checked);
+  updateBackupSelection();
+}
+
+async function descargarBackup(nombre) {
+  const { data, error } = await SB.storage.from('backups').download(nombre);
+  if (error) { toast('Error al descargar: ' + error.message, 'er'); return; }
+  const url = URL.createObjectURL(data);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function eliminarBackupsSeleccionados() {
+  const seleccionados = [...document.querySelectorAll('.backup-chk:checked')].map(c => c.dataset.name);
+  if (!seleccionados.length) return;
+  if (!confirm(`¿Eliminar ${seleccionados.length} backup${seleccionados.length !== 1 ? 's' : ''}? Esta acción no se puede deshacer.`)) return;
+
+  const btn = document.getElementById('btn-delete-backups');
+  btn.disabled = true; btn.textContent = '⏳ Eliminando...';
+
+  const { error } = await SB.storage.from('backups').remove(seleccionados);
+  btn.disabled = false;
+
+  if (error) { toast('Error al eliminar: ' + error.message, 'er'); return; }
+  toast(`${seleccionados.length} backup${seleccionados.length !== 1 ? 's' : ''} eliminado${seleccionados.length !== 1 ? 's' : ''} ✓`, 'ok');
+  await loadBackupList();
+}
+
 async function hacerBackupManual() {
   const btn = document.getElementById('btn-backup');
   const msg = document.getElementById('backup-msg');
