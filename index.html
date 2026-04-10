@@ -7098,6 +7098,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
     const sel = document.getElementById('f-anio');
     if (!sel) return;
     const y = new Date().getFullYear();
+    const okm = document.createElement('option');
+    okm.value = '0 KM';
+    okm.textContent = '0 KM';
+    sel.appendChild(okm);
     for (let i = 2016; i <= y + 1; i++) {
       const opt = document.createElement('option');
       opt.value = i;
