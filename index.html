@@ -1304,7 +1304,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="cont-tab-tot" onclick="showContTab('totales')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">📊 Totales</button>
         <button id="cont-tab-gas" onclick="showContTab('gastos')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">💸 Gastos</button>
         <button id="cont-tab-cob" onclick="showContTab('cobranza')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">🏦 Cobranza Banco</button>
-        <button id="cont-tab-cobradas" onclick="showContTab('cobradas')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">✅ Prendas Cobradas</button>
+        <button id="cont-btn-cobradas" onclick="showContTab('cobradas')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">✅ Prendas Cobradas</button>
         <button id="cont-tab-coef" onclick="showContTab('coeficientes')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">⚙️ Cambio de Coeficientes</button>
       </div>
 
@@ -4756,8 +4756,8 @@ function showContTab(tab) {
   ['liquidaciones','totales','gastos','cobranza','cobradas','coeficientes'].forEach(t => {
     const el = document.getElementById('cont-tab-'+t);
     if (el) el.style.display = t === tab ? '' : 'none';
-    const btnId = t === 'liquidaciones' ? 'liq' : t === 'totales' ? 'tot' : t === 'gastos' ? 'gas' : t === 'cobranza' ? 'cob' : t === 'cobradas' ? 'cobradas' : 'coef';
-    const btn = document.getElementById('cont-tab-'+btnId);
+    const btnId = t === 'liquidaciones' ? 'cont-tab-liq' : t === 'totales' ? 'cont-tab-tot' : t === 'gastos' ? 'cont-tab-gas' : t === 'cobranza' ? 'cont-tab-cob' : t === 'cobradas' ? 'cont-btn-cobradas' : 'cont-tab-coef';
+    const btn = document.getElementById(btnId);
     if (btn) {
       btn.style.borderBottomColor = t === tab ? 'var(--blue)' : 'transparent';
       btn.style.color = t === tab ? 'var(--blue)' : 'var(--muted)';
