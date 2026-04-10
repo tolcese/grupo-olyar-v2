@@ -2527,7 +2527,7 @@ function renderPrendasFinalizadas() {
   const q = (document.getElementById('pf-srch')?.value || '').toLowerCase();
   const isAdmin = ME?.rol === 'admin';
 
-  let data = RECORDS.filter(r => r.gestorAsignado && r.finalizada && r.finalizada.trim() !== '' && !r.entregada);
+  let data = RECORDS.filter(r => r.gestorAsignado && r.finalizada && r.finalizada.trim() !== '' && r.entregada);
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.banco, r.concesionaria, r.provincia, r.localidad, r.gestorAsignado].some(v => (v||'').toLowerCase().includes(q))
   );
