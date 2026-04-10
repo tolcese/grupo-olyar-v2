@@ -4056,15 +4056,23 @@ let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
 
 async function checkAutoBackup() {
   try {
-    // Verificar último backup en Supabase Storage
-    const { data: archivos } = await SB.storage.from('backups').list('', { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
     const ahora = Date.now();
     const VEINTICUATRO_HS = 24 * 60 * 60 * 1000;
 
-    if (archivos && archivos.length) {
+    // Primero verificar localStorage — evita múltiples backups en el mismo día
+    const lastLocal = localStorage.getItem('last_auto_backup');
+    if (lastLocal && ahora - parseInt(lastLocal) < VEINTICUATRO_HS) {
+      console.log('⏭️ Backup reciente (local), no es necesario');
+      return;
+    }
+
+    // Verificar también en Supabase Storage
+    const { data: archivos } = await SB.storage.from('backups').list('', { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
+    if (archivos && archivos.length && archivos[0].created_at) {
       const ultimoBackup = new Date(archivos[0].created_at).getTime();
       if (ahora - ultimoBackup < VEINTICUATRO_HS) {
-        console.log('⏭️ Backup reciente, no es necesario:', archivos[0].name);
+        localStorage.setItem('last_auto_backup', ahora.toString());
+        console.log('⏭️ Backup reciente (storage), no es necesario:', archivos[0].name);
         return;
       }
     }
@@ -4079,6 +4087,7 @@ async function checkAutoBackup() {
     });
     const data = await resp.json();
     if (data.ok) {
+      localStorage.setItem('last_auto_backup', ahora.toString());
       console.log('✅ Backup automático:', data.archivo);
     } else {
       console.warn('Backup falló:', data.error);
