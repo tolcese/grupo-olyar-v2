@@ -1304,6 +1304,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="cont-tab-tot" onclick="showContTab('totales')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">📊 Totales</button>
         <button id="cont-tab-gas" onclick="showContTab('gastos')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">💸 Gastos</button>
         <button id="cont-tab-cob" onclick="showContTab('cobranza')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">🏦 Cobranza Banco</button>
+        <button id="cont-tab-cobradas" onclick="showContTab('cobradas')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">✅ Prendas Cobradas</button>
         <button id="cont-tab-coef" onclick="showContTab('coeficientes')" style="padding:10px 22px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">⚙️ Cambio de Coeficientes</button>
       </div>
 
@@ -1505,6 +1506,36 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div id="cob-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
           <div style="font-size:48px;margin-bottom:12px">🏦</div>
           <div style="font-size:15px;font-weight:700;color:var(--ink2)">Sin registros</div>
+        </div>
+      </div>
+
+      <!-- TAB PRENDAS COBRADAS -->
+      <div id="cont-tab-cobradas" style="display:none">
+        <div style="overflow-x:auto;border-radius:12px;border:1.5px solid var(--line)">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:1200px">
+            <thead>
+              <tr style="background:var(--surface);border-bottom:1.5px solid var(--line)">
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">#</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Fecha solicitud</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Banco</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Concesionaria</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Localidad</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Provincia</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Cliente</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Gestor</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Vehículo</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Tasa</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Retribución Banco</th>
+                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--green);text-transform:uppercase;white-space:nowrap">Fecha de pago Banco</th>
+              </tr>
+            </thead>
+            <tbody id="cobradas-tbody"></tbody>
+          </table>
+        </div>
+        <div id="cobradas-empty" style="display:none;text-align:center;padding:60px 20px;color:var(--muted)">
+          <div style="font-size:48px;margin-bottom:12px">✅</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink2)">Sin prendas cobradas</div>
+          <div style="font-size:13px;margin-top:6px">Aparecen acá las operaciones con fecha de pago banco cargada</div>
         </div>
       </div>
 
@@ -4361,12 +4392,59 @@ async function loadContabilidad() {
   } catch(e) {}
 }
 
+function renderPrendasCobradas() {
+  const tbody = document.getElementById('cobradas-tbody');
+  const empty = document.getElementById('cobradas-empty');
+  if (!tbody) return;
+
+  // Solo operaciones AVANZA con fecha_pago_banco cargada
+  const data = RECORDS.filter(r => {
+    if ((r.estado||'').toUpperCase() !== 'AVANZA') return false;
+    const c = CONT_DATA[r.id] || {};
+    return !!c.fechaPagoBanco;
+  });
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const val = v => v || '—';
+  const mon = v => v ? '$' + Number(String(v).replace(/[$,]/g,'')).toLocaleString('es-AR') : '—';
+  const fmtF = v => v ? v.split('-').reverse().join('/') : '—';
+
+  tbody.innerHTML = data.map((r, i) => {
+    const c = CONT_DATA[r.id] || {};
+    return `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:9px 12px;white-space:nowrap">${fmtF(r.fecha)}</td>
+      <td style="padding:9px 12px;font-weight:600">${val(r.banco)}</td>
+      <td style="padding:9px 12px">${val(r.concesionaria)}</td>
+      <td style="padding:9px 12px">${val(r.localidad)}</td>
+      <td style="padding:9px 12px">${val(r.provincia)}</td>
+      <td style="padding:9px 12px;font-weight:700">${val(r.nombrecliente)}</td>
+      <td style="padding:9px 12px;color:var(--blue);font-weight:600">${val(r.gestorAsignado)}</td>
+      <td style="padding:9px 12px">${val(r.descripcion)}</td>
+      <td style="padding:9px 12px;font-family:monospace">${val(r.tasa)}</td>
+      <td style="padding:9px 12px;font-family:monospace;font-weight:600;color:var(--green)">${mon(c.retribBanco)}</td>
+      <td style="padding:9px 12px;font-weight:700;color:var(--green)">${fmtF(c.fechaPagoBanco)}</td>
+    </tr>`;
+  }).join('');
+}
+
 function renderCobranzaBanco() {
   const tbody = document.getElementById('cob-tbody');
   const empty = document.getElementById('cob-empty');
   if (!tbody) return;
 
-  const data = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
+  const data = RECORDS.filter(r => {
+    if ((r.estado||'').toUpperCase() !== 'AVANZA') return false;
+    const c = CONT_DATA[r.id] || {};
+    return !c.fechaPagoBanco; // Solo las que NO tienen fecha de pago
+  });
 
   if (!data.length) {
     tbody.innerHTML = '';
@@ -4675,10 +4753,10 @@ async function recargarLiquidaciones() {
 }
 
 function showContTab(tab) {
-  ['liquidaciones','totales','gastos','cobranza','coeficientes'].forEach(t => {
+  ['liquidaciones','totales','gastos','cobranza','cobradas','coeficientes'].forEach(t => {
     const el = document.getElementById('cont-tab-'+t);
     if (el) el.style.display = t === tab ? '' : 'none';
-    const btnId = t === 'liquidaciones' ? 'liq' : t === 'totales' ? 'tot' : t === 'gastos' ? 'gas' : t === 'cobranza' ? 'cob' : 'coef';
+    const btnId = t === 'liquidaciones' ? 'liq' : t === 'totales' ? 'tot' : t === 'gastos' ? 'gas' : t === 'cobranza' ? 'cob' : t === 'cobradas' ? 'cobradas' : 'coef';
     const btn = document.getElementById('cont-tab-'+btnId);
     if (btn) {
       btn.style.borderBottomColor = t === tab ? 'var(--blue)' : 'transparent';
@@ -4690,6 +4768,7 @@ function showContTab(tab) {
   if (tab === 'totales') renderTotalesTab();
   if (tab === 'gastos') loadGastos();
   if (tab === 'cobranza') renderCobranzaBanco();
+  if (tab === 'cobradas') renderPrendasCobradas();
   if (tab === 'coeficientes') loadCoeficientes();
 }
 
