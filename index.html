@@ -2574,6 +2574,7 @@ function renderPrendasFinalizadas() {
 }
 
 function openPFPanel(id) {
+  window._pePanelFrom = 'finalizadas';
   closePrendasFinalizadas();
   openPEPanel(id);
 }
@@ -2780,7 +2781,12 @@ function openPEPanel(id) {
 function closePEPanel() {
   document.getElementById('pe-panel-overlay').classList.remove('open');
   document.getElementById('pe-side-panel').classList.remove('open');
-  document.getElementById('pe-overlay').classList.add('open');
+  if (window._pePanelFrom === 'finalizadas') {
+    window._pePanelFrom = null;
+    document.getElementById('pf-overlay').classList.add('open');
+  } else {
+    document.getElementById('pe-overlay').classList.add('open');
+  }
 }
 
 function closePEPanelSinReabrir() {
