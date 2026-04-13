@@ -6270,7 +6270,7 @@ async function saveLTEdit() {
     if (!LISTS.puntodeventa) LISTS.puntodeventa = [];
     if (!LISTS.puntodeventa.includes(pv)) {
       LISTS.puntodeventa.push(pv);
-      try { await SB.from('punto_de_venta').upsert({ nombre: pv }); } catch(e) {}
+      try { await SB.from('punto_de_venta').insert({ nombre: pv }); } catch(e) {}
       initLTSelectPV();
       renderSidebarPV();
     }
@@ -6352,7 +6352,7 @@ async function addLTPVOpt() {
   if (!LISTS.puntodeventa) LISTS.puntodeventa = [];
   if (!LISTS.puntodeventa.includes(val)) {
     LISTS.puntodeventa.push(val);
-    SB.from('punto_de_venta').upsert({ nombre: val }).then(()=>{ renderSidebarPV(); }).catch(()=>{});
+    SB.from('punto_de_venta').insert({ nombre: val }).then(()=>{ renderSidebarPV(); }).catch(()=>{});
     initLTSelectPV();
     toast('Punto de venta agregado ✓', 'ok');
   }
