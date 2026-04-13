@@ -5340,6 +5340,11 @@ async function loadLists() {
       if (!LISTS[k]) LISTS[k] = [];
       if (!LISTS[k].includes(v)) LISTS[k].push(v);
     });
+    // Cargar puntos de venta desde su tabla propia
+    const { data: pvData } = await SB.from('punto_de_venta').select('nombre').order('nombre');
+    if (pvData) {
+      LISTS.puntodeventa = pvData.map(r => r.nombre);
+    }
     initBanco(); initAllDD();
   } catch(e) {}
 }
@@ -6311,6 +6316,7 @@ async function saveLTEdit() {
     renderLiqTerceros();
     // Sincronizar contabilidad con los datos actualizados
     renderContabilidad();
+    renderSidebarPV();
     if (currentLTId === id) openLTPanel(id);
   } catch(e) { toast('Error: ' + e.message, 'er'); }
 }
@@ -6346,7 +6352,7 @@ async function addLTPVOpt() {
   if (!LISTS.puntodeventa) LISTS.puntodeventa = [];
   if (!LISTS.puntodeventa.includes(val)) {
     LISTS.puntodeventa.push(val);
-    SB.from('punto_de_venta').upsert({ nombre: val }).then(()=>{}).catch(()=>{});
+    SB.from('punto_de_venta').upsert({ nombre: val }).then(()=>{ renderSidebarPV(); }).catch(()=>{});
     initLTSelectPV();
     toast('Punto de venta agregado ✓', 'ok');
   }
