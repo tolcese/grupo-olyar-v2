@@ -6265,7 +6265,7 @@ async function saveLTEdit() {
     if (!LISTS.puntodeventa) LISTS.puntodeventa = [];
     if (!LISTS.puntodeventa.includes(pv)) {
       LISTS.puntodeventa.push(pv);
-      SB.from('punto_de_venta').upsert({ nombre: pv }).then(()=>{}).catch(()=>{});
+      try { await SB.from('punto_de_venta').upsert({ nombre: pv }); } catch(e) {}
       initLTSelectPV();
       renderSidebarPV();
     }
@@ -6296,8 +6296,14 @@ async function saveLTEdit() {
     const viejoLT = { ...LT_DATA[id] };
     const { error } = await SB.from('contabilidad').upsert(row, { onConflict: 'solicitud_id' });
     if (error) throw error;
-    LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
-    CONT_DATA[id] = LT_DATA[id];
+    // Re-leer desde Supabase para confirmar que el dato se guardó
+    const { data: savedRow } = await SB.from('contabilidad').select('*').eq('solicitud_id', id).single();
+    if (savedRow) {
+      LT_DATA[id] = { aLiquidar: savedRow.a_liquidar, impCredito: savedRow.imp_credito, gastosGestoria: savedRow.gastos_gestoria, comLukaya: savedRow.com_lukaya, fechaLiq: savedRow.fecha_liq, comComercial: savedRow.com_comercial, comOperativo: savedRow.com_operativo, comGestora: savedRow.com_gestora, retribBanco: savedRow.retrib_banco, ganancia: savedRow.ganancia, pagado: savedRow.pagado, fechaPagado: savedRow.fecha_pagado, pagoGest: savedRow.pago_gest, fechaPagoGest: savedRow.fecha_pago_gest, obs: savedRow.obs };
+    } else {
+      LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
+    }
+    CONT_DATA[id] = { ...(CONT_DATA[id] || {}), ...LT_DATA[id] };
     const cambiosLT = diffObjetos(viejoLT, LT_DATA[id], ['aLiquidar','impCredito','gastosGestoria','comLukaya','fechaLiq','comComercial','comOperativo','comGestora','retribBanco','ganancia','pagado','fechaPagado','pagoGest','obs']);
     registrarHistorial('liquidacion', id, cambiosLT);
     toast('Guardado ✓', 'ok');
