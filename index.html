@@ -3088,7 +3088,13 @@ async function toggleMantenimiento(activar) {
     : '¿Desactivar mantenimiento? Los usuarios podrán ingresar normalmente.';
   if (!confirm(msg)) return;
   try {
-    await SB.from('listas').upsert({ campo: '_mantenimiento', valor: String(activar) });
+    // Intentar update primero, si no existe insertar
+    const { data: existing } = await SB.from('listas').select('id').eq('campo', '_mantenimiento').single().catch(()=>({data:null}));
+    if (existing?.id) {
+      await SB.from('listas').update({ valor: String(activar) }).eq('campo', '_mantenimiento');
+    } else {
+      await SB.from('listas').insert({ campo: '_mantenimiento', valor: String(activar) });
+    }
     toast(activar ? '🔧 Mantenimiento activado' : '✅ Sistema reactivado', activar ? 'wa' : 'ok');
     loadMantenimientoStatus();
   } catch(e) { toast('Error: ' + e.message, 'er'); }
