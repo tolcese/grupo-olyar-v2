@@ -5242,6 +5242,11 @@ function showV(v) {
     if (sp) sp.style.transform = 'translateX(100%)';
   }
   if (v !== 'datero') closeDateroPanel();
+  // Auto-guardar modal LT si está abierto al navegar a otra sección
+  if (v !== 'liq-terceros') {
+    const ltOverlay = document.getElementById('lt-edit-overlay');
+    if (ltOverlay && ltOverlay.classList.contains('open')) { closeLTEdit(true); return; }
+  }
   if (v === 'contabilidad') {
     renderContabilidad();
     setTimeout(initContMirror, 100);
@@ -6220,7 +6225,7 @@ function editLT(id) {
     const impCredito = importe ? Math.round(importe * COEFICIENTES.impCredito / 100) : (c.impCredito || 0);
     const comLukaya  = importe ? Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito) : (c.comLukaya || 0);
     const comGestora = importe ? Math.round(importe * COEFICIENTES.comGestor / 100) : (c.comGestora || 0);
-    const retribBanco = importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : (c.retribBanco || 0);
+    const retribBanco = c.retribBanco != null ? c.retribBanco : (importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : 0);
     const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
     const comComercial = parseFloat(String(c.comComercial||0)) || 0;
     const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
@@ -6239,7 +6244,12 @@ function editLT(id) {
   document.getElementById('lt-edit-overlay').classList.add('open');
 }
 
-function closeLTEdit() {
+async function closeLTEdit(autoSave = false) {
+  if (autoSave) {
+    const id = document.getElementById('lt-edit-id').value;
+    const pv = document.getElementById('lt-puntodeventa').value.trim();
+    if (id && pv) { try { await saveLTEdit(); return; } catch(e) {} }
+  }
   document.getElementById('lt-edit-overlay').classList.remove('open');
   document.querySelectorAll('.cdd').forEach(d => d.classList.remove('open'));
 }
@@ -6257,6 +6267,7 @@ async function saveLTEdit() {
       LISTS.puntodeventa.push(pv);
       SB.from('punto_de_venta').upsert({ nombre: pv }).then(()=>{}).catch(()=>{});
       initLTSelectPV();
+      renderSidebarPV();
     }
     SB.from('solicitudes').update({ punto_de_venta: pv }).eq('id', id).then(()=>{}).catch(()=>{});
   }
