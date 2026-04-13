@@ -4135,6 +4135,7 @@ async function checkDateroNuevos() {
     const latest = data[0].created_at;
     if (!DATERO_LAST_SEEN || latest > DATERO_LAST_SEEN) {
       document.getElementById('datero-badge').style.display = '';
+      window._datero_latest_created_at = latest;
     } else {
       document.getElementById('datero-badge').style.display = 'none';
     }
@@ -4142,9 +4143,10 @@ async function checkDateroNuevos() {
 }
 
 function markDateroSeen() {
-  const now = new Date().toISOString();
-  DATERO_LAST_SEEN = now;
-  localStorage.setItem('datero_last_seen', now);
+  // Usar el created_at del último datero en vez de la hora del cliente
+  const seen = window._datero_latest_created_at || new Date().toISOString();
+  DATERO_LAST_SEEN = seen;
+  localStorage.setItem('datero_last_seen', seen);
   document.getElementById('datero-badge').style.display = 'none';
 }
 
