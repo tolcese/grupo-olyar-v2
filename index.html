@@ -3089,8 +3089,9 @@ async function toggleMantenimiento(activar) {
   if (!confirm(msg)) return;
   try {
     // Intentar update primero, si no existe insertar
-    const { data: existing } = await SB.from('listas').select('id').eq('campo', '_mantenimiento').single().catch(()=>({data:null}));
-    if (existing?.id) {
+    let existingId = null;
+    try { const { data: ex } = await SB.from('listas').select('id').eq('campo', '_mantenimiento').single(); existingId = ex?.id || null; } catch(e) {}
+    if (existingId) {
       await SB.from('listas').update({ valor: String(activar) }).eq('campo', '_mantenimiento');
     } else {
       await SB.from('listas').insert({ campo: '_mantenimiento', valor: String(activar) });
