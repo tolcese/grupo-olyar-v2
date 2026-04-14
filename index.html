@@ -2726,10 +2726,11 @@ async function savePEEdit() {
   const finalizada     = document.getElementById('pe-edit-finalizada').value;
   const fechaEntregada = document.getElementById('pe-edit-fecha-entregada').value;
   try {
-    const { error } = await SB.from('solicitudes').update({ obs, finalizada: finalizada || null, fecha_entregada: fechaEntregada || null }).eq('id', id);
+    const entregada = !!(fechaEntregada);
+    const { error } = await SB.from('solicitudes').update({ obs, finalizada: finalizada || null, fecha_entregada: fechaEntregada || null, entregada }).eq('id', id);
     if (error) throw error;
     const r = RECORDS.find(x => x.id === id);
-    if (r) { r.obs = obs; r.finalizada = finalizada; r.fechaEntregada = fechaEntregada; }
+    if (r) { r.obs = obs; r.finalizada = finalizada; r.fechaEntregada = fechaEntregada; r.entregada = entregada; }
     toast('Guardado ✓', 'ok');
     closePEEdit();
     renderPrendasEntregadas();
