@@ -3220,12 +3220,23 @@ async function renderRecordatoriosWA() {
     const vehiculo = sol.descripcion || sol.marca || 'su vehículo';
     const hora = new Date().getHours();
     const saludo = hora < 13 ? 'Buenos días' : 'Buenas tardes';
-    const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
+    // Calcular número de cuota actual
+    const cant = parseInt(c.cantCuotas) || 0;
+    let nroCuota = 1;
+    if (c.fechaInicio) {
+      const partes = c.fechaInicio.split('-');
+      const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+      const hoyN = new Date(); hoyN.setHours(0,0,0,0);
+      const meses = (hoyN.getFullYear() - inicio.getFullYear()) * 12 + (hoyN.getMonth() - inicio.getMonth());
+      nroCuota = Math.min(Math.max(meses + 1, 1), cant);
+    }
+    const infoCuota = cant ? ` (Cuota ${nroCuota} de ${cant})` : '';
+    const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota${infoCuota} del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
     const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(msg)}` : '';
     return `
       <div style="background:#fff;border:1.5px solid var(--red);border-radius:12px;padding:14px 16px">
         <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px">${c.cliente||'—'}</div>
-        <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b></div>
+        <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b> · <b style="color:var(--blue)">Cuota ${nroCuota} de ${cant}</b></div>
         ${waUrl
           ? `<a href="${waUrl}" target="_blank" style="text-decoration:none" onclick="marcarRecordatorioEnviado('${c.id}','${vencMes}');setTimeout(renderRecordatoriosWA,500)">
                <button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button>
@@ -3766,12 +3777,22 @@ async function checkRecordatoriosCreditos() {
         const vehiculo = sol.descripcion || sol.marca || 'su vehículo';
         const hora = new Date().getHours();
         const saludo = hora < 13 ? 'Buenos días' : 'Buenas tardes';
-        const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
+        const cant = parseInt(c.cantCuotas) || 0;
+        let nroCuota = 1;
+        if (c.fechaInicio) {
+          const partes = c.fechaInicio.split('-');
+          const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+          const hoyN = new Date(); hoyN.setHours(0,0,0,0);
+          const meses = (hoyN.getFullYear() - inicio.getFullYear()) * 12 + (hoyN.getMonth() - inicio.getMonth());
+          nroCuota = Math.min(Math.max(meses + 1, 1), cant);
+        }
+        const infoCuota = cant ? ` (Cuota ${nroCuota} de ${cant})` : '';
+        const msg = `${saludo}, ${c.cliente||''}. Le recordamos que el día ${fmtF(venc)}, es el vencimiento de la cuota${infoCuota} del vehículo ${vehiculo} gestionado con la entidad bancaria ${c.banco||''}. Recorda que abonar en tiempo evita recargos y mora en su línea de crédito. ¡Que tengas un excelente día!`;
         const waUrl = tel ? `https://wa.me/${tel}?text=${encodeURIComponent(msg)}` : '';
         return `
           <div style="background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px">
             <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px">${c.cliente||'—'}</div>
-            <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b></div>
+            <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b> · <b style="color:var(--blue)">Cuota ${nroCuota} de ${cant}</b></div>
             ${waUrl
               ? `<a href="${waUrl}" target="_blank" style="text-decoration:none" onclick="marcarRecordatorioEnviado('${c.id}','${vencMes}')"><button class="btn btn-p" style="background:#25D366;border-color:#25D366;font-size:12px;padding:7px 14px;width:100%">💬 Enviar WhatsApp</button></a>`
               : `<div style="font-size:11px;color:var(--muted)">Sin teléfono cargado</div>`
