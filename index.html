@@ -2189,17 +2189,29 @@ async function loadGestores() {
     if (error) throw error;
     GESTORES_CACHE = data || [];
     renderGestoresList(GESTORES_CACHE);
+    populateGestorProvFilter();
   } catch(e) {
     list.innerHTML = '<div style="color:var(--red);padding:20px;font-size:13px">Error cargando gestores.</div>';
   }
 }
 
 function filtrarGestores() {
-  const q = (document.getElementById('gestor-srch')?.value || '').toLowerCase();
-  const filtrados = q
-    ? GESTORES_CACHE.filter(g => (g.nombre||'').toLowerCase().includes(q))
-    : GESTORES_CACHE;
+  const q    = (document.getElementById('gestor-srch')?.value || '').toLowerCase();
+  const prov = (document.getElementById('gestor-prov-filter')?.value || '');
+  let filtrados = GESTORES_CACHE;
+  if (q)    filtrados = filtrados.filter(g => (g.nombre||'').toLowerCase().includes(q));
+  if (prov) filtrados = filtrados.filter(g => (g.provincia||'') === prov);
   renderGestoresList(filtrados);
+}
+
+function populateGestorProvFilter() {
+  const sel = document.getElementById('gestor-prov-filter');
+  if (!sel) return;
+  const provincias = [...new Set(GESTORES_CACHE.map(g => g.provincia).filter(Boolean))].sort();
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todas las provincias</option>' +
+    provincias.map(p => `<option value="${p}">${p}</option>`).join('');
+  if (current) sel.value = current;
 }
 
 function renderGestoresList(gestores) {
@@ -7773,11 +7785,14 @@ function renderReportes() {
         <button class="xbtn" onclick="closeGestores()">×</button>
       </div>
     </div>
-    <div style="padding:12px 20px;border-bottom:1px solid var(--line)">
-      <div class="searchbox">
+    <div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center">
+      <div class="searchbox" style="flex:1">
         <span style="color:var(--muted)">🔍</span>
         <input id="gestor-srch" placeholder="Buscar por nombre..." oninput="filtrarGestores()">
       </div>
+      <select id="gestor-prov-filter" onchange="filtrarGestores()" style="font-size:12px;padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-width:140px">
+        <option value="">Todas las provincias</option>
+      </select>
     </div>
 
     <!-- Lista de gestores -->
