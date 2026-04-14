@@ -1,6 +1,6 @@
 # Grupo Olyar v2 — Sistema de Gestión de Créditos Automotrices
 
-Sistema interno de gestión de créditos prendarios para el equipo de Grupo Olyar. Migrado desde Google Sheets + Apps Script a una arquitectura moderna con Supabase y Vercel.
+Sistema interno de gestión de créditos prendarios para el equipo de Grupo Olyar. Migrado desde Google Sheets + Apps Script a una arquitectura moderna con Supabase y GitHub Pages.
 
 ---
 
@@ -10,13 +10,13 @@ Sistema interno de gestión de créditos prendarios para el equipo de Grupo Olya
 |---|---|
 | Frontend | Vanilla JS — monolito `index.html` |
 | Base de datos | Supabase (PostgreSQL) — región São Paulo |
-| Hosting | Vercel |
+| Hosting | GitHub Pages |
 | Repositorio | GitHub `tolcese/grupo-olyar-v2` |
 | Email | Resend API (vía Supabase Edge Function) |
 | Clima | wttr.in (sin API key) |
 
-**URL producción:** `grupo-olyar-v2.vercel.app`  
-**Formulario público (Datero):** `grupo-olyar-v2.vercel.app/datero.html`
+**URL producción:** `https://tolcese.github.io/grupo-olyar-v2`  
+**Formulario público (Datero):** `https://tolcese.github.io/grupo-olyar-v2/datero.html`
 
 ---
 
@@ -37,6 +37,7 @@ Anon Key: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 tolcese/grupo-olyar-v2/
 ├── index.html        ← Sistema principal (monolito completo)
 ├── datero.html       ← Formulario público de carga de solicitudes
+├── .nojekyll         ← Evita interferencia de Jekyll en GitHub Pages
 └── README.md
 ```
 
@@ -61,6 +62,7 @@ Tabla principal con todos los créditos registrados. Permite crear, editar y fil
 Formulario público para carga de solicitudes externas desde concesionarias. Incluye:
 - Datos de agencia (provincia, concesionaria, encargado)
 - Datos del solicitante (nombre, DNI, teléfono, compañía, email, código postal, teléfonos alternativos con nombre y relación)
+- Estado civil y datos del cónyuge (se muestran solo si estado civil = Casado/a)
 - Foto DNI (subida a Supabase Storage — bucket `datero-dni`)
 - Título automotor
 - Información laboral (empresa, fecha ingreso, domicilio, teléfono laboral)
@@ -72,24 +74,33 @@ Formulario público para carga de solicitudes externas desde concesionarias. Inc
 Asignación de gestores a solicitudes aprobadas. Al desasignar un gestor el estado vuelve a "Aprobado" y sale de Prendas y Contabilidad.
 
 ### Prendas pendientes
-Lista solicitudes con gestor asignado que aún no tienen los tres estados completos (en proceso, presentada, finalizada). Solo muestra prendas sin fecha de finalización.
+Lista solicitudes con gestor asignado que aún no tienen fecha de finalización.
+
+### Prendas finalizadas
+Lista solicitudes con fecha de finalización cargada. Permite editar la fecha de finalización y cargar fecha de entrega. Al cargar la fecha de entrega el registro pasa automáticamente a Prendas entregadas. Incluye botón de Acuse de recibo imprimible.
+
+### Prendas entregadas
+Lista solicitudes marcadas como entregadas (con fecha de entrega cargada).
 
 ### Contabilidad *(solo admin)*
 Gestión contable con las siguientes pestañas:
 - **Liquidaciones**: tabla completa con todos los campos contables por operación
 - **Totales**: resumen de comisiones y ganancias
 - **Gastos**: registro de gastos con cálculo de ganancia neta (Lukaya menos gastos)
-- **Cobranza Banco**: operaciones AVANZA con campo editable "Fecha de pago Banco"
+- **Cobranza Banco**: operaciones AVANZA sin fecha de pago banco
+- **Prendas Cobradas**: operaciones AVANZA con fecha de pago banco cargada
 - **Cambio de Coeficientes**: modificación de porcentajes de cálculo
 
-### Liquidaciones a Terceros
-Vista contable por punto de venta. Permite editar los campos contables de cada operación AVANZA.
+### Liquidaciones a Terceros *(solo admin)*
+Vista contable por punto de venta. Permite editar los campos contables de cada operación AVANZA. Los puntos de venta nuevos agregados desde acá se guardan automáticamente en Supabase y se reflejan en el sidebar.
 
 ### Sistema de Créditos
 Seguimiento de créditos prendarios activos con sus cuotas. Incluye:
-- **Créditos**: lista de créditos con panel lateral de detalle
-- **Cuotas**: vista de vencimientos por crédito
-- **Recordatorio Vencimiento Cuota (WA)**: lista de créditos con vencimiento próximo (7 días hábiles) pendientes de aviso por WhatsApp. Al enviar el mensaje queda registrado en Supabase y no vuelve a aparecer para ningún usuario ese mes.
+- **Créditos**: lista de créditos con panel lateral de detalle. Muestra la cuota actual calculada automáticamente según la fecha del día.
+- **Cuotas**: vista de vencimientos por crédito con número de cuota actual
+- **Recordatorio Vencimiento Cuota (WA)**: lista de créditos con vencimiento próximo (7 días hábiles) pendientes de aviso por WhatsApp. Muestra "Cuota X de Y" en la card y en el mensaje de WA. Al enviar el mensaje queda registrado en Supabase y no vuelve a aparecer para ningún usuario ese mes.
+
+El número de cuota actual se calcula automáticamente: meses transcurridos desde la fecha del primer vencimiento + 1, avanzando al siguiente si el día de vencimiento del mes actual ya pasó.
 
 ### Reportes
 - Admin: gráficos de estados, registros por mes, comisiones
@@ -99,16 +110,23 @@ Seguimiento de créditos prendarios activos con sus cuotas. Incluye:
 Eventos, tareas y recordatorios. Los creados por admin son visibles para todos; los de cada usuario solo los ve él mismo.
 
 ### Datero (vista interna)
-Tabla con todas las solicitudes recibidas desde el formulario público. Badge verde cuando hay registros nuevos sin ver.
+Tabla con todas las solicitudes recibidas desde el formulario público. Badge verde cuando hay registros nuevos sin ver. El badge se marca como visto guardando el `created_at` exacto del último datero para evitar falsos positivos.
 
 ### Bancos
 Acceso rápido a portales bancarios:
 - Banco Columbia: `columbiacompras.com.ar`
 - Banco Supervielle: `carapp.iudu.com.ar`
 - Banco Santander: `login-prendarios.santanderconsumer.com.ar`
+- Banco Bancor: `aplicaciones.bancor.com.ar`
 
 ### Puntos de Venta *(sidebar admin)*
-Lista de puntos de venta. Al hacer click se abre un modal con todas las operaciones asociadas.
+Lista de puntos de venta cargada desde Supabase al iniciar. Al hacer click se abre un modal con todas las operaciones asociadas.
+
+### Simulador Prendario
+Botón en el sidebar que abre `https://tolcese.github.io/simulador-prendarios/` en nueva pestaña.
+
+### Modo Mantenimiento *(solo admin)*
+Desde Configuración el admin puede activar/desactivar el modo mantenimiento. Cuando está activo, los usuarios ven una pantalla de mantenimiento y no pueden ingresar. El admin puede seguir usando el sistema normalmente.
 
 ---
 
@@ -124,14 +142,13 @@ Lista de puntos de venta. Al hacer click se abre un modal con todas las operacio
 | `creditos` | Créditos prendarios activos |
 | `cuotas` | Cuotas por crédito |
 | `datero` | Solicitudes del formulario público |
-| `listas` | Valores de listas desplegables (bancos, provincias, etc.) |
+| `listas` | Valores de listas desplegables y flags de configuración (ej. `_mantenimiento`) |
 | `usuarios` | Usuarios del sistema con roles |
 | `calendario` | Eventos, tareas y recordatorios |
 | `gastos` | Gastos registrados en contabilidad |
 | `historial_cambios` | Auditoría de cambios por sección |
 | `punto_de_venta` | Puntos de venta disponibles |
 | `recordatorios_enviados` | Registro de recordatorios WA enviados por crédito y mes |
-| `mantenimiento` | Control de modo mantenimiento |
 
 ---
 
@@ -166,7 +183,7 @@ Al loguearse el admin, el sistema consulta el último archivo en el bucket `back
 El sistema calcula 7 días hábiles (sin sábados ni domingos) antes del vencimiento de cada cuota activa. Cuando la fecha de recordatorio llega:
 - Los usuarios (no admin) ven un popup al entrar a Sistema de Créditos
 - Badge rojo en el botón del sidebar
-- Pestaña "Recordatorio Vencimiento Cuota (WA)" con botón directo a WhatsApp
+- Pestaña "Recordatorio Vencimiento Cuota (WA)" con botón directo a WhatsApp con número de cuota incluido en el mensaje
 - Al enviar el mensaje se registra en `recordatorios_enviados` y no vuelve a aparecer para ningún usuario ese mes
 
 ### Historial de cambios
@@ -182,19 +199,24 @@ El sistema se refresca automáticamente cada 30 segundos. En móvil espera 3 seg
 
 ## Deploy
 
-El deploy es automático: cada push a la rama `main` en GitHub dispara un nuevo deploy en Vercel.
+El deploy es automático: cada push a la rama `main` en GitHub actualiza el sitio en GitHub Pages en pocos segundos.
 
-Para deployar manualmente:
+Para actualizar el sistema:
 1. Editá `index.html` o `datero.html`
-2. Commiteá y pusheá a `main`
-3. Vercel detecta el cambio y deploya automáticamente en ~30 segundos
+2. Subí el archivo a GitHub (Add file → Upload files → reemplazá el existente)
+3. Commiteá a `main`
+4. GitHub Pages publica el cambio automáticamente
+
+> **Nota:** El archivo `.nojekyll` en la raíz del repo es necesario para que GitHub Pages sirva correctamente los archivos sin interferencia de Jekyll.
 
 ---
 
-## Pendientes / Roadmap
+## Notas de arquitectura
 
-- Adaptación responsive móvil (en progreso)
-- Mejora de vista de tabla del Datero en PC
+- Supabase se conecta directamente desde el browser — el hosting (GitHub Pages) no interviene en las llamadas a la base de datos.
+- Todos los datos están en Supabase. Cambiar de hosting no afecta la data.
+- La tabla `punto_de_venta` requiere `id` con `gen_random_uuid()` — los inserts desde el sistema lo generan automáticamente.
+- La flag de mantenimiento se guarda en la tabla `listas` con `campo = '_mantenimiento'` y `valor = 'true'/'false'`.
 
 ---
 
