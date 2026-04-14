@@ -3290,7 +3290,8 @@ function renderCreditos() {
     const partes = (c.fechaInicio||'').split('-');
     const inicio = partes.length===3 ? new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2])) : new Date();
     const meses  = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
-    const cuotaActual = Math.min(Math.max(meses + 1, 1), cant||1);
+    let cuotaActual = Math.min(Math.max(meses + 1, 1), cant||1);
+    if (c.fechaInicio) { const _p=c.fechaInicio.split('-'); const _v=new Date(+_p[0],+_p[1]-1+(cuotaActual-1),+_p[2]); _v.setHours(0,0,0,0); const _h=new Date(); _h.setHours(0,0,0,0); if(_h>_v && cuotaActual<(cant||1)) cuotaActual++; }
     const pct = cant > 0 ? Math.round(cuotaActual / cant * 100) : 0;
     return `
     <div style="background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;transition:all .12s" onmouseenter="this.style.borderColor='var(--blue)'" onmouseleave="this.style.borderColor='var(--line)'" onclick="openCredPanel('${c.id}')">
@@ -3341,6 +3342,8 @@ function renderCuotas() {
       const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
       const meses  = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
       cuotaActual  = Math.min(Math.max(meses + 1, 1), cant);
+      // Si el vencimiento de la cuota actual ya pasó, avanzar a la siguiente
+      if (c.fechaInicio) { const _p=c.fechaInicio.split('-'); const _v=new Date(+_p[0],+_p[1]-1+(cuotaActual-1),+_p[2]); _v.setHours(0,0,0,0); const _hh=new Date(); _hh.setHours(0,0,0,0); if(_hh>_v && cuotaActual<cant) cuotaActual++; }
     }
     const pct = cant > 0 ? Math.round(cuotaActual / cant * 100) : 0;
     // Próximo vencimiento
@@ -3566,7 +3569,8 @@ function openCredPanel(id) {
         const partesP = (c.fechaInicio||'').split('-');
         const inicio = partesP.length===3 ? new Date(parseInt(partesP[0]), parseInt(partesP[1])-1, parseInt(partesP[2])) : new Date();
         const mesesTranscurridos = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
-        const cuotaActual = Math.min(Math.max(mesesTranscurridos + 1, 1), cant||1);
+        let cuotaActual = Math.min(Math.max(mesesTranscurridos + 1, 1), cant||1);
+        if (c.fechaInicio) { const _p=c.fechaInicio.split('-'); const _v=new Date(+_p[0],+_p[1]-1+(cuotaActual-1),+_p[2]); _v.setHours(0,0,0,0); const _hd=new Date(); _hd.setHours(0,0,0,0); if(_hd>_v && cuotaActual<(cant||1)) cuotaActual++; }
         const pct = cant > 0 ? Math.round(cuotaActual / cant * 100) : 0;
         return `
           <div style="text-align:center;padding:10px 0 16px">
@@ -3642,7 +3646,11 @@ function proximoVencimientoCuota(c) {
   const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
   const cant = parseInt(c.cantCuotas) || 0;
   const meses = (hoy.getFullYear() - inicio.getFullYear()) * 12 + (hoy.getMonth() - inicio.getMonth());
-  const cuotaActual = Math.min(Math.max(meses + 1, 1), cant);
+  let cuotaActual = Math.min(Math.max(meses + 1, 1), cant);
+  // Si el vencimiento de la cuota actual ya pasó, avanzar a la siguiente
+  const vencActual = new Date(parseInt(partes[0]), parseInt(partes[1])-1 + (cuotaActual - 1), parseInt(partes[2]));
+  vencActual.setHours(0,0,0,0);
+  if (hoy > vencActual && cuotaActual < cant) cuotaActual++;
   return new Date(parseInt(partes[0]), parseInt(partes[1])-1 + (cuotaActual - 1), parseInt(partes[2]));
 }
 
