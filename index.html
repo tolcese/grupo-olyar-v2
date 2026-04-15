@@ -4772,7 +4772,8 @@ async function editCont(id) {
     document.getElementById('cont-com-lukaya').value   = c.comLukaya  != null ? c.comLukaya  : (comLukaya  || '');
     document.getElementById('cont-com-gestora').value  = c.comGestora != null ? c.comGestora : (comGestora || '');
     document.getElementById('cont-retrib-banco').value = retribBanco || '';
-    document.getElementById('cont-ganancia').value     = ganancia    || '';
+    // Usar ganancia guardada en Supabase; solo recalcular si no existe
+    document.getElementById('cont-ganancia').value     = c.ganancia != null ? c.ganancia : (ganancia || '');
     document.getElementById('cont-a-liquidar').value   = aLiquidar   || '';
   } else {
     // Registro nuevo sin datos contables — calcular y guardar automáticamente
