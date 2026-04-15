@@ -4767,13 +4767,12 @@ async function editCont(id) {
     const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
     const pagosExtras  = parseFloat(String(c.pagosExtras||0)) || 0;
     const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExtras);
-    const aLiquidar   = importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : (c.aLiquidar || 0);
+    const aLiquidar   = c.aLiquidar != null ? c.aLiquidar : (importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : 0);
     document.getElementById('cont-imp-credito').value  = impCredito  || '';
     document.getElementById('cont-com-lukaya').value   = c.comLukaya  != null ? c.comLukaya  : (comLukaya  || '');
     document.getElementById('cont-com-gestora').value  = c.comGestora != null ? c.comGestora : (comGestora || '');
     document.getElementById('cont-retrib-banco').value = retribBanco || '';
-    // Usar ganancia guardada en Supabase; solo recalcular si no existe
-    document.getElementById('cont-ganancia').value     = c.ganancia != null ? c.ganancia : (ganancia || '');
+    document.getElementById('cont-ganancia').value     = c.ganancia  != null ? c.ganancia   : (ganancia   || '');
     document.getElementById('cont-a-liquidar').value   = aLiquidar   || '';
   } else {
     // Registro nuevo sin datos contables — calcular y guardar automáticamente
