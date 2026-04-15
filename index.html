@@ -6288,7 +6288,8 @@ function editLT(id) {
     const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
     const comComercial = parseFloat(String(c.comComercial||0)) || 0;
     const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
-    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+    const pagosExLT   = parseFloat(String(c.pagosExtras||0)) || 0;
+    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExLT);
     const aLiquidar   = importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : (c.aLiquidar || 0);
     document.getElementById('lt-imp-credito').value  = impCredito  || '';
     document.getElementById('lt-com-lukaya').value   = comLukaya   || '';
