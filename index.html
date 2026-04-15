@@ -4037,8 +4037,9 @@ function editConc(nombre) {
   document.getElementById('conc-edit-nombre-orig').value = nombre;
   document.getElementById('conc-edit-titulo').textContent = nombre;
   document.getElementById('conc-edit-nombre').value    = c.nombre    || '';
-  document.getElementById('conc-edit-nombre').readOnly = true;
-  document.getElementById('conc-edit-nombre').style.background = 'var(--surface)';
+  const concIsAdmin = ME?.rol === 'admin';
+  document.getElementById('conc-edit-nombre').readOnly = !concIsAdmin;
+  document.getElementById('conc-edit-nombre').style.background = concIsAdmin ? '' : 'var(--surface)';
   document.getElementById('conc-edit-cuit').value      = c.cuit      || '';
   document.getElementById('conc-edit-telefono').value  = c.telefono  || '';
   document.getElementById('conc-edit-email').value     = c.email     || '';
