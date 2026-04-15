@@ -5686,12 +5686,13 @@ async function saveRecord() {
       if (c.aLiquidar || c.comLukaya || c.impCredito) {
         const importe = parseFloat(String(rec.importe||0).replace(/[$,]/g,'')) || 0;
         if (importe) {
+          // Solo recalcular campos que no fueron modificados manualmente
           const impCredito  = Math.round(importe * COEFICIENTES.impCredito / 100);
-          const comLukaya   = Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
-          const comGestora  = Math.round(importe * COEFICIENTES.comGestor / 100);
-          const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
-          const ganancia    = Math.round(comLukaya - (c.comComercial||0) - (c.comOperativo||0) - comGestora + retribBanco);
+          const comLukaya   = c.comLukaya  != null ? c.comLukaya  : Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
+          const comGestora  = c.comGestora != null ? c.comGestora : Math.round(importe * COEFICIENTES.comGestor / 100);
+          const retribBanco = c.retribBanco != null ? c.retribBanco : Math.round(importe * COEFICIENTES.retribBanco / 100);
           const aLiquidar   = Math.round(importe - comLukaya - (c.gastosGestoria||0) - impCredito);
+          const ganancia    = Math.round(comLukaya - (c.comComercial||0) - (c.comOperativo||0) - (c.pagosExtras||0) - comGestora + retribBanco);
           const data = { solicitud_id: rec.id, a_liquidar: aLiquidar, imp_credito: impCredito, com_lukaya: comLukaya, com_gestora: comGestora, retrib_banco: retribBanco, ganancia };
           SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' }).then(()=>{}).catch(()=>{});
           CONT_DATA[rec.id] = { ...c, aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
