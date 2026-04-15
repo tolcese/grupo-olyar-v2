@@ -4701,8 +4701,16 @@ function renderTotalesCont(data) {
   }
 }
 
-function editCont(id) {
+async function editCont(id) {
   const r = RECORDS.find(x => x.id === id);
+  // Siempre leer desde Supabase para tener el dato más actualizado
+  try {
+    const { data: fresh } = await SB.from('contabilidad').select('*').eq('solicitud_id', id).single();
+    if (fresh) {
+      CONT_DATA[id] = { ...(CONT_DATA[id]||{}), aLiquidar: fresh.a_liquidar, impCredito: fresh.imp_credito, gastosGestoria: fresh.gastos_gestoria, comLukaya: fresh.com_lukaya, fechaLiq: fresh.fecha_liq, comComercial: fresh.com_comercial, comOperativo: fresh.com_operativo, pagosExtras: fresh.pagos_extras, comGestora: fresh.com_gestora, retribBanco: fresh.retrib_banco, ganancia: fresh.ganancia, pagado: fresh.pagado, fechaPagado: fresh.fecha_pagado, pagoGest: fresh.pago_gest, fechaPagoGest: fresh.fecha_pago_gest, obs: fresh.obs };
+      LT_DATA[id] = CONT_DATA[id];
+    }
+  } catch(e) {}
   const c = CONT_DATA[id] || {};
   const cd = CLIENTES_DATA[r?.dni] || {};
   const val = v => (v && v !== 'undefined') ? v : '—';
@@ -6250,8 +6258,16 @@ function calcLTLiquidar() {
   if (!document.getElementById('lt-retrib-banco').value) document.getElementById('lt-retrib-banco').value = retribBanco.toFixed(2);
 }
 
-function editLT(id) {
+async function editLT(id) {
   const r  = RECORDS.find(x => x.id === id);
+  // Siempre leer desde Supabase para tener el dato más actualizado
+  try {
+    const { data: fresh } = await SB.from('contabilidad').select('*').eq('solicitud_id', id).single();
+    if (fresh) {
+      CONT_DATA[id] = { ...(CONT_DATA[id]||{}), aLiquidar: fresh.a_liquidar, impCredito: fresh.imp_credito, gastosGestoria: fresh.gastos_gestoria, comLukaya: fresh.com_lukaya, fechaLiq: fresh.fecha_liq, comComercial: fresh.com_comercial, comOperativo: fresh.com_operativo, pagosExtras: fresh.pagos_extras, comGestora: fresh.com_gestora, retribBanco: fresh.retrib_banco, ganancia: fresh.ganancia, pagado: fresh.pagado, fechaPagado: fresh.fecha_pagado, pagoGest: fresh.pago_gest, fechaPagoGest: fresh.fecha_pago_gest, obs: fresh.obs };
+      LT_DATA[id] = CONT_DATA[id];
+    }
+  } catch(e) {}
   const c  = LT_DATA[id] || CONT_DATA[id] || {};
   const cd = CLIENTES_DATA[r?.dni] || {};
   const val = v => (v && v !== 'undefined') ? v : '—';
