@@ -4435,6 +4435,7 @@ async function loadContabilidad() {
         comGestora:     c.com_gestora,
         retribBanco:    c.retrib_banco,
         ganancia:       c.ganancia,
+        pagosExtras:    c.pagos_extras,
         fechaPagoBanco: c.fecha_pago_banco,
         pagado:         c.pagado,
         fechaPagado:    c.fecha_pagado,
@@ -4661,6 +4662,7 @@ function renderTotalesCont(data) {
     { label:'Gastos Gestoría',    value: fmt(sum('gastosGestoria')) },
     { label:'Comisión LUKAYA',    value: fmt(sum('comLukaya')) },
     { label:'Com. Comercial',     value: fmt(sum('comComercial')) },
+    { label:'Pagos Extras',        value: fmt(sum('pagosExtras')) },
     { label:'Com. Operativo',     value: fmt(sum('comOperativo')) },
     { label:'Com. Gestor',        value: fmt(sum('comGestora')) },
     { label:'Retrib. Banco',      value: fmt(sum('retribBanco')) },
@@ -4681,7 +4683,7 @@ function renderTotalesCont(data) {
   const netoPanel = document.getElementById('cont-totales-neto');
   const netoGrid  = document.getElementById('cont-totales-neto-grid');
   if (netoPanel && netoGrid) {
-    const gananciaLukaya = sum('ganancia');
+    const gananciaLukaya = sum('comLukaya') - sum('comComercial') - sum('comOperativo') - sum('comGestora') + sum('retribBanco') - sum('pagosExtras');
     const totalGastos = GASTOS_DATA.reduce((acc, g) => acc + (parseFloat(g.monto) || 0), 0);
     const neto = gananciaLukaya - totalGastos;
     const fmtN = v => '$' + Math.round(v).toLocaleString('es-AR');
@@ -4735,6 +4737,7 @@ function editCont(id) {
   document.getElementById('cont-gastos-gestoria').value = c.gastosGestoria || '';
   document.getElementById('cont-com-comercial').value = c.comComercial || '';
   document.getElementById('cont-com-operativo').value = c.comOperativo || '';
+  document.getElementById('cont-pagos-extras').value  = c.pagosExtras  || '';
   document.getElementById('cont-fecha-liq').value     = c.fechaLiq     || '';
   document.getElementById('cont-pagado').checked      = !!c.pagado;
   document.getElementById('cont-fecha-pagado').value  = c.fechaPagado  || '';
@@ -4752,7 +4755,8 @@ function editCont(id) {
     const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
     const comComercial = parseFloat(String(c.comComercial||0)) || 0;
     const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
-    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+    const pagosExLT   = parseFloat(String(c.pagosExtras||0)) || 0;
+    const ganancia    = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExLT);
     const aLiquidar   = importe ? Math.round(importe - comLukaya - gastosGest - impCredito) : (c.aLiquidar || 0);
     document.getElementById('cont-imp-credito').value  = impCredito  || '';
     document.getElementById('cont-com-lukaya').value   = comLukaya   || '';
@@ -4912,7 +4916,8 @@ function calcContLiquidar() {
   // Ganancia LUKAYA
   const comComercial = parseFloat(document.getElementById('cont-com-comercial').value||0) || 0;
   const comOperativo = parseFloat(document.getElementById('cont-com-operativo').value||0) || 0;
-  const ganancia = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+  const pagosExtras = parseFloat(document.getElementById('cont-pagos-extras').value||0) || 0;
+  const ganancia = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExtras);
   document.getElementById('cont-ganancia').value = ganancia.toFixed(2);
   // A liquidar agencia
   const gastosGest = parseFloat(document.getElementById('cont-gastos-gestoria').value||0) || 0;
@@ -4939,6 +4944,7 @@ async function saveContEdit(silent = false) {
     com_operativo:   n(document.getElementById('cont-com-operativo').value),
     com_gestora:     n(document.getElementById('cont-com-gestora').value),
     retrib_banco:    n(document.getElementById('cont-retrib-banco').value),
+    pagos_extras:    n(document.getElementById('cont-pagos-extras').value),
     fecha_pago_banco: document.getElementById('cont-fecha-pago-banco')?.value || null,
     ganancia:        n(document.getElementById('cont-ganancia').value),
     pagado:          document.getElementById('cont-pagado').checked,
@@ -4955,7 +4961,7 @@ async function saveContEdit(silent = false) {
       aLiquidar: row.a_liquidar, impCredito: row.imp_credito,
       gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya,
       fechaLiq: row.fecha_liq, comComercial: row.com_comercial,
-      comOperativo: row.com_operativo, comGestora: row.com_gestora,
+      comOperativo: row.com_operativo, pagosExtras: row.pagos_extras, comGestora: row.com_gestora,
       retribBanco: row.retrib_banco, ganancia: row.ganancia,
       pagado: row.pagado, fechaPagado: row.fecha_pagado,
       pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs
@@ -6217,7 +6223,8 @@ function calcLTLiquidar() {
   const comComercial = parseFloat(document.getElementById('lt-com-comercial').value||0) || 0;
   const comOperativo = parseFloat(document.getElementById('lt-com-operativo').value||0) || 0;
   const gastosGest   = parseFloat(document.getElementById('lt-gastos-gestoria').value||0) || 0;
-  const ganancia  = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco);
+  const pagosExtrasLT = parseFloat(document.getElementById('lt-pagos-extras').value||0) || 0;
+  const ganancia  = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExtrasLT);
   const aLiquidar = Math.round(importe - comLukaya - gastosGest - impCredito);
   document.getElementById('lt-ganancia').value   = ganancia.toFixed(2);
   document.getElementById('lt-a-liquidar').value = aLiquidar.toFixed(2);
@@ -6261,6 +6268,7 @@ function editLT(id) {
   document.getElementById('lt-gastos-gestoria').value = c.gastosGestoria || '';
   document.getElementById('lt-com-comercial').value   = c.comComercial   || '';
   document.getElementById('lt-com-operativo').value   = c.comOperativo   || '';
+  document.getElementById('lt-pagos-extras').value     = c.pagosExtras    || '';
   document.getElementById('lt-fecha-liq').value       = c.fechaLiq       || '';
   document.getElementById('lt-pagado').checked        = !!c.pagado;
   document.getElementById('lt-fecha-pagado').value    = c.fechaPagado    || '';
@@ -6333,6 +6341,7 @@ async function saveLTEdit() {
     com_operativo:   n(document.getElementById('lt-com-operativo').value),
     com_gestora:     n(document.getElementById('lt-com-gestora').value),
     retrib_banco:    n(document.getElementById('lt-retrib-banco').value),
+    pagos_extras:    n(document.getElementById('lt-pagos-extras').value),
     ganancia:        n(document.getElementById('lt-ganancia').value),
     pagado:          document.getElementById('lt-pagado').checked,
     fecha_pagado:    document.getElementById('lt-fecha-pagado').value || null,
@@ -6348,12 +6357,12 @@ async function saveLTEdit() {
     // Re-leer desde Supabase para confirmar que el dato se guardó
     const { data: savedRow } = await SB.from('contabilidad').select('*').eq('solicitud_id', id).single();
     if (savedRow) {
-      LT_DATA[id] = { aLiquidar: savedRow.a_liquidar, impCredito: savedRow.imp_credito, gastosGestoria: savedRow.gastos_gestoria, comLukaya: savedRow.com_lukaya, fechaLiq: savedRow.fecha_liq, comComercial: savedRow.com_comercial, comOperativo: savedRow.com_operativo, comGestora: savedRow.com_gestora, retribBanco: savedRow.retrib_banco, ganancia: savedRow.ganancia, pagado: savedRow.pagado, fechaPagado: savedRow.fecha_pagado, pagoGest: savedRow.pago_gest, fechaPagoGest: savedRow.fecha_pago_gest, obs: savedRow.obs };
+      LT_DATA[id] = { aLiquidar: savedRow.a_liquidar, impCredito: savedRow.imp_credito, gastosGestoria: savedRow.gastos_gestoria, comLukaya: savedRow.com_lukaya, fechaLiq: savedRow.fecha_liq, comComercial: savedRow.com_comercial, comOperativo: savedRow.com_operativo, pagosExtras: savedRow.pagos_extras, comGestora: savedRow.com_gestora, retribBanco: savedRow.retrib_banco, ganancia: savedRow.ganancia, pagado: savedRow.pagado, fechaPagado: savedRow.fecha_pagado, pagoGest: savedRow.pago_gest, fechaPagoGest: savedRow.fecha_pago_gest, obs: savedRow.obs };
     } else {
-      LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
+      LT_DATA[id] = { aLiquidar: row.a_liquidar, impCredito: row.imp_credito, gastosGestoria: row.gastos_gestoria, comLukaya: row.com_lukaya, fechaLiq: row.fecha_liq, comComercial: row.com_comercial, comOperativo: row.com_operativo, pagosExtras: row.pagos_extras, comGestora: row.com_gestora, retribBanco: row.retrib_banco, ganancia: row.ganancia, pagado: row.pagado, fechaPagado: row.fecha_pagado, pagoGest: row.pago_gest, fechaPagoGest: row.fecha_pago_gest, obs: row.obs };
     }
     CONT_DATA[id] = { ...(CONT_DATA[id] || {}), ...LT_DATA[id] };
-    const cambiosLT = diffObjetos(viejoLT, LT_DATA[id], ['aLiquidar','impCredito','gastosGestoria','comLukaya','fechaLiq','comComercial','comOperativo','comGestora','retribBanco','ganancia','pagado','fechaPagado','pagoGest','obs']);
+    const cambiosLT = diffObjetos(viejoLT, LT_DATA[id], ['aLiquidar','impCredito','gastosGestoria','comLukaya','fechaLiq','comComercial','comOperativo','pagosExtras','comGestora','retribBanco','ganancia','pagado','fechaPagado','pagoGest','obs']);
     registrarHistorial('liquidacion', id, cambiosLT);
     toast('Guardado ✓', 'ok');
     closeLTEdit();
@@ -8132,6 +8141,7 @@ function renderReportes() {
       <div class="fc"><label>Fecha liquidación</label><input id="lt-fecha-liq" type="date"></div>
       <div class="fc"><label>Comisión comercial</label><input id="lt-com-comercial" type="number" placeholder="0" oninput="calcLTLiquidar()"></div>
       <div class="fc"><label>Comisión operativo</label><input id="lt-com-operativo" type="number" placeholder="0" oninput="calcLTLiquidar()"></div>
+      <div class="fc"><label>Pagos Extras</label><input id="lt-pagos-extras" type="number" placeholder="0" oninput="calcLTLiquidar()"></div>
       <div class="fc"><label>Comisión gestor</label><input id="lt-com-gestora" type="number" placeholder="0" oninput="calcLTLiquidar()" style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Retribución banco</label><input id="lt-retrib-banco" type="number" placeholder="0" oninput="calcLTLiquidar()" style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Ganancia LUKAYA</label><input id="lt-ganancia" type="number" placeholder="0" style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
@@ -8176,6 +8186,7 @@ function renderReportes() {
       <div class="fc"><label>Fecha liquidación</label><input id="cont-fecha-liq" type="date"></div>
       <div class="fc"><label>Comisión comercial</label><input id="cont-com-comercial" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión operativo</label><input id="cont-com-operativo" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
+      <div class="fc"><label>Pagos Extras</label><input id="cont-pagos-extras" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión gestor <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-com-gestora" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Retribución banco <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-retrib-banco" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Ganancia LUKAYA <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-ganancia" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
