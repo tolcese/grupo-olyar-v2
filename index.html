@@ -4762,7 +4762,7 @@ function editCont(id) {
     document.getElementById('cont-imp-credito').value  = impCredito  || '';
     document.getElementById('cont-com-lukaya').value   = comLukaya   || '';
     document.getElementById('cont-com-gestora').value  = comGestora  || '';
-    document.getElementById('cont-retrib-banco').value = retribBanco || '';
+    document.getElementById('cont-retrib-banco').value = c.retribBanco || '';
     document.getElementById('cont-ganancia').value     = ganancia    || '';
     document.getElementById('cont-a-liquidar').value   = aLiquidar   || '';
   } else {
@@ -4899,6 +4899,17 @@ async function guardarCoeficientes() {
   } catch(e) { toast('Error: ' + e.message, 'er'); }
 }
 
+function calcContGanancia() {
+  const comLukaya    = parseFloat(document.getElementById('cont-com-lukaya').value||0) || 0;
+  const comComercial = parseFloat(document.getElementById('cont-com-comercial').value||0) || 0;
+  const comOperativo = parseFloat(document.getElementById('cont-com-operativo').value||0) || 0;
+  const comGestora   = parseFloat(document.getElementById('cont-com-gestora').value||0) || 0;
+  const retribBanco  = parseFloat(document.getElementById('cont-retrib-banco').value||0) || 0;
+  const pagosExtras  = parseFloat(document.getElementById('cont-pagos-extras').value||0) || 0;
+  const ganancia = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExtras);
+  document.getElementById('cont-ganancia').value = ganancia.toFixed(2);
+}
+
 function calcContLiquidar() {
   const r        = RECORDS.find(x => x.id === document.getElementById('cont-edit-id').value);
   const importe  = parseFloat(r?.importe||0) || 0;
@@ -4911,9 +4922,12 @@ function calcContLiquidar() {
   // Comisión gestor
   const comGestora = Math.round(importe * COEFICIENTES.comGestor / 100);
   document.getElementById('cont-com-gestora').value = comGestora.toFixed(2);
-  // Retribución banco
-  const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
-  document.getElementById('cont-retrib-banco').value = retribBanco.toFixed(2);
+  // Retribución banco — solo calcular si el campo está vacío (respeta valor manual)
+  const retribBancoCalc = Math.round(importe * COEFICIENTES.retribBanco / 100);
+  if (!document.getElementById('cont-retrib-banco').value) {
+    document.getElementById('cont-retrib-banco').value = retribBancoCalc.toFixed(2);
+  }
+  const retribBanco = parseFloat(document.getElementById('cont-retrib-banco').value||0) || retribBancoCalc;
   // Ganancia LUKAYA
   const comComercial = parseFloat(document.getElementById('cont-com-comercial').value||0) || 0;
   const comOperativo = parseFloat(document.getElementById('cont-com-operativo').value||0) || 0;
@@ -8191,7 +8205,7 @@ function renderReportes() {
       <div class="fc"><label>Comisión operativo</label><input id="cont-com-operativo" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Pagos Extras</label><input id="cont-pagos-extras" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión gestor <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-com-gestora" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
-      <div class="fc"><label>Retribución banco <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-retrib-banco" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
+      <div class="fc"><label>Retribución banco</label><input id="cont-retrib-banco" type="number" placeholder="0" oninput="calcContGanancia()" style="font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Ganancia LUKAYA <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-ganancia" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Pagado</label>
         <div class="chk-grid" style="grid-template-columns:1fr">
