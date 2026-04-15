@@ -1080,6 +1080,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th>Fecha liquidación</th>
                 <th>Comisión comercial</th>
                 <th>Comisión operativo</th>
+                <th>Pagos Extras</th>
                 <th>Comisión gestor</th>
                 <th>Retribución banco</th>
                 <th>Ganancia LUKAYA</th>
@@ -6187,6 +6188,7 @@ function renderLiqTerceros() {
       <td>${fmtD(c.fechaLiq)}</td>
       <td style="font-family:monospace">${mon(c.comComercial)}</td>
       <td style="font-family:monospace">${mon(c.comOperativo)}</td>
+      <td style="font-family:monospace">${mon(c.pagosExtras)}</td>
       <td style="font-family:monospace">${mon(c.comGestora)}</td>
       <td style="font-family:monospace">${mon(c.retribBanco)}</td>
       <td style="font-family:monospace;color:var(--green);font-weight:600">${mon(c.ganancia)}</td>
