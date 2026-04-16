@@ -2679,14 +2679,14 @@ function renderPrendasRechazadas() {
   const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
   const val = v => v || '—';
   tbody.innerHTML = data.map((r, i) => `
-    <tr>
-      <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)">
+    <tr style="cursor:pointer" onclick="openPRPanel('${r.id}')">
+      <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
         <div class="abtns">
           ${isAdmin ? `<button class="ibtn" style="font-size:10px;padding:2px 5px;background:#f0fff4;border-color:var(--green);color:var(--green)" onclick="reingresar('${r.id}')" title="Reingresar al banco">✅</button>` : ''}
         </div>
       </td>
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
-      <td style="color:var(--red);font-weight:600">${fmtD(r.fechaRechazoPrend)}</td>
+      <td style="color:var(--red);font-weight:600;cursor:pointer" onclick="openPRPanel('${r.id}')">${fmtD(r.fechaRechazoPrend)}</td>
       <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${r.motivoRechazoPrend||''}">${val(r.motivoRechazoPrend)}</td>
       <td style="color:var(--green);font-weight:600">${fmtD(r.fechaReingresoPrend)}</td>
       <td style="font-weight:700;color:var(--blue)">${val(r.gestorAsignado)}</td>
@@ -2764,6 +2764,59 @@ async function confirmarReingresoPrend() {
     closePRReingreso();
     renderPrendasRechazadas();
   } catch(e) { toast('Error: ' + e.message, 'er'); }
+}
+
+function openPRPanel(id) {
+  const r = RECORDS.find(x => x.id === id);
+  if (!r) return;
+  const isAdmin = ME?.rol === 'admin';
+  const val = v => v || '—';
+  const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+
+  document.getElementById('pr-panel-name').textContent = r.nombrecliente || '—';
+  document.getElementById('pr-panel-sub').textContent  = (r.banco||'—') + ' · ' + (r.gestorAsignado||'Sin gestor');
+
+  document.getElementById('pr-panel-body').innerHTML = `
+    <div class="panel-section">
+      <div class="panel-section-t">Rechazo del banco</div>
+      <div class="prow"><span class="pl">Fecha rechazo</span><span class="pv bold" style="color:var(--red)">${fmtD(r.fechaRechazoPrend)}</span></div>
+      <div class="prow"><span class="pl">Motivo</span><span class="pv" style="white-space:pre-wrap;line-height:1.5">${val(r.motivoRechazoPrend)}</span></div>
+      ${r.fechaReingresoPrend ? `<div class="prow"><span class="pl">Fecha reingreso</span><span class="pv bold" style="color:var(--green)">${fmtD(r.fechaReingresoPrend)}</span></div>` : ''}
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Datos generales</div>
+      <div class="prow"><span class="pl">Fecha solicitud</span><span class="pv">${r.fecha ? r.fecha.split('-').reverse().join('/') : '—'}</span></div>
+      <div class="prow"><span class="pl">Año</span><span class="pv">${val(r.anio)}</span></div>
+      <div class="prow"><span class="pl">Fecha finalizada</span><span class="pv bold" style="color:var(--green)">${fmtD(r.finalizada)}</span></div>
+      <div class="prow"><span class="pl">Fecha entregada</span><span class="pv bold" style="color:var(--purple)">${fmtD(r.fechaEntregada)}</span></div>
+      <div class="prow"><span class="pl">Gestor asignado</span><span class="pv bold" style="color:var(--blue)">${val(r.gestorAsignado)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Cliente</div>
+      <div class="prow"><span class="pl">Nombre</span><span class="pv bold">${val(r.nombrecliente)}</span></div>
+      <div class="prow"><span class="pl">DNI</span><span class="pv mono">${val(r.dni)}</span></div>
+      <div class="prow"><span class="pl">Provincia</span><span class="pv">${val(r.provincia)}</span></div>
+      <div class="prow"><span class="pl">Localidad</span><span class="pv">${val(r.localidad)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Operación</div>
+      <div class="prow"><span class="pl">Banco</span><span class="pv bold">${val(r.banco)}</span></div>
+      <div class="prow"><span class="pl">Concesionaria</span><span class="pv">${val(r.concesionaria)}</span></div>
+      <div class="prow"><span class="pl">Vehículo</span><span class="pv">${val(r.descripcion)}</span></div>
+      <div class="prow"><span class="pl">Dominio</span><span class="pv mono">${val(r.dominio)}</span></div>
+    </div>
+    ${isAdmin ? `<div style="padding:12px 0"><button class="btn btn-p" style="width:100%;background:var(--green);border-color:var(--green);font-size:12px" onclick="closePRPanel();reingresar('${r.id}')">✅ Reingresar al banco</button></div>` : ''}
+  `;
+
+  document.getElementById('pr-overlay').classList.remove('open');
+  document.getElementById('pr-panel-overlay').classList.add('open');
+  document.getElementById('pr-side-panel').classList.add('open');
+}
+
+function closePRPanel() {
+  document.getElementById('pr-panel-overlay').classList.remove('open');
+  document.getElementById('pr-side-panel').classList.remove('open');
+  openPrendasRechazadas();
 }
 
 function openPrendasEntregadas() {
@@ -7536,6 +7589,19 @@ setInterval(() => {
     <button class="xbtn" onclick="closePEPanel()" style="width:34px;height:34px;font-size:18px">×</button>
   </div>
   <div class="panel-body" id="pe-panel-body"></div>
+</div>
+
+<!-- SLIDE PANEL PRENDAS RECHAZADAS -->
+<div class="panel-overlay" id="pr-panel-overlay" onclick="closePRPanel()"></div>
+<div class="panel" id="pr-side-panel">
+  <div class="panel-head">
+    <div>
+      <div class="panel-title" id="pr-panel-name">—</div>
+      <div class="panel-sub" id="pr-panel-sub">—</div>
+    </div>
+    <button class="xbtn" onclick="closePRPanel()" style="width:34px;height:34px;font-size:18px">×</button>
+  </div>
+  <div class="panel-body" id="pr-panel-body"></div>
 </div>
 
 <!-- SLIDE PANEL CLIENTES -->
