@@ -3856,6 +3856,10 @@ function abrirAcuse(id) {
   document.getElementById('acuse-dni-view').textContent    = r.dni || '';
   document.getElementById('acuse-nombre-input').value      = r.nombrecliente || '';
   document.getElementById('acuse-dni-input').value         = r.dni || '';
+  const _ae1 = document.getElementById('acuse-extra-1'); if (_ae1) _ae1.value = '';
+  const _ae2 = document.getElementById('acuse-extra-2'); if (_ae2) _ae2.value = '';
+  const _av1 = document.getElementById('acuse-extra-1-view'); if (_av1) { _av1.textContent=''; _av1.style.display='none'; }
+  const _av2 = document.getElementById('acuse-extra-2-view'); if (_av2) { _av2.textContent=''; _av2.style.display='none'; }
   // Resetear a vista previa
   _acuseEditMode = false;
   document.getElementById('acuse-preview').style.display = '';
@@ -3876,6 +3880,13 @@ function toggleEditAcuse() {
     // Aplicar cambios al preview
     document.getElementById('acuse-nombre-view').textContent = document.getElementById('acuse-nombre-input').value || '';
     document.getElementById('acuse-dni-view').textContent    = document.getElementById('acuse-dni-input').value    || '';
+    // Extras documentacion
+    const _e1 = document.getElementById('acuse-extra-1')?.value.trim();
+    const _e2 = document.getElementById('acuse-extra-2')?.value.trim();
+    const _v1 = document.getElementById('acuse-extra-1-view');
+    const _v2 = document.getElementById('acuse-extra-2-view');
+    if (_v1) { _v1.textContent = _e1 ? '☐  ' + _e1 : ''; _v1.style.display = _e1 ? '' : 'none'; }
+    if (_v2) { _v2.textContent = _e2 ? '☐  ' + _e2 : ''; _v2.style.display = _e2 ? '' : 'none'; }
     document.getElementById('acuse-preview').style.display = '';
     document.getElementById('acuse-edit').style.display    = 'none';
   }
@@ -3918,6 +3929,8 @@ function imprimirAcuse() {
       <div class="item">☐ &nbsp;F044 - REGISTRO DE FIRMAS</div>
       <div class="item">☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
       <div class="item">☐ &nbsp;ALTA DE CLIENTE</div>
+      ${document.getElementById('acuse-extra-1')?.value.trim() ? `<div class="item">☐ &nbsp;${document.getElementById('acuse-extra-1').value.trim()}</div>` : ''}
+      ${document.getElementById('acuse-extra-2')?.value.trim() ? `<div class="item">☐ &nbsp;${document.getElementById('acuse-extra-2').value.trim()}</div>` : ''}
       <div class="firma-linea">Firma del que recibe</div>
     </body></html>`;
 
@@ -8997,6 +9010,8 @@ function renderReportes() {
             <div>☐ &nbsp;F044 - REGISTRO DE FIRMAS</div>
             <div>☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
             <div>☐ &nbsp;ALTA DE CLIENTE</div>
+            <div id="acuse-extra-1-view" style="display:none"></div>
+            <div id="acuse-extra-2-view" style="display:none"></div>
           </div>
           <div style="margin-top:60px;border-top:1px solid #000;width:240px;padding-top:6px;font-size:12px;color:#555">Firma del que recibe</div>
         </div>
@@ -9006,6 +9021,8 @@ function renderReportes() {
         <div class="fg" style="gap:12px">
           <div class="fc span2"><label>Nombre y Apellido</label><input type="text" id="acuse-nombre-input" style="font-size:14px"></div>
           <div class="fc span2"><label>DNI</label><input type="text" id="acuse-dni-input" style="font-size:14px"></div>
+          <div class="fc span2"><label>Documentación extra 1 (opcional)</label><input type="text" id="acuse-extra-1" placeholder="Ej: CERTIFICADO DE DOMINIO" style="font-size:13px"></div>
+          <div class="fc span2"><label>Documentación extra 2 (opcional)</label><input type="text" id="acuse-extra-2" placeholder="Ej: INFORME DE DOMINIO" style="font-size:13px"></div>
         </div>
       </div>
     </div>
