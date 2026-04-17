@@ -5697,12 +5697,23 @@ async function addOpt(k) {
   const val = inp?.value.trim() || prompt('Nuevo valor:');
   if (!val) return;
   if (!LISTS[k]) LISTS[k] = [];
-  if (!LISTS[k].includes(val)) {
+  // Verificar duplicado en memoria (case-insensitive)
+  const existe = LISTS[k].some(v => v.trim().toLowerCase() === val.toLowerCase());
+  if (existe) { toast('Ya existe en la lista', 'wa'); return; }
+  // Verificar duplicado en Supabase antes de insertar
+  try {
+    const { data } = await SB.from('listas').select('id').eq('campo', k).ilike('valor', val);
+    if (data && data.length > 0) {
+      // Ya existe en Supabase, solo agregar a memoria local si falta
+      if (!LISTS[k].includes(val)) { LISTS[k].push(val); renderDD(k); }
+      toast('Ya existe en la lista', 'wa');
+      return;
+    }
     LISTS[k].push(val);
     renderDD(k);
-    SB.from('listas').insert({ campo: k, valor: val }).then(()=>{}).catch(()=>{});
+    await SB.from('listas').insert({ campo: k, valor: val });
     toast(`"${val}" agregado`, 'ok');
-  } else { toast('Ya existe en la lista','wa'); }
+  } catch(e) { toast('Error al agregar', 'er'); }
 }
 
 async function delOpt(k, i) {
