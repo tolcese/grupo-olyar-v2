@@ -3851,13 +3851,18 @@ let _acuseEditMode = false;
 function abrirAcuse(id) {
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
-  // Cargar datos en el preview
-  document.getElementById('acuse-nombre-view').textContent = r.nombrecliente || '—';
-  document.getElementById('acuse-dni-view').textContent    = r.dni || '—';
-  document.getElementById('acuse-nombre-input').value      = r.nombrecliente || '';
-  document.getElementById('acuse-dni-input').value         = r.dni || '';
-  // Resetear a vista previa
+  // Cargar datos en inputs
+  document.getElementById('acuse-nombre-input').value = r.nombrecliente || '';
+  document.getElementById('acuse-dni-input').value    = r.dni || '';
+  document.getElementById('acuse-obs-input').value    = r.obs || '';
+  // Resetear checkboxes documentacion
+  ['titulo','sellado','prenda','fianza','f051','f044','f050','alta'].forEach(k => {
+    const el = document.getElementById('acuse-chk-'+k);
+    if (el) el.checked = false;
+  });
+  // Aplicar preview inicial
   _acuseEditMode = false;
+  actualizarPreviewAcuse();
   document.getElementById('acuse-preview').style.display = '';
   document.getElementById('acuse-edit').style.display    = 'none';
   document.getElementById('acuse-overlay').classList.add('open');
@@ -3867,15 +3872,41 @@ function cerrarAcuse() {
   document.getElementById('acuse-overlay').classList.remove('open');
 }
 
+function actualizarPreviewAcuse() {
+  const nombre = document.getElementById('acuse-nombre-input').value.trim();
+  const dni    = document.getElementById('acuse-dni-input').value.trim();
+  const obs    = document.getElementById('acuse-obs-input').value.trim();
+  document.getElementById('acuse-nombre-view').textContent = nombre || '';
+  document.getElementById('acuse-dni-view').textContent    = dni    || '';
+  // Documentacion
+  const docs = [
+    { id: 'titulo',  label: 'TITULO' },
+    { id: 'sellado', label: 'SELLADO' },
+    { id: 'prenda',  label: 'PRENDA' },
+    { id: 'fianza',  label: 'FIANZA' },
+    { id: 'f051',    label: 'F051 - SOLICITUD DE CRÉDITO' },
+    { id: 'f044',    label: 'F044 - REGISTRO DE FIRMAS' },
+    { id: 'f050',    label: 'F050 - CARTA DE PREAPROBACIÓN' },
+    { id: 'alta',    label: 'ALTA DE CLIENTE' },
+  ];
+  const docContainer = document.getElementById('acuse-docs-view');
+  if (docContainer) {
+    docContainer.innerHTML = docs.map(d => {
+      const checked = document.getElementById('acuse-chk-'+d.id)?.checked;
+      return `<div>☐ &nbsp;${d.label}${checked ? ' <b style="color:green">✓</b>' : ''}</div>`;
+    }).join('');
+  }
+  const obsView = document.getElementById('acuse-obs-view');
+  if (obsView) obsView.textContent = obs || '';
+}
+
 function toggleEditAcuse() {
   _acuseEditMode = !_acuseEditMode;
   if (_acuseEditMode) {
     document.getElementById('acuse-preview').style.display = 'none';
     document.getElementById('acuse-edit').style.display    = '';
   } else {
-    // Aplicar cambios al preview
-    document.getElementById('acuse-nombre-view').textContent = document.getElementById('acuse-nombre-input').value || '—';
-    document.getElementById('acuse-dni-view').textContent    = document.getElementById('acuse-dni-input').value    || '—';
+    actualizarPreviewAcuse();
     document.getElementById('acuse-preview').style.display = '';
     document.getElementById('acuse-edit').style.display    = 'none';
   }
@@ -3885,10 +3916,24 @@ function imprimirAcuse() {
   // Si está en modo edición, aplicar cambios primero
   if (_acuseEditMode) toggleEditAcuse();
 
-  const nombre = document.getElementById('acuse-nombre-view').textContent;
-  const dni    = document.getElementById('acuse-dni-view').textContent;
+  const nombre = document.getElementById('acuse-nombre-input').value.trim();
+  const dni    = document.getElementById('acuse-dni-input').value.trim();
+  const obs    = document.getElementById('acuse-obs-input').value.trim();
   const hoy    = new Date();
   const fecha  = String(hoy.getDate()).padStart(2,'0') + '/' + String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
+
+  const docs = [
+    { id: 'titulo',  label: 'TITULO' },
+    { id: 'sellado', label: 'SELLADO' },
+    { id: 'prenda',  label: 'PRENDA' },
+    { id: 'fianza',  label: 'FIANZA' },
+    { id: 'f051',    label: 'F051 - SOLICITUD DE CRÉDITO' },
+    { id: 'f044',    label: 'F044 - REGISTRO DE FIRMAS' },
+    { id: 'f050',    label: 'F050 - CARTA DE PREAPROBACIÓN' },
+    { id: 'alta',    label: 'ALTA DE CLIENTE' },
+  ];
+  const docsHtml = docs.map(d => `<div class="item">☐ &nbsp;${d.label}</div>`).join('');
+  const obsHtml = obs ? `<div class="obs">${obs}</div>` : '';
 
   const html = `
     <html><head><title></title>
@@ -3901,23 +3946,18 @@ function imprimirAcuse() {
       .fecha { text-align: right; font-size: 12px; margin-bottom: 24px; color: #000; font-weight: bold; }
       .subtitulo { font-size: 13px; font-weight: bold; text-decoration: underline; margin: 24px 0 12px; }
       .item { font-size: 13px; margin-bottom: 8px; }
+      .obs { font-size: 13px; margin-top: 16px; white-space: pre-wrap; }
       .firma-linea { border-top: 1px solid #000; width: 240px; margin-top: 80px; padding-top: 6px; font-size: 12px; color: #555; }
     </style></head>
     <body>
       <div class="acuse-titulo-doc">ACUSE DE RECIBO</div>
       <div class="fecha">Fecha: ${fecha}</div>
       <div class="titulo">Prendas para contabilizar de<br>Gestoria Gustavo Olcese SRL</div>
-      <div class="datos"><b>Nombre y Apellido:</b> ${nombre}</div>
-      <div class="datos"><b>DNI:</b> ${dni}</div>
+      ${nombre ? `<div class="datos"><b>Nombre y Apellido:</b> ${nombre}</div>` : ''}
+      ${dni    ? `<div class="datos"><b>DNI:</b> ${dni}</div>` : ''}
       <div class="subtitulo">DOCUMENTACIÓN ENTREGADA</div>
-      <div class="item">☐ &nbsp;TITULO</div>
-      <div class="item">☐ &nbsp;SELLADO</div>
-      <div class="item">☐ &nbsp;PRENDA</div>
-      <div class="item">☐ &nbsp;FIANZA</div>
-      <div class="item">☐ &nbsp;F051 - SOLICITUD DE CRÉDITO</div>
-      <div class="item">☐ &nbsp;F044 - REGISTRO DE FIRMAS</div>
-      <div class="item">☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
-      <div class="item">☐ &nbsp;ALTA DE CLIENTE</div>
+      ${docsHtml}
+      ${obsHtml}
       <div class="firma-linea">Firma del que recibe</div>
     </body></html>`;
 
@@ -8988,7 +9028,7 @@ function renderReportes() {
           <div style="margin-bottom:6px;font-size:13px"><b>Nombre y Apellido:</b> <span id="acuse-nombre-view"></span></div>
           <div style="margin-bottom:24px;font-size:13px"><b>DNI:</b> <span id="acuse-dni-view"></span></div>
           <div style="font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:12px">DOCUMENTACIÓN ENTREGADA</div>
-          <div style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:48px">
+          <div id="acuse-docs-view" style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:24px">
             <div>☐ &nbsp;TITULO</div>
             <div>☐ &nbsp;SELLADO</div>
             <div>☐ &nbsp;PRENDA</div>
@@ -8998,14 +9038,28 @@ function renderReportes() {
             <div>☐ &nbsp;F050 - CARTA DE PREAPROBACIÓN</div>
             <div>☐ &nbsp;ALTA DE CLIENTE</div>
           </div>
+          <div id="acuse-obs-view" style="font-size:13px;margin-bottom:24px;white-space:pre-wrap"></div>
           <div style="margin-top:60px;border-top:1px solid #000;width:240px;padding-top:6px;font-size:12px;color:#555">Firma del que recibe</div>
         </div>
       </div>
       <!-- MODO EDICIÓN -->
       <div id="acuse-edit" style="display:none">
         <div class="fg" style="gap:12px">
-          <div class="fc span2"><label>Nombre y Apellido</label><input type="text" id="acuse-nombre-input" style="font-size:14px"></div>
-          <div class="fc span2"><label>DNI</label><input type="text" id="acuse-dni-input" style="font-size:14px"></div>
+          <div class="fc span2"><label>Nombre y Apellido</label><input type="text" id="acuse-nombre-input" style="font-size:14px" oninput="actualizarPreviewAcuse()"></div>
+          <div class="fc span2"><label>DNI</label><input type="text" id="acuse-dni-input" style="font-size:14px" oninput="actualizarPreviewAcuse()"></div>
+          <div class="fc span2"><label>Documentación entregada</label>
+            <div style="display:flex;flex-direction:column;gap:8px;padding:10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface)">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-titulo"  onchange="actualizarPreviewAcuse()"> TITULO</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-sellado" onchange="actualizarPreviewAcuse()"> SELLADO</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-prenda"  onchange="actualizarPreviewAcuse()"> PRENDA</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-fianza"  onchange="actualizarPreviewAcuse()"> FIANZA</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-f051"    onchange="actualizarPreviewAcuse()"> F051 - SOLICITUD DE CRÉDITO</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-f044"    onchange="actualizarPreviewAcuse()"> F044 - REGISTRO DE FIRMAS</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-f050"    onchange="actualizarPreviewAcuse()"> F050 - CARTA DE PREAPROBACIÓN</label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" id="acuse-chk-alta"    onchange="actualizarPreviewAcuse()"> ALTA DE CLIENTE</label>
+            </div>
+          </div>
+          <div class="fc span2"><label>Observaciones adicionales</label><textarea id="acuse-obs-input" rows="3" style="font-size:13px;resize:vertical" placeholder="Texto adicional (opcional)..." oninput="actualizarPreviewAcuse()"></textarea></div>
         </div>
       </div>
     </div>
