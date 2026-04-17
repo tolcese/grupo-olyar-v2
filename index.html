@@ -3852,8 +3852,8 @@ function abrirAcuse(id) {
   const r = RECORDS.find(x => x.id === id);
   if (!r) return;
   // Cargar datos en el preview
-  document.getElementById('acuse-nombre-view').textContent = r.nombrecliente || '—';
-  document.getElementById('acuse-dni-view').textContent    = r.dni || '—';
+  document.getElementById('acuse-nombre-view').textContent = r.nombrecliente || '';
+  document.getElementById('acuse-dni-view').textContent    = r.dni || '';
   document.getElementById('acuse-nombre-input').value      = r.nombrecliente || '';
   document.getElementById('acuse-dni-input').value         = r.dni || '';
   // Resetear a vista previa
@@ -3874,8 +3874,8 @@ function toggleEditAcuse() {
     document.getElementById('acuse-edit').style.display    = '';
   } else {
     // Aplicar cambios al preview
-    document.getElementById('acuse-nombre-view').textContent = document.getElementById('acuse-nombre-input').value || '—';
-    document.getElementById('acuse-dni-view').textContent    = document.getElementById('acuse-dni-input').value    || '—';
+    document.getElementById('acuse-nombre-view').textContent = document.getElementById('acuse-nombre-input').value || '';
+    document.getElementById('acuse-dni-view').textContent    = document.getElementById('acuse-dni-input').value    || '';
     document.getElementById('acuse-preview').style.display = '';
     document.getElementById('acuse-edit').style.display    = 'none';
   }
@@ -3885,8 +3885,8 @@ function imprimirAcuse() {
   // Si está en modo edición, aplicar cambios primero
   if (_acuseEditMode) toggleEditAcuse();
 
-  const nombre = document.getElementById('acuse-nombre-view').textContent;
-  const dni    = document.getElementById('acuse-dni-view').textContent;
+  const nombre = document.getElementById('acuse-nombre-input').value.trim();
+  const dni    = document.getElementById('acuse-dni-input').value.trim();
   const hoy    = new Date();
   const fecha  = String(hoy.getDate()).padStart(2,'0') + '/' + String(hoy.getMonth()+1).padStart(2,'0') + '/' + hoy.getFullYear();
 
