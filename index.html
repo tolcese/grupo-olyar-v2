@@ -3896,6 +3896,11 @@ function actualizarPreviewAcuse() {
       return `<div>☐ &nbsp;${d.label}${checked ? ' <b style="color:green">✓</b>' : ''}</div>`;
     }).join('');
   }
+  // Mostrar/ocultar etiquetas nombre y dni si están vacías
+  const nombreRow = document.getElementById('acuse-nombre-row');
+  const dniRow    = document.getElementById('acuse-dni-row');
+  if (nombreRow) nombreRow.style.display = nombre ? '' : 'none';
+  if (dniRow)    dniRow.style.display    = dni    ? '' : 'none';
   const obsView = document.getElementById('acuse-obs-view');
   if (obsView) obsView.textContent = obs || '';
 }
@@ -3932,7 +3937,7 @@ function imprimirAcuse() {
     { id: 'f050',    label: 'F050 - CARTA DE PREAPROBACIÓN' },
     { id: 'alta',    label: 'ALTA DE CLIENTE' },
   ];
-  const docsHtml = docs.map(d => `<div class="item">☐ &nbsp;${d.label}</div>`).join('');
+  const docsHtml = docs.map(d => { const chk = document.getElementById('acuse-chk-'+d.id)?.checked; return `<div class="item">${chk ? '☑' : '☐'} &nbsp;${d.label}</div>`; }).join('');
   const obsHtml = obs ? `<div class="obs">${obs}</div>` : '';
 
   const html = `
@@ -9025,8 +9030,8 @@ function renderReportes() {
       <div id="acuse-preview">
         <div style="border:1.5px solid var(--line);border-radius:10px;padding:32px;font-family:Arial,sans-serif">
           <div style="text-align:center;font-size:15px;font-weight:700;color:var(--ink);margin-bottom:24px;line-height:1.4">Prendas para contabilizar de<br>Gestoria Gustavo Olcese SRL</div>
-          <div style="margin-bottom:6px;font-size:13px"><b>Nombre y Apellido:</b> <span id="acuse-nombre-view"></span></div>
-          <div style="margin-bottom:24px;font-size:13px"><b>DNI:</b> <span id="acuse-dni-view"></span></div>
+          <div id="acuse-nombre-row" style="margin-bottom:6px;font-size:13px;display:none"><b>Nombre y Apellido:</b> <span id="acuse-nombre-view"></span></div>
+          <div id="acuse-dni-row" style="margin-bottom:24px;font-size:13px;display:none"><b>DNI:</b> <span id="acuse-dni-view"></span></div>
           <div style="font-size:13px;font-weight:700;text-decoration:underline;margin-bottom:12px">DOCUMENTACIÓN ENTREGADA</div>
           <div id="acuse-docs-view" style="display:flex;flex-direction:column;gap:6px;font-size:13px;margin-bottom:24px">
             <div>☐ &nbsp;TITULO</div>
