@@ -935,6 +935,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="tab-comisiones" onclick="showRepTab('comisiones')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">💰 Comisiones por mes</button>
         <button id="tab-prendas-pend" onclick="showRepTab('prendas-pend')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px">📌 Prendas pendientes</button>
         <button id="tab-solicitudes-hoy" onclick="showRepTab('solicitudes-hoy')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Solicitudes del día</button>
+        <button id="tab-solicitudes-ayer" onclick="showRepTab('solicitudes-ayer')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Solicitudes día anterior</button>
       </div>
 
       <!-- TAB 1: ESTADOS TOTALES -->
@@ -1030,6 +1031,37 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div id="rep-hoy-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
           <div style="font-size:32px;margin-bottom:8px">📭</div>
           <div style="font-weight:600">Sin solicitudes cargadas hoy</div>
+        </div>
+      </div>
+
+      <!-- SOLICITUDES DIA ANTERIOR -->
+      <div id="rep-solicitudes-ayer" class="card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="card-t">📋 Solicitudes día anterior</div>
+            <div class="card-s" id="rep-ayer-fecha">—</div>
+          </div>
+          <span id="rep-ayer-count" style="font-size:12px;font-weight:700;color:var(--muted)">—</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">#</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Cliente</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">DNI</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Banco</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Concesionaria</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Importe</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Cargado por</th>
+              </tr>
+            </thead>
+            <tbody id="rep-ayer-tbody"></tbody>
+          </table>
+        </div>
+        <div id="rep-ayer-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
+          <div style="font-size:32px;margin-bottom:8px">📭</div>
+          <div style="font-weight:600">Sin solicitudes aprobadas el día anterior</div>
         </div>
       </div>
     </div>
@@ -5477,11 +5509,13 @@ function showV(v) {
       if (el) el.style.display = isAdmin ? '' : 'none';
     });
     // Tab solicitudes del día solo para usuarios
-    const tabHoy = document.getElementById('tab-solicitudes-hoy');
+    const tabAyer = document.getElementById('tab-solicitudes-ayer');
+  const tabHoy = document.getElementById('tab-solicitudes-hoy');
     if (tabHoy) tabHoy.style.display = !isAdmin ? '' : 'none';
     // Para usuario: ir directo a solicitudes del día
     if (!isAdmin) {
       showRepTab('solicitudes-hoy');
+      if (tabAyer) tabAyer.style.display = '';
     } else {
       setTimeout(renderReportes, 50);
     }
@@ -7701,7 +7735,7 @@ let chartTorta = null;
 let chartBarras = null;
 
 function showRepTab(tab) {
-  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy'].forEach(t => {
+  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer'].forEach(t => {
     document.getElementById('rep-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('tab-'+t);
     if (btn) {
@@ -7712,7 +7746,52 @@ function showRepTab(tab) {
   });
   if (tab === 'prendas-pend') renderPrendasPendientes();
   else if (tab === 'solicitudes-hoy') renderSolicitudesHoy();
+  else if (tab === 'solicitudes-ayer') renderSolicitudesAyer();
   else setTimeout(renderReportes, 50);
+}
+
+function renderSolicitudesAyer() {
+  const tbody  = document.getElementById('rep-ayer-tbody');
+  const empty  = document.getElementById('rep-ayer-empty');
+  const countEl = document.getElementById('rep-ayer-count');
+  const fechaEl = document.getElementById('rep-ayer-fecha');
+  if (!tbody) return;
+
+  const ayer = new Date();
+  ayer.setDate(ayer.getDate() - 1);
+  const ayerStr = ayer.toISOString().slice(0, 10);
+  const fmtAyer = ayerStr.split('-').reverse().join('/');
+  if (fechaEl) fechaEl.textContent = fmtAyer;
+
+  // Solo solicitudes APROBADAS del día anterior
+  const data = RECORDS.filter(r =>
+    (r.fechaReg === ayerStr || r.fecha === ayerStr) &&
+    (r.estado || '').toUpperCase() === 'APROBADO'
+  );
+
+  if (countEl) countEl.textContent = data.length + ' solicitud' + (data.length !== 1 ? 'es' : '');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const mon = v => v ? '$' + Number(String(v).replace(/[$,]/g,'')).toLocaleString('es-AR') : '—';
+  const val = v => v || '—';
+
+  tbody.innerHTML = data.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:9px 12px;font-weight:700">${val(r.nombrecliente)}</td>
+      <td style="padding:9px 12px;font-family:monospace">${val(r.dni)}</td>
+      <td style="padding:9px 12px;font-weight:600">${val(r.banco)}</td>
+      <td style="padding:9px 12px">${val(r.concesionaria)}</td>
+      <td style="padding:9px 12px;font-family:monospace">${mon(r.importe)}</td>
+      <td style="padding:9px 12px;color:var(--muted)">${val(r.usuario)}</td>
+    </tr>
+  `).join('');
 }
 
 function renderSolicitudesHoy() {
