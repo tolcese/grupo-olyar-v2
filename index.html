@@ -937,6 +937,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="tab-solicitudes-hoy" onclick="showRepTab('solicitudes-hoy')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Solicitudes del día</button>
         <button id="tab-solicitudes-ayer" onclick="showRepTab('solicitudes-ayer')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Solicitudes día anterior</button>
         <button id="tab-conversion-conc" onclick="showRepTab('conversion-conc')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📊 Conversión por concesionaria</button>
+        <button id="tab-listado-prendas" onclick="showRepTab('listado-prendas')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Listado de prendas</button>
       </div>
 
       <!-- TAB 1: ESTADOS TOTALES -->
@@ -1093,6 +1094,49 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div id="rep-conv-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
           <div style="font-size:32px;margin-bottom:8px">📭</div>
           <div style="font-weight:600">Sin datos para mostrar</div>
+        </div>
+      </div>
+    </div>
+
+      <!-- LISTADO DE PRENDAS -->
+      <div id="rep-listado-prendas" class="card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="card-t">📋 Listado de prendas</div>
+            <div class="card-s">Todas las prendas del sistema</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="rep-prendas-filtro-estado" onchange="renderListadoPrendas()" style="font-size:12px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff">
+              <option value="">Todos los estados</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="finalizada">Finalizadas</option>
+              <option value="entregada">Entregadas</option>
+              <option value="rechazada">Rechazadas</option>
+            </select>
+            <span id="rep-prendas-count" style="font-size:12px;font-weight:700;color:var(--muted)">—</span>
+            <button class="btn btn-s" style="font-size:12px" onclick="imprimirListadoPrendas()">🖨️ Imprimir</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:700px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">#</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">DNI</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Banco</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Gestor</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Estado prenda</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">F. Finalizada</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">F. Entregada</th>
+              </tr>
+            </thead>
+            <tbody id="rep-prendas-tbody"></tbody>
+          </table>
+        </div>
+        <div id="rep-prendas-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
+          <div style="font-size:32px;margin-bottom:8px">📭</div>
+          <div style="font-weight:600">Sin prendas para mostrar</div>
         </div>
       </div>
     </div>
@@ -5566,6 +5610,8 @@ function showV(v) {
       if (tabAyer) tabAyer.style.display = '';
     } else {
       if (tabConv) tabConv.style.display = '';
+      const tabLP = document.getElementById('tab-listado-prendas');
+      if (tabLP) tabLP.style.display = '';
       setTimeout(renderReportes, 50);
     }
   }
@@ -7785,7 +7831,7 @@ let chartTorta = null;
 let chartBarras = null;
 
 function showRepTab(tab) {
-  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc'].forEach(t => {
+  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc','listado-prendas'].forEach(t => {
     document.getElementById('rep-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('tab-'+t);
     if (btn) {
@@ -7798,7 +7844,118 @@ function showRepTab(tab) {
   else if (tab === 'solicitudes-hoy') renderSolicitudesHoy();
   else if (tab === 'solicitudes-ayer') renderSolicitudesAyer();
   else if (tab === 'conversion-conc') renderConversionConc();
+  else if (tab === 'listado-prendas') renderListadoPrendas();
   else setTimeout(renderReportes, 50);
+}
+
+function renderListadoPrendas() {
+  const tbody   = document.getElementById('rep-prendas-tbody');
+  const empty   = document.getElementById('rep-prendas-empty');
+  const countEl = document.getElementById('rep-prendas-count');
+  const filtro  = document.getElementById('rep-prendas-filtro-estado')?.value || '';
+  if (!tbody) return;
+
+  const fmtD = v => { if (!v) return '—'; const p = String(v).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+  const val  = v => v || '—';
+
+  // Determinar estado prenda de cada registro
+  let data = RECORDS.filter(r => r.gestorAsignado);
+
+  data = data.map(r => {
+    let estadoPrend, estadoColor;
+    if (r.prendaRechazada) {
+      estadoPrend = 'Rechazada'; estadoColor = 'var(--red)';
+    } else if (r.entregada) {
+      estadoPrend = 'Entregada'; estadoColor = 'var(--purple)';
+    } else if (r.finalizada) {
+      estadoPrend = 'Finalizada'; estadoColor = 'var(--blue)';
+    } else {
+      estadoPrend = 'Pendiente'; estadoColor = 'var(--muted)';
+    }
+    return { ...r, estadoPrend, estadoColor };
+  });
+
+  if (filtro === 'pendiente') data = data.filter(r => r.estadoPrend === 'Pendiente');
+  else if (filtro === 'finalizada') data = data.filter(r => r.estadoPrend === 'Finalizada');
+  else if (filtro === 'entregada') data = data.filter(r => r.estadoPrend === 'Entregada');
+  else if (filtro === 'rechazada') data = data.filter(r => r.estadoPrend === 'Rechazada');
+
+  if (countEl) countEl.textContent = data.length + ' prenda' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:9px 12px;font-weight:700">${val(r.nombrecliente)}</td>
+      <td style="padding:9px 12px;font-family:monospace">${val(r.dni)}</td>
+      <td style="padding:9px 12px;font-weight:600">${val(r.banco)}</td>
+      <td style="padding:9px 12px;color:var(--blue)">${val(r.gestorAsignado)}</td>
+      <td style="padding:9px 12px;font-weight:700;color:${r.estadoColor}">${r.estadoPrend}</td>
+      <td style="padding:9px 12px">${fmtD(r.finalizada)}</td>
+      <td style="padding:9px 12px">${fmtD(r.fechaEntregada)}</td>
+    </tr>
+  `).join('');
+}
+
+function imprimirListadoPrendas() {
+  const filtro = document.getElementById('rep-prendas-filtro-estado')?.value || '';
+  const titulo = filtro ? `Prendas - ${filtro.charAt(0).toUpperCase()+filtro.slice(1)}s` : 'Listado de prendas';
+  const hoy = new Date().toLocaleDateString('es-AR');
+  const fmtD = v => { if (!v) return '—'; const p = String(v).split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+  const val  = v => v || '—';
+
+  let data = RECORDS.filter(r => r.gestorAsignado).map(r => {
+    let estadoPrend;
+    if (r.prendaRechazada)  estadoPrend = 'Rechazada';
+    else if (r.entregada)   estadoPrend = 'Entregada';
+    else if (r.finalizada)  estadoPrend = 'Finalizada';
+    else                    estadoPrend = 'Pendiente';
+    return { ...r, estadoPrend };
+  });
+
+  if (filtro === 'pendiente')  data = data.filter(r => r.estadoPrend === 'Pendiente');
+  else if (filtro === 'finalizada') data = data.filter(r => r.estadoPrend === 'Finalizada');
+  else if (filtro === 'entregada')  data = data.filter(r => r.estadoPrend === 'Entregada');
+  else if (filtro === 'rechazada')  data = data.filter(r => r.estadoPrend === 'Rechazada');
+
+  const rows = data.map((r, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><b>${val(r.nombrecliente)}</b></td>
+      <td>${val(r.dni)}</td>
+      <td>${val(r.banco)}</td>
+      <td>${val(r.gestorAsignado)}</td>
+      <td><b>${r.estadoPrend}</b></td>
+      <td>${fmtD(r.finalizada)}</td>
+      <td>${fmtD(r.fechaEntregada)}</td>
+    </tr>`).join('');
+
+  const html = `<html><head><title>${titulo}</title>
+    <style>
+      @media print { body{margin:0} @page{margin:1.5cm;size:A4 landscape} }
+      body{font-family:Arial,sans-serif;padding:32px;font-size:11px;color:#000}
+      h2{font-size:16px;margin-bottom:4px}
+      .sub{font-size:11px;color:#666;margin-bottom:20px}
+      table{width:100%;border-collapse:collapse}
+      th{background:#f0f0f0;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;border-bottom:2px solid #ccc}
+      td{padding:7px 10px;border-bottom:1px solid #eee}
+    </style></head>
+    <body>
+      <h2>Gestoria Gustavo Olcese SRL — ${titulo}</h2>
+      <div class="sub">Fecha de impresión: ${hoy} · Total: ${data.length} prenda${data.length!==1?'s':''}</div>
+      <table>
+        <thead><tr><th>#</th><th>Cliente</th><th>DNI</th><th>Banco</th><th>Gestor</th><th>Estado</th><th>F. Finalizada</th><th>F. Entregada</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`;
+
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
 }
 
 function renderConversionConc() {
