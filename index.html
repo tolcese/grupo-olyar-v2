@@ -2837,12 +2837,28 @@ function openPRPanel(id) {
       <div class="prow"><span class="pl">Vehículo</span><span class="pv">${val(r.descripcion)}</span></div>
       <div class="prow"><span class="pl">Dominio</span><span class="pv mono">${val(r.dominio)}</span></div>
     </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Correcciones realizadas</div>
+      <textarea id="pr-correcciones-input" rows="4" placeholder="Describí las correcciones realizadas..." style="width:100%;font-size:12px;padding:8px;border:1.5px solid var(--line);border-radius:8px;resize:vertical;font-family:inherit;box-sizing:border-box">${r.correccionesPrend || ''}</textarea>
+      <button class="btn btn-s" style="margin-top:8px;width:100%;font-size:12px" onclick="guardarCorreccionesPrend('${r.id}')">💾 Guardar correcciones</button>
+    </div>
     ${isAdmin ? `<div style="padding:12px 0"><button class="btn btn-p" style="width:100%;background:var(--green);border-color:var(--green);font-size:12px" onclick="closePRPanel();reingresar('${r.id}')">✅ Reingresar al banco</button></div>` : ''}
   `;
 
   document.getElementById('pr-overlay').classList.remove('open');
   document.getElementById('pr-panel-overlay').classList.add('open');
   document.getElementById('pr-side-panel').classList.add('open');
+}
+
+async function guardarCorreccionesPrend(id) {
+  const texto = document.getElementById('pr-correcciones-input')?.value || '';
+  try {
+    const { error } = await SB.from('solicitudes').update({ correcciones_prenda: texto }).eq('id', id);
+    if (error) throw error;
+    const r = RECORDS.find(x => x.id === id);
+    if (r) r.correccionesPrend = texto;
+    toast('Correcciones guardadas ✓', 'ok');
+  } catch(e) { toast('Error: ' + e.message, 'er'); }
 }
 
 function closePRPanel() {
@@ -5586,7 +5602,8 @@ async function loadRecords() {
       prendaRechazada: r.prenda_rechazada || false,
       fechaRechazoPrend: r.fecha_rechazo_prenda,
       motivoRechazoPrend: r.motivo_rechazo_prenda,
-      fechaReingresoPrend: r.fecha_reingreso_prenda
+      fechaReingresoPrend: r.fecha_reingreso_prenda,
+      correccionesPrend: r.correcciones_prenda || ''
     }));
     renderTable._keepPage = true;
     renderTable();
