@@ -4239,15 +4239,29 @@ async function loadConcesionarias() {
     if (error) throw error;
     CONC_CACHE = data || [];
     if (list) renderConcesionarias(CONC_CACHE);
+    populateConcProvFilter();
   } catch(e) {
     if (list) list.innerHTML = '<div style="color:var(--red);padding:20px">Error cargando concesionarias.</div>';
   }
 }
 
 function filtrarConcesionarias() {
-  const q = (document.getElementById('conc-srch')?.value || '').toLowerCase();
-  const filtradas = q ? CONC_CACHE.filter(c => (c.nombre||'').toLowerCase().includes(q)) : CONC_CACHE;
+  const q    = (document.getElementById('conc-srch')?.value || '').toLowerCase();
+  const prov = (document.getElementById('conc-prov-filter')?.value || '');
+  let filtradas = CONC_CACHE;
+  if (q)    filtradas = filtradas.filter(c => (c.nombre||'').toLowerCase().includes(q));
+  if (prov) filtradas = filtradas.filter(c => (c.provincia||'') === prov);
   renderConcesionarias(filtradas);
+}
+
+function populateConcProvFilter() {
+  const sel = document.getElementById('conc-prov-filter');
+  if (!sel) return;
+  const provincias = [...new Set(CONC_CACHE.map(c => c.provincia).filter(Boolean))].sort();
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Todas las provincias</option>' +
+    provincias.map(p => `<option value="${p}">${p}</option>`).join('');
+  if (current) sel.value = current;
 }
 
 function renderConcesionarias(lista) {
@@ -9078,11 +9092,14 @@ function renderReportes() {
         <button class="xbtn" onclick="closeConcesionarias()" style="width:34px;height:34px;font-size:18px">×</button>
       </div>
     </div>
-    <div style="padding:12px 20px;border-bottom:1px solid var(--line)">
-      <div class="searchbox">
+    <div style="padding:12px 20px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center">
+      <div class="searchbox" style="flex:1">
         <span style="color:var(--muted)">🔍</span>
         <input id="conc-srch" placeholder="Buscar por nombre..." oninput="filtrarConcesionarias()">
       </div>
+      <select id="conc-prov-filter" onchange="filtrarConcesionarias()" style="font-size:12px;padding:7px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-width:140px">
+        <option value="">Todas las provincias</option>
+      </select>
     </div>
     <div class="conc-body" id="conc-list">
       <div style="text-align:center;color:var(--muted);padding:30px"><span class="spinner"></span> Cargando...</div>
