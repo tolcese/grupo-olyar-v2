@@ -1456,15 +1456,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                   <th>Acciones</th>
                   <th>#</th>
                   <th>Fecha solicitud</th>
-                  <th>Estado</th>
                   <th>Banco</th>
                   <th>Concesionaria</th>
                   <th>Localidad</th>
                   <th>Provincia</th>
                   <th>Cliente</th>
                   <th>DNI</th>
-                  <th>Teléfono</th>
-                  <th>Email</th>
                   <th>Dominio</th>
                   <th>Gestor</th>
                   <th>Vehículo</th>
@@ -4933,15 +4930,12 @@ function renderContabilidad() {
       </td>
       <td style="color:var(--muted);font-size:11px">${i+1}</td>
       <td>${r.fecha ? r.fecha.split('-').reverse().join('/') : '—'}</td>
-      <td>${r.estado ? `<span class="badge b-${r.estado.toLowerCase()}"><span class="bd"></span>${r.estado}</span>` : '—'}</td>
       <td style="font-weight:600">${val(r.banco)}</td>
       <td>${val(r.concesionaria)}</td>
       <td>${val(r.localidad)}</td>
       <td>${val(r.provincia)}</td>
       <td style="font-weight:700">${val(r.nombrecliente)}</td>
       <td style="font-family:monospace">${val(r.dni)}</td>
-      <td>${val(cd.telefono)}</td>
-      <td>${val(cd.email)}</td>
       <td style="font-family:monospace">${val(r.dominio)}</td>
       <td style="font-weight:600;color:var(--blue)">${val(r.gestorAsignado)}</td>
       <td>${val(r.descripcion)}</td>
