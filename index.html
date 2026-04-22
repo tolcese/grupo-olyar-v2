@@ -2287,14 +2287,12 @@ function closeGestores() {
 async function loadGestores() {
   const list = document.getElementById('gestores-list');
   list.innerHTML = '<div style="text-align:center;color:var(--muted);padding:30px"><span class="spinner"></span> Cargando...</div>';
-  const srch = document.getElementById('gestor-srch');
-  if (srch) srch.value = '';
   try {
     const { data, error } = await SB.from('gestores').select('*').order('nombre');
     if (error) throw error;
     GESTORES_CACHE = data || [];
-    renderGestoresList(GESTORES_CACHE);
     populateGestorProvFilter();
+    filtrarGestores();
   } catch(e) {
     list.innerHTML = '<div style="color:var(--red);padding:20px;font-size:13px">Error cargando gestores.</div>';
   }
