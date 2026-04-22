@@ -2207,7 +2207,7 @@ function openSidebar() {
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-liq-terceros').style.display = ME?.rol === 'admin' ? '' : 'none';
+
   if (ME?.rol === 'admin') renderSidebarPV();
 }
 function closeSidebar() {
@@ -5627,7 +5627,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','liq-terceros','calendario'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
     const tn = document.getElementById('tn-'+id);
@@ -5653,21 +5653,13 @@ function showV(v) {
     if (sp) sp.style.transform = 'translateX(100%)';
   }
   if (v !== 'datero') closeDateroPanel();
-  // Auto-guardar modal LT si está abierto al navegar a otra sección
-  if (v !== 'liq-terceros') {
-    const ltOverlay = document.getElementById('lt-edit-overlay');
-    if (ltOverlay && ltOverlay.classList.contains('open')) { closeLTEdit(true); return; }
-  }
+
   if (v === 'contabilidad') {
     renderContabilidad();
     setTimeout(initContMirror, 100);
     recargarLiquidaciones();
   }
-  if (v === 'liq-terceros') {
-    initLTSelectPV();
-    renderLiqTerceros();
-    setTimeout(initLTMirror, 100);
-  }
+
 }
 
 // ══════════════════════════════════════════════
@@ -5701,8 +5693,7 @@ async function loadRecords() {
     renderStats();
     const tab = document.getElementById('rep-prendas-pend');
     if (tab && tab.style.display !== 'none') renderPrendasPendientes();
-    const vLT = document.getElementById('v-liq-terceros');
-    if (vLT && vLT.style.display !== 'none') renderLiqTerceros();
+
     setTimeout(() => autoCalcContabilidad(), 800);
     syncUI('ok');
   } catch(e) { syncUI('err'); toast('Error cargando registros: '+e.message,'er'); }
@@ -7697,7 +7688,7 @@ setInterval(() => {
   checkMantenimiento();
   checkDateroNuevos();
 
-  const sections = ['sol','nueva','reportes','datero','micuenta','config','usuarios','backup','creditos','bancos','liq-terceros','calendario'];
+  const sections = ['sol','nueva','reportes','datero','micuenta','config','usuarios','backup','creditos','bancos','calendario'];
   const activeSection = sections.find(s => {
     const el = document.getElementById('v-' + s);
     return el && el.style.display !== 'none';
@@ -8327,9 +8318,7 @@ function renderReportes() {
     <button class="sb-item" onclick="closeSidebar();showV('datero')">
       <span class="sb-icon">📨</span> Datero
     </button>
-    <button class="sb-item" id="sb-liq-terceros" onclick="closeSidebar();showV('liq-terceros')" style="display:none">
-      <span class="sb-icon">💼</span> Liquidaciones a Terceros
-    </button>
+
     <button class="sb-item" onclick="closeSidebar();openNotasBlock()">
       <span class="sb-icon">📝</span> Block de notas
     </button>
