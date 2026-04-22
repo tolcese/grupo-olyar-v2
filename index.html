@@ -1477,8 +1477,8 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                   <th>Comisión gestor</th>
                   <th>Retribución banco</th>
                   <th>Ganancia LUKAYA</th>
-                  <th>Pagado</th>
-                  <th>Fecha pagado</th>
+                  <th>Pago agencia</th>
+                  <th>Fecha pago agencia</th>
                   <th>Pago com. gest.</th>
                   <th>Fecha pagado com. gest.</th>
                   <th>Observaciones</th>
@@ -4982,7 +4982,7 @@ function renderTotalesCont(data) {
     { label:'Com. Gestor',        value: fmt(sum('comGestora')) },
     { label:'Retrib. Banco',      value: fmt(sum('retribBanco')) },
     { label:'Ganancia LUKAYA',    value: fmt(sum('ganancia')), highlight: true },
-    { label:'Pagados',            value: countPagado + ' / ' + data.length },
+    { label:'Pago agencia',            value: countPagado + ' / ' + data.length },
     { label:'Pago com. gest.',    value: countPagoGest + ' / ' + data.length },
   ];
 
@@ -8852,12 +8852,12 @@ function renderReportes() {
       <div class="fc"><label>Comisión gestor</label><input id="cont-com-gestora" type="number" placeholder="0" oninput="calcContGanancia()" style="font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Retribución banco</label><input id="cont-retrib-banco" type="number" placeholder="0" oninput="calcContGanancia()" style="font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Ganancia LUKAYA <span style="color:var(--green);font-size:10px">(calculado)</span></label><input id="cont-ganancia" type="number" placeholder="0" readonly style="background:#f0fdf4;font-weight:700;color:var(--green)"></div>
-      <div class="fc"><label>Pagado</label>
+      <div class="fc"><label>Pago agencia</label>
         <div class="chk-grid" style="grid-template-columns:1fr">
           <label class="chk-row"><input type="checkbox" id="cont-pagado"> Sí, pagado</label>
         </div>
       </div>
-      <div class="fc"><label>Fecha pagado</label><input id="cont-fecha-pagado" type="date"></div>
+      <div class="fc"><label>Fecha pago agencia</label><input id="cont-fecha-pagado" type="date"></div>
       <div class="fc"><label>Pago com. gest.</label>
         <div class="chk-grid" style="grid-template-columns:1fr">
           <label class="chk-row"><input type="checkbox" id="cont-pago-gest"> Sí, pagado</label>
