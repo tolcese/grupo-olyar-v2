@@ -1473,7 +1473,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                   <th>Gastos Gestoría</th>
                   <th>Comisión LUKAYA</th>
                   <th>Fecha liquidación</th>
-                  <th>Comisión comercial</th>
                   <th>Comisión operativo</th>
                   <th>Comisión gestor</th>
                   <th>Retribución banco</th>
@@ -4945,7 +4944,6 @@ function renderContabilidad() {
       <td style="font-family:monospace">${mon(c.gastosGestoria)}</td>
       <td style="font-family:monospace">${mon(c.comLukaya)}</td>
       <td>${fmtD(c.fechaLiq)}</td>
-      <td style="font-family:monospace">${mon(c.comComercial)}</td>
       <td style="font-family:monospace">${mon(c.comOperativo)}</td>
       <td style="font-family:monospace">${mon(c.comGestora)}</td>
       <td style="font-family:monospace">${mon(c.retribBanco)}</td>
@@ -4979,7 +4977,6 @@ function renderTotalesCont(data) {
     { label:'1,2 Imp. Crédito',   value: fmt(sum('impCredito')) },
     { label:'Gastos Gestoría',    value: fmt(sum('gastosGestoria')) },
     { label:'Comisión LUKAYA',    value: fmt(sum('comLukaya')) },
-    { label:'Com. Comercial',     value: fmt(sum('comComercial')) },
     { label:'Pagos Extras',        value: fmt(sum('pagosExtras')) },
     { label:'Com. Operativo',     value: fmt(sum('comOperativo')) },
     { label:'Com. Gestor',        value: fmt(sum('comGestora')) },
@@ -5061,7 +5058,6 @@ async function editCont(id) {
   }
 
   document.getElementById('cont-gastos-gestoria').value = c.gastosGestoria || '';
-  document.getElementById('cont-com-comercial').value = c.comComercial || '';
   document.getElementById('cont-com-operativo').value = c.comOperativo || '';
   document.getElementById('cont-pagos-extras').value  = c.pagosExtras  || '';
   document.getElementById('cont-fecha-liq').value     = c.fechaLiq     || '';
@@ -5227,7 +5223,7 @@ async function guardarCoeficientes() {
 
 function calcContGanancia() {
   const comLukaya    = parseFloat(document.getElementById('cont-com-lukaya').value||0) || 0;
-  const comComercial = parseFloat(document.getElementById('cont-com-comercial').value||0) || 0;
+  const comComercial = 0;
   const comOperativo = parseFloat(document.getElementById('cont-com-operativo').value||0) || 0;
   const comGestora   = parseFloat(document.getElementById('cont-com-gestora').value||0) || 0;
   const retribBanco  = parseFloat(document.getElementById('cont-retrib-banco').value||0) || 0;
@@ -5261,7 +5257,7 @@ function calcContLiquidar() {
   }
   const retribBanco = parseFloat(document.getElementById('cont-retrib-banco').value||0) || retribBancoCalc;
   // Ganancia LUKAYA
-  const comComercial = parseFloat(document.getElementById('cont-com-comercial').value||0) || 0;
+  const comComercial = 0;
   const comOperativo = parseFloat(document.getElementById('cont-com-operativo').value||0) || 0;
   const pagosExtras = parseFloat(document.getElementById('cont-pagos-extras').value||0) || 0;
   const ganancia = Math.round(comLukaya - comComercial - comOperativo - comGestora + retribBanco - pagosExtras);
@@ -5287,7 +5283,7 @@ async function saveContEdit(silent = false) {
     gastos_gestoria: n(document.getElementById('cont-gastos-gestoria').value),
     com_lukaya:      n(document.getElementById('cont-com-lukaya').value),
     fecha_liq:       document.getElementById('cont-fecha-liq').value || null,
-    com_comercial:   n(document.getElementById('cont-com-comercial').value),
+    com_comercial:   null,
     com_operativo:   n(document.getElementById('cont-com-operativo').value),
     com_gestora:     n(document.getElementById('cont-com-gestora').value),
     retrib_banco:    n(document.getElementById('cont-retrib-banco').value),
@@ -8851,7 +8847,6 @@ function renderReportes() {
       <div class="fc"><label>Gastos Gestoría</label><input id="cont-gastos-gestoria" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión LUKAYA</label><input id="cont-com-lukaya" type="number" placeholder="0" oninput="calcContGanancia()" style="font-weight:700;color:var(--green)"></div>
       <div class="fc"><label>Fecha liquidación</label><input id="cont-fecha-liq" type="date"></div>
-      <div class="fc"><label>Comisión comercial</label><input id="cont-com-comercial" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión operativo</label><input id="cont-com-operativo" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Pagos Extras</label><input id="cont-pagos-extras" type="number" placeholder="0" oninput="calcContLiquidar()"></div>
       <div class="fc"><label>Comisión gestor</label><input id="cont-com-gestora" type="number" placeholder="0" oninput="calcContGanancia()" style="font-weight:700;color:var(--green)"></div>
