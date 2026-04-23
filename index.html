@@ -5997,10 +5997,11 @@ async function saveRecord() {
   });
 
   let rec;
+  let viejo = {};
   try {
     if (editId) {
       const idx = RECORDS.findIndex(r=>r.id===editId);
-      const viejo = { ...RECORDS[idx] };
+      viejo = { ...RECORDS[idx] };
       RECORDS[idx] = { ...RECORDS[idx], ...d };
       rec = { ...RECORDS[idx], usuarioEdit: ME.nom };
       const { error } = await SB.from('solicitudes').update(toDb(rec)).eq('id', editId);
