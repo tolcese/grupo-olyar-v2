@@ -1638,7 +1638,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Tasa</th>
                 <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Retribución Banco</th>
                 <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--green);text-transform:uppercase;white-space:nowrap">Fecha de pago Banco</th>
-                <th style="padding:9px 12px;text-align:left;font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;white-space:nowrap">Acciones</th>
               </tr>
             </thead>
             <tbody id="cobradas-tbody"></tbody>
@@ -4806,12 +4805,7 @@ function renderPrendasCobradas() {
       <td style="padding:9px 12px">${val(r.descripcion)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.tasa)}</td>
       <td style="padding:9px 12px;font-family:monospace;font-weight:600;color:var(--green)">${mon(c.retribBanco)}</td>
-      <td style="padding:9px 12px">
-        <input type="date" value="${c.fechaPagoBanco||''}" style="font-size:11px;padding:3px 6px;border:1.5px solid var(--line);border-radius:6px;font-family:Inter,sans-serif;cursor:pointer" onchange="saveCobFechaPago('${r.id}',this.value)">
-      </td>
-      <td style="padding:9px 12px">
-        <button class="ibtn" onclick="editCont('${r.id}')" title="Editar">✏️</button>
-      </td>
+      <td style="padding:9px 12px;font-weight:700;color:var(--green)">${fmtF(c.fechaPagoBanco)}</td>
     </tr>`;
   }).join('');
 }
