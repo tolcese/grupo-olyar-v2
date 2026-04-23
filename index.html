@@ -4892,7 +4892,11 @@ function renderContabilidad() {
   const desde = document.getElementById('cont-f-desde')?.value || '';
   const hasta = document.getElementById('cont-f-hasta')?.value || '';
 
-  let data = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
+  let data = RECORDS.filter(r => {
+    if ((r.estado||'').toUpperCase() !== 'AVANZA') return false;
+    const c = CONT_DATA[r.id] || {};
+    return !c.fechaPagoBanco; // Excluir los que ya tienen fecha de pago banco
+  });
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.banco, r.dni, r.concesionaria, r.provincia, r.localidad].some(v => (v||'').toLowerCase().includes(q))
   );
