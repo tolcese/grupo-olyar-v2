@@ -4743,6 +4743,7 @@ async function loadContabilidad() {
     const { data, error } = await SB.from('contabilidad').select('*');
     if (error) throw error;
     (data || []).forEach(c => {
+      const r = RECORDS.find(x => x.id === c.solicitud_id);
       CONT_DATA[c.solicitud_id] = {
         id: c.solicitud_id,
         aLiquidar:      c.a_liquidar,
@@ -4758,6 +4759,7 @@ async function loadContabilidad() {
         pagosExtras:    c.pagos_extras,
         fechaPagoBanco: c.fecha_pago_banco,
         pagado:         c.pagado,
+        _importeOrig:   r ? parseFloat(String(r.importe||0).replace(/[$,]/g,'')) || 0 : 0,
         fechaPagado:    c.fecha_pagado,
         pagoGest:       c.pago_gest,
         fechaPagoGest:  c.fecha_pago_gest,
@@ -6015,24 +6017,29 @@ async function saveRecord() {
     syncUI('ok');
     toast(editId?'Solicitud actualizada ✓':'Solicitud guardada ✓','ok');
     if ((rec.estado||'').toUpperCase() === 'AVANZA') {
-      // Si ya tiene datos contables, recalcular con el nuevo importe
       const c = CONT_DATA[rec.id] || {};
       if (c.aLiquidar || c.comLukaya || c.impCredito) {
-        const importe = parseFloat(String(rec.importe||0).replace(/[$,]/g,'')) || 0;
-        if (importe) {
-          // Solo recalcular campos que no fueron modificados manualmente
-          const impCredito  = Math.round(importe * COEFICIENTES.impCredito / 100);
-          const comLukaya   = c.comLukaya  != null ? c.comLukaya  : Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
-          const comGestora  = c.comGestora != null ? c.comGestora : Math.round(importe * COEFICIENTES.comGestor / 100);
-          const retribBanco = c.retribBanco != null ? c.retribBanco : Math.round(importe * COEFICIENTES.retribBanco / 100);
-          const aLiquidar   = Math.round(importe - comLukaya - (c.gastosGestoria||0) - impCredito);
-          const ganancia    = Math.round(comLukaya - (c.comComercial||0) - (c.comOperativo||0) - (c.pagosExtras||0) - comGestora + retribBanco);
-          const data = { solicitud_id: rec.id, a_liquidar: aLiquidar, imp_credito: impCredito, com_lukaya: comLukaya, com_gestora: comGestora, retrib_banco: retribBanco, ganancia };
-          SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' }).then(()=>{}).catch(()=>{});
-          CONT_DATA[rec.id] = { ...c, aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
-          if (LT_DATA[rec.id]) LT_DATA[rec.id] = { ...LT_DATA[rec.id], aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
+        // Si el importe cambió, preguntar si recalcular
+        const importeNuevo = parseFloat(String(rec.importe||0).replace(/[$,]/g,'')) || 0;
+        const importeViejo = parseFloat(String(c._importeOrig||0)) || 0;
+        const importeCambio = importeNuevo && importeViejo && importeNuevo !== importeViejo;
+        if (importeNuevo && (importeCambio || !importeViejo)) {
+          const recalcular = importeCambio
+            ? confirm(`El importe cambió de $${importeViejo.toLocaleString('es-AR')} a $${importeNuevo.toLocaleString('es-AR')}. ¿Querés recalcular los valores contables con el nuevo importe?`)
+            : false;
+          if (recalcular) {
+            const impCredito  = Math.round(importeNuevo * COEFICIENTES.impCredito / 100);
+            const comLukaya   = Math.round((importeNuevo * COEFICIENTES.comLukaya / 100) - impCredito);
+            const comGestora  = Math.round(importeNuevo * COEFICIENTES.comGestor / 100);
+            const retribBanco = Math.round(importeNuevo * COEFICIENTES.retribBanco / 100);
+            const aLiquidar   = Math.round(importeNuevo - comLukaya - (c.gastosGestoria||0) - impCredito);
+            const ganancia    = Math.round(comLukaya - (c.comOperativo||0) - (c.pagosExtras||0) - comGestora + retribBanco);
+            const data = { solicitud_id: rec.id, a_liquidar: aLiquidar, imp_credito: impCredito, com_lukaya: comLukaya, com_gestora: comGestora, retrib_banco: retribBanco, ganancia };
+            SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' }).then(()=>{}).catch(()=>{});
+            CONT_DATA[rec.id] = { ...c, aLiquidar, impCredito, comLukaya, comGestora, retribBanco, ganancia };
+            toast('Contabilidad recalculada ✓', 'ok');
+          }
           renderContabilidad();
-          renderLiqTerceros();
         }
       } else {
         autoCalcContabilidad();
