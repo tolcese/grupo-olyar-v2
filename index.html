@@ -6026,8 +6026,18 @@ async function saveRecord() {
         const importeCambio = importeNuevo > 0 && importeViejo > 0 && Math.round(importeNuevo) !== Math.round(importeViejo);
         if (importeNuevo && (importeCambio || !importeViejo)) {
           const recalcular = importeCambio
-            ? confirm(`El importe cambió de $${importeViejo.toLocaleString('es-AR')} a $${importeNuevo.toLocaleString('es-AR')}. ¿Querés recalcular los valores contables con el nuevo importe?`)
+            ? confirm(`El importe cambió de $${importeViejo.toLocaleString('es-AR')} a $${importeNuevo.toLocaleString('es-AR')}. ¿Querés recalcular los valores contables con el nuevo importe?\n\nAceptar = recalcular contabilidad\nCancelar = revertir al importe anterior`)
             : false;
+          if (importeCambio && !recalcular) {
+            // Revertir importe al valor anterior en solicitudes y en memoria
+            await SB.from('solicitudes').update({ importe: importeViejo }).eq('id', rec.id);
+            const ridx = RECORDS.findIndex(x => x.id === rec.id);
+            if (ridx >= 0) RECORDS[ridx].importe = importeViejo;
+            rec.importe = importeViejo;
+            toast('Importe revertido al valor anterior', 'wa');
+            renderContabilidad();
+            return;
+          }
           if (recalcular) {
             const impCredito  = Math.round(importeNuevo * COEFICIENTES.impCredito / 100);
             const comLukaya   = Math.round((importeNuevo * COEFICIENTES.comLukaya / 100) - impCredito);
