@@ -6036,6 +6036,14 @@ async function saveRecord() {
             rec.importe = importeViejo;
             toast('Importe revertido al valor anterior', 'wa');
             renderContabilidad();
+            btn.disabled = false;
+            btn.innerHTML = '💾 Guardar cambios';
+            editId = null;
+            const savedPage2 = CURRENT_PAGE;
+            renderTable._keepPage = true;
+            showV('sol');
+            CURRENT_PAGE = savedPage2;
+            renderTablePage();
             return;
           }
           if (recalcular) {
