@@ -56,86 +56,61 @@ tolcese/grupo-olyar-v2/
 ## Secciones del sistema
 
 ### Solicitudes
-Tabla principal con todos los créditos registrados. Permite crear, editar y filtrar solicitudes. Incluye exportación a Excel y PDF. Los estados posibles son: Pendiente, Aprobado, Rechazado, Avanza, Entregado.
+Tabla principal con todos los créditos registrados. Permite crear, editar y filtrar solicitudes. Incluye exportación a Excel y PDF. Los estados posibles son: Pendiente, Aprobado, Rechazado, Avanza, Entregado. Al modificar el importe de una solicitud AVANZA que ya tiene datos contables, el sistema pregunta si recalcular Contabilidad con el nuevo importe.
 
 ### Datero (`datero.html`)
-Formulario público para carga de solicitudes externas desde concesionarias. Incluye:
-- Datos de agencia (provincia, concesionaria, encargado)
-- Datos del solicitante (nombre, DNI, teléfono, compañía, email, código postal, teléfonos alternativos con nombre y relación)
-- Estado civil y datos del cónyuge (se muestran solo si estado civil = Casado/a)
-- Foto DNI (subida a Supabase Storage — bucket `datero-dni`)
-- Título automotor
-- Información laboral (empresa, fecha ingreso, domicilio, teléfono laboral)
-- Datos del vehículo (monto, dominio, marca, modelo, año, GNC)
-- Datos crediticios (banco, tipo tasa, monto, cuotas)
-- Notificación por email vía Resend API al recibir una nueva solicitud
-- Badge verde en el sistema cuando hay registros nuevos sin ver (basado en `created_at` exacto para evitar falsos positivos)
+Formulario público para carga de solicitudes externas desde concesionarias. Incluye datos personales, estado civil y cónyuge, foto DNI, datos laborales, vehículo y crédito. Badge verde en el sistema cuando hay registros nuevos sin ver.
 
 ### Gestoría
-Asignación de gestores a solicitudes aprobadas. Al desasignar un gestor el estado vuelve a "Aprobado" y sale de Prendas y Contabilidad. La ventana de gestores incluye filtro por provincia.
+Asignación de gestores a solicitudes aprobadas. Ventana con filtro por nombre y por provincia. Solo el admin puede editar el nombre de una concesionaria existente.
 
 ### Prendas pendientes
 Lista solicitudes con gestor asignado que aún no tienen fecha de finalización.
 
 ### Prendas finalizadas
-Lista solicitudes con fecha de finalización cargada. Permite editar la fecha de finalización y cargar fecha de entrega. Al cargar la fecha de entrega el registro pasa automáticamente a Prendas entregadas. Incluye botón de Acuse de recibo imprimible.
+Lista solicitudes con fecha de finalización cargada. Permite editar la fecha y cargar fecha de entrega. Incluye botón de Acuse de recibo imprimible con campos editables (nombre, DNI, documentación con checkboxes, extras opcionales).
 
 ### Prendas entregadas
-Lista solicitudes marcadas como entregadas. Desde acá el admin puede marcar una prenda como rechazada por el banco (botón ⛔), lo que la mueve a Prendas rechazadas.
+Lista solicitudes marcadas como entregadas. Desde acá el admin puede marcar una prenda como rechazada por el banco (botón ⛔).
 
 ### Prendas rechazadas
-Nueva sección para el seguimiento de prendas rechazadas por el banco. Flujo:
-1. Admin marca prenda como rechazada desde Prendas entregadas con fecha y motivo
-2. La prenda aparece en esta sección con badge rojo en el sidebar
-3. Al hacer click en un registro se despliega panel lateral con detalle completo
-4. Admin puede reingresar la prenda al banco con fecha de reingreso (botón ✅)
-5. Al reingresar vuelve a Prendas entregadas y desaparece de Rechazadas
+Seguimiento de prendas rechazadas por el banco. Flujo: rechazada → panel lateral con detalle, correcciones editables por admin y usuario → reingresar al banco (admin) → vuelve a Prendas entregadas. Badge rojo en sidebar cuando hay prendas pendientes de reingreso.
 
 ### Contabilidad *(solo admin)*
 Gestión contable con las siguientes pestañas:
-- **Liquidaciones**: tabla completa con todos los campos contables por operación. Campos editables manualmente: Com. Lukaya, Com. Gestor, Retrib. Banco, Pagos Extras. Si tienen valor manual lo usan; si están vacíos calculan desde el coeficiente.
-- **Totales**: resumen de comisiones y ganancias incluyendo Pagos Extras
-- **Gastos**: registro de gastos con cálculo de ganancia neta
-- **Cobranza Banco**: operaciones AVANZA sin fecha de pago banco
-- **Prendas Cobradas**: operaciones AVANZA con fecha de pago banco cargada
-- **Cambio de Coeficientes**: modificación de porcentajes de cálculo globales
 
-Fórmula Ganancia Lukaya: `Com. Lukaya - Pagos Extras - Com. Operativo - Com. Gestor + Retrib. Banco`
+- **Liquidaciones**: tabla de operaciones AVANZA sin fecha de pago banco. Campos editables en modal: Com. Lukaya, Com. Gestor, Retrib. Banco, Pagos Extras, Com. Operativo, Gastos Gestoría, Ganancia Lukaya, A Liquidar Agencia, Fecha Liquidación, Pago Agencia, Fecha Pago Agencia, Pago Com. Gest., Observaciones.
+- **Totales**: resumen del período con Imp. Solicitado, A Liquidar, 1,2 Imp. Crédito, Gastos Gestoría, Com. Lukaya, Pagos Extras, Com. Operativo, Com. Gestor, Retrib. Banco, Ganancia Lukaya, Pago Agencia, Pago Com. Gest.
+- **Gastos**: registro de gastos con ganancia neta.
+- **Prendas a cobrar**: operaciones AVANZA sin fecha de pago banco. Campo editable de fecha de pago. Total Retribución Banco al pie. Al cargar la fecha pasa automáticamente a Prendas Cobradas y sale de Liquidaciones.
+- **Prendas Cobradas**: operaciones con fecha de pago banco cargada. Fecha editable para corregir o borrar (si se borra vuelve a Prendas a cobrar). Total Retribución Banco al pie. Botón ✏️ para editar el registro completo.
+- **Cambio de Coeficientes**: modificación de porcentajes globales de cálculo.
 
-### Liquidaciones a Terceros *(solo admin)*
-Vista contable por punto de venta. Mismos campos editables que Contabilidad. Al abrir cualquier modal siempre lee desde Supabase para tener el dato más actualizado — los cambios en Contabilidad se reflejan en LT y viceversa. Los puntos de venta nuevos se guardan automáticamente en Supabase y se reflejan en el sidebar.
+**Fórmula Ganancia Lukaya:** `Com. Lukaya - Pagos Extras - Com. Operativo - Com. Gestor + Retrib. Banco`
+
+Los modales de Contabilidad siempre leen desde Supabase al abrirse para garantizar datos actualizados. Los valores editados manualmente se respetan al recalcular — solo se usa el coeficiente si el campo está vacío.
 
 ### Sistema de Créditos
-Seguimiento de créditos prendarios activos con sus cuotas. Incluye:
-- **Créditos**: lista con cuota actual calculada automáticamente. El número de cuota avanza al día siguiente del vencimiento.
-- **Cuotas**: vista de vencimientos con número de cuota actual
-- **Recordatorio Vencimiento Cuota (WA)**: lista de créditos con vencimiento próximo (7 días hábiles). El mensaje de WhatsApp incluye "Cuota X de Y". Al enviar queda registrado en Supabase y no vuelve a aparecer ese mes.
+Seguimiento de créditos prendarios activos. Cuota actual calculada automáticamente — avanza al día siguiente del vencimiento. Recordatorio de WhatsApp 7 días hábiles antes del vencimiento con "Cuota X de Y" en el mensaje. Créditos se pueden cargar manualmente desde el sistema sin afectar Contabilidad.
 
 ### Reportes
-- Admin: gráficos de estados, registros por mes, comisiones
-- Usuario: solicitudes del día (automático al entrar) + prendas pendientes
+- Admin: gráficos de estados, barras por mes, comisiones, conversión por concesionaria, listado imprimible de prendas con filtro por estado.
+- Usuario: solicitudes del día (automático), solicitudes día anterior (solo Aprobadas).
 
 ### Calendario
-Eventos, tareas y recordatorios. Los creados por admin son visibles para todos; los creados por usuarios solo los ve el propio usuario.
+Eventos del admin visibles para todos. Eventos de usuarios solo visibles para el propio usuario.
 
 ### Datero (vista interna)
-Tabla con todas las solicitudes recibidas desde el formulario público. Badge verde cuando hay registros nuevos sin ver.
+Tabla con todas las solicitudes del formulario público. Badge verde con detección exacta de nuevos registros.
 
 ### Bancos
-Acceso rápido a portales bancarios:
-- Banco Columbia: `columbiacompras.com.ar`
-- Banco Supervielle: `carapp.iudu.com.ar`
-- Banco Santander: `login-prendarios.santanderconsumer.com.ar`
-- Banco Bancor: `aplicaciones.bancor.com.ar`
-
-### Puntos de Venta *(sidebar admin)*
-Lista de puntos de venta cargada desde Supabase al iniciar. Al hacer click se abre un modal con todas las operaciones asociadas.
-
-### Simulador Prendario
-Botón en el sidebar que abre `https://tolcese.github.io/simulador-prendarios/` en nueva pestaña.
+Acceso rápido a: Columbia, Supervielle, Santander, Bancor.
 
 ### Modo Mantenimiento *(solo admin)*
-Desde Configuración el admin puede activar/desactivar el modo mantenimiento. Cuando está activo, los usuarios ven una pantalla de mantenimiento y no pueden ingresar. El admin puede seguir usando el sistema normalmente.
+Activa pantalla de mantenimiento para usuarios. Admin puede seguir usando el sistema.
+
+### Widget de clima *(solo claudionieva)*
+Muestra ícono y temperatura en el topbar usando wttr.in.
 
 ---
 
@@ -145,13 +120,13 @@ Desde Configuración el admin puede activar/desactivar el modo mantenimiento. Cu
 |---|---|
 | `solicitudes` | Registros principales del sistema |
 | `contabilidad` | Datos contables por solicitud |
-| `gestores` | Gestores disponibles |
+| `gestores` | Gestores con nombre, teléfono, email, dirección, CP, localidad, provincia |
 | `concesionarias` | Concesionarias registradas |
 | `clientes` | Datos de clientes |
 | `creditos` | Créditos prendarios activos |
 | `cuotas` | Cuotas por crédito |
 | `datero` | Solicitudes del formulario público |
-| `listas` | Valores de listas desplegables y flags de configuración (ej. `_mantenimiento`) |
+| `listas` | Valores de listas desplegables y flags de configuración |
 | `usuarios` | Usuarios del sistema con roles |
 | `calendario` | Eventos, tareas y recordatorios |
 | `gastos` | Gastos registrados en contabilidad |
@@ -159,14 +134,11 @@ Desde Configuración el admin puede activar/desactivar el modo mantenimiento. Cu
 | `punto_de_venta` | Puntos de venta disponibles |
 | `recordatorios_enviados` | Registro de recordatorios WA enviados por crédito y mes |
 
-### Columnas nuevas en `solicitudes`
-- `prenda_rechazada` (boolean) — indica si la prenda fue rechazada por el banco
-- `fecha_rechazo_prenda` (date) — fecha del rechazo
-- `motivo_rechazo_prenda` (text) — motivo del rechazo
-- `fecha_reingreso_prenda` (date) — fecha de reingreso al banco
+### Columnas clave en `solicitudes`
+- `prenda_rechazada`, `fecha_rechazo_prenda`, `motivo_rechazo_prenda`, `fecha_reingreso_prenda`, `correcciones_prenda`
 
-### Columnas nuevas en `contabilidad`
-- `pagos_extras` (numeric) — pagos extras que restan en la Ganancia Lukaya
+### Columnas clave en `contabilidad`
+- `pagos_extras` — pagos extras que restan en Ganancia Lukaya
 
 ---
 
@@ -174,69 +146,27 @@ Desde Configuración el admin puede activar/desactivar el modo mantenimiento. Cu
 
 | Función | Descripción |
 |---|---|
-| `auto-backup` | Exporta todas las tablas a JSON y las sube al bucket `backups`. Se dispara automáticamente al login del admin si pasaron más de 24hs desde el último backup. |
-| `resend-email` | Envía email de notificación al recibir una nueva solicitud del datero. Usa la API de Resend. |
-
-**Secrets requeridos:**
-- `SERVICE_ROLE_KEY` — para `auto-backup`
-- `RESEND_API_KEY` — para `resend-email`
-
----
-
-## Supabase — Storage Buckets
-
-| Bucket | Contenido |
-|---|---|
-| `datero-dni` | Fotos de DNI subidas desde el formulario público |
-| `backups` | Archivos JSON de backup automático |
-
----
-
-## Funcionalidades especiales
-
-### Backup automático
-Al loguearse el admin, el sistema consulta el último archivo en el bucket `backups`. Si pasaron más de 24hs, ejecuta la Edge Function `auto-backup` automáticamente. El resultado se puede ver en la consola del navegador (F12).
-
-### Recordatorios de WhatsApp
-El sistema calcula 7 días hábiles (sin sábados ni domingos) antes del vencimiento de cada cuota activa. Cuando la fecha de recordatorio llega los usuarios ven un popup al entrar a Sistema de Créditos, con badge rojo en el sidebar y botón directo a WhatsApp con número de cuota incluido en el mensaje.
-
-### Historial de cambios
-Auditoría automática de modificaciones en: solicitudes, contabilidad, liquidaciones a terceros, gestores, concesionarias y prendas.
-
-### Widget de clima *(solo claudionieva)*
-Muestra temperatura y descripción del clima en el topbar usando `wttr.in`. Intenta geolocalización real; si falla, usa Córdoba como fallback.
-
-### Auto-refresh
-El sistema se refresca automáticamente cada 30 segundos. En móvil espera 3 segundos después del último scroll antes de refrescar para evitar parpadeos.
-
-### Prevención de duplicados
-Al agregar una opción nueva en cualquier lista desplegable (concesionaria, provincia, marca, etc.), el sistema verifica en Supabase si ya existe antes de insertar. La comparación es case-insensitive.
+| `auto-backup` | Exporta tablas a JSON en bucket `backups`. Se dispara al login del admin si pasaron +24hs. |
+| `resend-email` | Notificación email al recibir nuevo datero. |
 
 ---
 
 ## Deploy
 
-El deploy es automático: cada push a la rama `main` en GitHub actualiza el sitio en GitHub Pages en pocos segundos.
-
-Para actualizar el sistema:
 1. Editá `index.html` o `datero.html`
-2. Subí el archivo a GitHub (Add file → Upload files → reemplazá el existente)
+2. Subí a GitHub (Add file → Upload files → reemplazá el existente)
 3. Commiteá a `main`
-4. GitHub Pages publica el cambio automáticamente
-5. Siempre recargá con **Ctrl+Shift+R** para limpiar caché del navegador
-
-> **Nota:** El archivo `.nojekyll` en la raíz del repo es necesario para que GitHub Pages sirva correctamente los archivos sin interferencia de Jekyll.
+4. Recargá con **Ctrl+Shift+R** para limpiar caché
 
 ---
 
 ## Notas de arquitectura
 
-- Supabase se conecta directamente desde el browser — el hosting (GitHub Pages) no interviene en las llamadas a la base de datos.
-- Todos los datos están en Supabase. Cambiar de hosting no afecta la data.
-- La tabla `punto_de_venta` requiere `id` con `gen_random_uuid()` — los inserts desde el sistema lo generan automáticamente.
-- La flag de mantenimiento se guarda en la tabla `listas` con `campo = '_mantenimiento'` y `valor = 'true'/'false'`.
-- Los modales de Contabilidad y Liquidaciones a Terceros siempre leen desde Supabase al abrirse para garantizar datos actualizados entre secciones.
-- Los valores editados manualmente en contabilidad (Retrib. Banco, Com. Gestor, Com. Lukaya, Pagos Extras) se respetan al recalcular — solo se usa el coeficiente si el campo está vacío.
+- Supabase se conecta directamente desde el browser — GitHub Pages no interviene en las llamadas a la BD.
+- Los modales de Contabilidad siempre hacen fetch fresco a Supabase al abrirse.
+- Al modificar importe en solicitud AVANZA con datos contables existentes, el sistema pregunta si recalcular.
+- La flag de mantenimiento se guarda en `listas` con `campo = '_mantenimiento'`.
+- Liquidaciones a Terceros fue eliminada del sistema — toda la gestión contable se hace desde Contabilidad.
 
 ---
 
