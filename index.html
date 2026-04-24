@@ -2533,6 +2533,8 @@ function renderGestoria() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = '';
+    const totalElCob2 = document.getElementById('cobradas-total-retrib');
+    if (totalElCob2) totalElCob2.textContent = '$0';
     return;
   }
   empty.style.display = 'none';
@@ -4886,6 +4888,12 @@ async function saveCobFechaPago(id, fecha) {
   renderPrendasCobradas();
   renderCobranzaBanco();
   renderContabilidad();
+  // Actualizar totales
+  const contData = Object.values(CONT_DATA).length;
+  if (contData) {
+    const data = (window._lastContData || []);
+    if (data.length) renderTotalesCont(data);
+  }
 }
 
 async function saveContFechaPagoBanco(id, fecha) {
