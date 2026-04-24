@@ -4790,6 +4790,8 @@ function renderPrendasCobradas() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = '';
+    const _tcob = document.getElementById('cobradas-total-retrib');
+    if (_tcob) _tcob.textContent = '$0';
     return;
   }
   empty.style.display = 'none';
