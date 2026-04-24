@@ -4888,12 +4888,6 @@ async function saveCobFechaPago(id, fecha) {
   renderPrendasCobradas();
   renderCobranzaBanco();
   renderContabilidad();
-  // Actualizar totales
-  const contData = Object.values(CONT_DATA).length;
-  if (contData) {
-    const data = (window._lastContData || []);
-    if (data.length) renderTotalesCont(data);
-  }
 }
 
 async function saveContFechaPagoBanco(id, fecha) {
@@ -5218,7 +5212,9 @@ function renderTotalesTab() {
     return;
   }
   empty.style.display = 'none';
-  renderTotalesCont(data);
+  // Para totales usar TODOS los AVANZA (con y sin fecha de pago banco)
+  const dataTotal = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
+  renderTotalesCont(dataTotal);
   panel.style.display = '';
 }
 
