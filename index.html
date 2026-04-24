@@ -5006,7 +5006,15 @@ function renderTotalesCont(data) {
     { label:'Com. Operativo',     value: fmt(sum('comOperativo')) },
     { label:'Com. Gestor',        value: fmt(sum('comGestora')) },
     { label:'Retrib. Banco',      value: fmt(sum('retribBanco')) },
-    { label:'Ganancia LUKAYA',    value: fmt(sum('ganancia')), highlight: true },
+    { label:'Ganancia LUKAYA',    value: fmt(data.reduce((acc, r) => {
+      const c = CONT_DATA[r.id] || {};
+      const comLukaya = parseFloat(String(c.comLukaya||0)) || 0;
+      const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
+      const comGestora = parseFloat(String(c.comGestora||0)) || 0;
+      const pagosExtras = parseFloat(String(c.pagosExtras||0)) || 0;
+      const retrib = c.fechaPagoBanco ? (parseFloat(String(c.retribBanco||0)) || 0) : 0;
+      return acc + comLukaya - comOperativo - comGestora - pagosExtras + retrib;
+    }, 0)), highlight: true },
     { label:'Pago agencia',            value: countPagado + ' / ' + data.length },
     { label:'Pago com. gest.',    value: countPagoGest + ' / ' + data.length },
   ];
@@ -5023,7 +5031,15 @@ function renderTotalesCont(data) {
   const netoPanel = document.getElementById('cont-totales-neto');
   const netoGrid  = document.getElementById('cont-totales-neto-grid');
   if (netoPanel && netoGrid) {
-    const gananciaLukaya = sum('comLukaya') - sum('comComercial') - sum('comOperativo') - sum('comGestora') + sum('retribBanco') - sum('pagosExtras');
+    const gananciaLukaya = data.reduce((acc, r) => {
+      const c = CONT_DATA[r.id] || {};
+      const comLukaya = parseFloat(String(c.comLukaya||0)) || 0;
+      const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
+      const comGestora = parseFloat(String(c.comGestora||0)) || 0;
+      const pagosExtras = parseFloat(String(c.pagosExtras||0)) || 0;
+      const retrib = c.fechaPagoBanco ? (parseFloat(String(c.retribBanco||0)) || 0) : 0;
+      return acc + comLukaya - comOperativo - comGestora - pagosExtras + retrib;
+    }, 0);
     const totalGastos = GASTOS_DATA.reduce((acc, g) => acc + (parseFloat(g.monto) || 0), 0);
     const neto = gananciaLukaya - totalGastos;
     const fmtN = v => '$' + Math.round(v).toLocaleString('es-AR');
