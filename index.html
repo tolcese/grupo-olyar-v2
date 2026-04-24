@@ -4888,6 +4888,9 @@ async function saveCobFechaPago(id, fecha) {
   renderPrendasCobradas();
   renderCobranzaBanco();
   renderContabilidad();
+  // Recalcular totales con todos los AVANZA
+  const dataAvanza = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
+  if (dataAvanza.length) renderTotalesCont(dataAvanza);
 }
 
 async function saveContFechaPagoBanco(id, fecha) {
