@@ -1723,6 +1723,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <select id="u-rol">
         <option value="user">Usuario — ve todo, no puede editar/eliminar</option>
         <option value="admin">Admin — control total</option>
+        <option value="presupuestos">Presupuestos — solo presupuestos</option>
       </select></div>
     <div class="mfoot" style="border:none;padding:0;margin:0">
       <button class="btn btn-s" onclick="document.getElementById('user-modal').classList.remove('open')">Cancelar</button>
@@ -6730,6 +6731,7 @@ async function loadUsers() {
             <select class="fsel" style="font-size:12px;padding:4px 8px" onchange="cambiarRol('${u.usr}',this.value)">
               <option value="user" ${u.rol==='user'?'selected':''}>👤 Usuario</option>
               <option value="admin" ${u.rol==='admin'?'selected':''}>⚡ Admin</option>
+              <option value="presupuestos" ${u.rol==='presupuestos'?'selected':''}>📄 Presupuestos</option>
             </select>
             <button class="btn btn-d" style="font-size:12px;padding:5px 10px" onclick="delUser('${u.usr}')">Eliminar</button>
           </div>
