@@ -2285,7 +2285,8 @@ async function enterApp() {
     document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-presupuestos').style.display = '';
     // Show Mi Cuenta in Cuenta section
-    document.querySelector('[onclick="closeSidebar();showV(\'micuenta\')"]')?.style.setProperty('display','');
+    const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
+    if (miCuentaBtn) miCuentaBtn.style.display = '';
     showV('presupuestos');
   } else {
     showV('sol');
@@ -2948,7 +2949,7 @@ function renderPresupuestos() {
         </div>
       </td>
       <td style="padding:9px 12px">${fmtD(p.fecha)}</td>
-      <td style="padding:9px 12px;font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.cliente||'''}">${p.cliente||'—'}</td>
+      <td style="padding:9px 12px;font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.cliente||''}">${p.cliente||'—'}</td>
       <td style="padding:9px 12px;font-family:monospace">${p.dni||'—'}</td>
       <td style="padding:9px 12px;font-family:monospace">${p.dominio||'—'}</td>
       <td style="padding:9px 12px;font-weight:700;font-family:monospace">${mon(p.total)}</td>
