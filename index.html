@@ -882,6 +882,139 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
     </div>
 
+    
+    <!-- PRESUPUESTOS -->
+    <div id="v-presupuestos" style="display:none">
+      <div style="padding:20px;font-size:20px;color:red">TEST PRESUPUESTOS VISIBLE</div>
+      <div class="ph">
+        <div><div class="ph-t">📄 Presupuestos</div><div class="ph-s">Confección y gestión de presupuestos prendarios</div></div>
+        <button class="btn btn-p" onclick="nuevoPresupuesto()">+ Nuevo presupuesto</button>
+      </div>
+      <div id="presup-list-section">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Acciones</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Fecha</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">DNI</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Dominio</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Total</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="presup-tbody">
+              <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <!-- PRESUPUESTO FORM -->
+    <div id="v-presupuesto-form" style="display:none">
+      <div class="ph" style="margin-bottom:16px">
+        <div>
+          <button class="btn btn-s" onclick="volverListaPresupuestos()" style="margin-bottom:8px">← Volver</button>
+          <div class="ph-t" id="presup-form-title">Nuevo presupuesto</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="guardarPresupuesto()">💾 Guardar</button>
+          <button class="btn btn-p" onclick="imprimirPresupuesto()">🖨️ Imprimir</button>
+        </div>
+      </div>
+      <input type="hidden" id="presup-id">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="card">
+          <div class="card-t" style="margin-bottom:12px">Datos del cliente</div>
+          <div class="fg">
+            <div class="fc"><label>Agencia</label><input id="pf-agencia" type="text" placeholder="Nombre de la agencia"></div>
+            <div class="fc"><label>Cliente</label><input id="pf-cliente" type="text" placeholder="Apellido y nombre"></div>
+            <div class="fc"><label>DNI</label><input id="pf-dni" type="text" placeholder="00.000.000"></div>
+            <div class="fc"><label>Estado Civil</label>
+              <select id="pf-estado-civil">
+                <option value="SOLTERO/A">SOLTERO/A</option>
+                <option value="CASADO/A">CASADO/A</option>
+                <option value="DIVORCIADO/A">DIVORCIADO/A</option>
+                <option value="VIUDO/A">VIUDO/A</option>
+              </select>
+            </div>
+            <div class="fc"><label>Fecha presupuesto</label><input id="pf-fecha" type="date"></div>
+            <div class="fc"><label>Estado</label>
+              <select id="pf-estado">
+                <option value="Borrador">Borrador</option>
+                <option value="Enviado">Enviado</option>
+                <option value="Aprobado">Aprobado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-t" style="margin-bottom:12px">Datos del vehículo</div>
+          <div class="fg">
+            <div class="fc"><label>Dominio</label><input id="pf-dominio" type="text" placeholder="AA000AA"></div>
+            <div class="fc"><label>Modelo / Año</label><input id="pf-modelo-anio" type="text" placeholder="RENAULT LOGAN 2019"></div>
+            <div class="fc"><label>Chasis</label><input id="pf-chasis" type="text"></div>
+            <div class="fc"><label>Registro</label><input id="pf-registro" type="text" placeholder="CORDOBA N° 16"></div>
+            <div class="fc"><label>Marca</label><input id="pf-marca" type="text"></div>
+            <div class="fc"><label>Valuación DNRPA</label><input id="pf-valuacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+            <div class="fc"><label>Base Imponible 70%</label><input id="pf-base-imp" type="number" placeholder="0" readonly style="background:var(--surface)"></div>
+            <div class="fc"><label>Monto a colocar</label><input id="pf-monto-colocar" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Costos</div>
+        <div class="fg">
+          <div class="fc"><label>Certificación (02, Y Nota)</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Formularios 02, 03 y 08</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Sellado de Prenda (doble)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Legalizaciones</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Anotaciones Personales</label><input id="pf-anotaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Informe de Dominio</label><input id="pf-informe-dominio" type="number" placeholder="0" oninput="calcPresup()"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Rentas</div>
+        <div class="fg">
+          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
+          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Otros</div>
+        <div class="fg">
+          <div class="fc"><label>Movilidad</label><input id="pf-movilidad" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Altas y Bajas</label><input id="pf-altas-bajas" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Honorarios</label><input id="pf-honorarios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Observaciones</label><textarea id="pf-obs" rows="2" placeholder="Nota al pie del presupuesto..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:var(--green)">
+        <div class="card-t" style="color:var(--green)">TOTAL DEL PRESUPUESTO</div>
+        <div style="font-size:28px;font-weight:800;color:var(--green);font-family:monospace" id="pf-total-display">$0</div>
+      </div>
+
+
+  </div>
+</div>
+
     <!-- MODAL CALENDARIO -->
     <div class="overlay" id="cal-modal-overlay" onclick="if(event.target===this)cerrarModalCalendario()">
       <div class="modal" style="max-width:480px">
@@ -9799,137 +9932,6 @@ function renderReportes() {
       </div>
     </div>
 
-    <!-- PRESUPUESTOS -->
-    <div id="v-presupuestos" style="display:none">
-      <div style="padding:20px;font-size:20px;color:red">TEST PRESUPUESTOS VISIBLE</div>
-      <div class="ph">
-        <div><div class="ph-t">📄 Presupuestos</div><div class="ph-s">Confección y gestión de presupuestos prendarios</div></div>
-        <button class="btn btn-p" onclick="nuevoPresupuesto()">+ Nuevo presupuesto</button>
-      </div>
-      <div id="presup-list-section">
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
-            <thead>
-              <tr style="background:var(--surface)">
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Acciones</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Fecha</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">DNI</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Dominio</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Total</th>
-                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Estado</th>
-              </tr>
-            </thead>
-            <tbody id="presup-tbody">
-              <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    <!-- PRESUPUESTO FORM -->
-    <div id="v-presupuesto-form" style="display:none">
-      <div class="ph" style="margin-bottom:16px">
-        <div>
-          <button class="btn btn-s" onclick="volverListaPresupuestos()" style="margin-bottom:8px">← Volver</button>
-          <div class="ph-t" id="presup-form-title">Nuevo presupuesto</div>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-s" onclick="guardarPresupuesto()">💾 Guardar</button>
-          <button class="btn btn-p" onclick="imprimirPresupuesto()">🖨️ Imprimir</button>
-        </div>
-      </div>
-      <input type="hidden" id="presup-id">
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
-        <div class="card">
-          <div class="card-t" style="margin-bottom:12px">Datos del cliente</div>
-          <div class="fg">
-            <div class="fc"><label>Agencia</label><input id="pf-agencia" type="text" placeholder="Nombre de la agencia"></div>
-            <div class="fc"><label>Cliente</label><input id="pf-cliente" type="text" placeholder="Apellido y nombre"></div>
-            <div class="fc"><label>DNI</label><input id="pf-dni" type="text" placeholder="00.000.000"></div>
-            <div class="fc"><label>Estado Civil</label>
-              <select id="pf-estado-civil">
-                <option value="SOLTERO/A">SOLTERO/A</option>
-                <option value="CASADO/A">CASADO/A</option>
-                <option value="DIVORCIADO/A">DIVORCIADO/A</option>
-                <option value="VIUDO/A">VIUDO/A</option>
-              </select>
-            </div>
-            <div class="fc"><label>Fecha presupuesto</label><input id="pf-fecha" type="date"></div>
-            <div class="fc"><label>Estado</label>
-              <select id="pf-estado">
-                <option value="Borrador">Borrador</option>
-                <option value="Enviado">Enviado</option>
-                <option value="Aprobado">Aprobado</option>
-                <option value="Rechazado">Rechazado</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-t" style="margin-bottom:12px">Datos del vehículo</div>
-          <div class="fg">
-            <div class="fc"><label>Dominio</label><input id="pf-dominio" type="text" placeholder="AA000AA"></div>
-            <div class="fc"><label>Modelo / Año</label><input id="pf-modelo-anio" type="text" placeholder="RENAULT LOGAN 2019"></div>
-            <div class="fc"><label>Chasis</label><input id="pf-chasis" type="text"></div>
-            <div class="fc"><label>Registro</label><input id="pf-registro" type="text" placeholder="CORDOBA N° 16"></div>
-            <div class="fc"><label>Marca</label><input id="pf-marca" type="text"></div>
-            <div class="fc"><label>Valuación DNRPA</label><input id="pf-valuacion" type="number" placeholder="0" oninput="calcPresup()"></div>
-            <div class="fc"><label>Base Imponible 70%</label><input id="pf-base-imp" type="number" placeholder="0" readonly style="background:var(--surface)"></div>
-            <div class="fc"><label>Monto a colocar</label><input id="pf-monto-colocar" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-t" style="margin-bottom:12px">Costos</div>
-        <div class="fg">
-          <div class="fc"><label>Certificación (02, Y Nota)</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Formularios 02, 03 y 08</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Sellado de Prenda (doble)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Legalizaciones</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Anotaciones Personales</label><input id="pf-anotaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Informe de Dominio</label><input id="pf-informe-dominio" type="number" placeholder="0" oninput="calcPresup()"></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-t" style="margin-bottom:12px">Rentas</div>
-        <div class="fg">
-          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
-          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:16px">
-        <div class="card-t" style="margin-bottom:12px">Otros</div>
-        <div class="fg">
-          <div class="fc"><label>Movilidad</label><input id="pf-movilidad" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Altas y Bajas</label><input id="pf-altas-bajas" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Honorarios</label><input id="pf-honorarios" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Observaciones</label><textarea id="pf-obs" rows="2" placeholder="Nota al pie del presupuesto..."></textarea></div>
-        </div>
-      </div>
-
-      <div class="card" style="border-color:var(--green)">
-        <div class="card-t" style="color:var(--green)">TOTAL DEL PRESUPUESTO</div>
-        <div style="font-size:28px;font-weight:800;color:var(--green);font-family:monospace" id="pf-total-display">$0</div>
-      </div>
-
-
-  </div>
-</div>
 
 <!-- HOJA DE IMPRESIÓN ACUSE -->
 <div id="acuse-print-sheet" style="display:none">
