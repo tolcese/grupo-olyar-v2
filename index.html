@@ -2284,6 +2284,8 @@ async function enterApp() {
     // Ocultar sidebar items excepto presupuestos
     document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-presupuestos').style.display = '';
+    // Show Mi Cuenta in Cuenta section
+    document.querySelector('[onclick="closeSidebar();showV(\'micuenta\')"]')?.style.setProperty('display','');
     showV('presupuestos');
   } else {
     showV('sol');
@@ -8895,12 +8897,6 @@ function renderReportes() {
       <span class="sb-icon">📄</span> Presupuestos
     </button>
     <div class="sb-divider"></div>
-    <div class="sb-section-label">Simulador</div>
-    <a href="https://tolcese.github.io/simulador-prendarios/" target="_blank" style="text-decoration:none">
-      <button class="sb-item" onclick="closeSidebar()">
-        <span class="sb-icon">🧮</span> Calculador
-      </button>
-    </a>
     <div class="sb-divider"></div>
     <button class="sb-item" onclick="closeSidebar();openNotasBlock()">
       <span class="sb-icon">📝</span> Block de notas
