@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v1.8</title>
+<title>Grupo Olyar — Solicitudes v1.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3146,7 +3146,10 @@ function imprimirPresupuesto() {
 
 function imprimirPresupuestoById(id) {
   const p = PRESUP_CACHE.find(x => x.id === id);
-  if (p) generarImpresionPresupuesto(p);
+  if (p) {
+    generarImpresionPresupuesto(p);
+    setTimeout(() => renderPresupuestos(), 500);
+  }
 }
 
 function generarImpresionPresupuesto(p) {
@@ -3224,6 +3227,8 @@ function generarImpresionPresupuesto(p) {
   const win = window.open('','_blank','width=800,height=1000');
   win.document.write(html);
   win.document.close();
+  // Re-focus main window after print
+  setTimeout(() => { try { window.focus(); } catch(e){} }, 300);
 }
 
 // ══════════════════════════════════════════════
