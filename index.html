@@ -554,9 +554,10 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="tb-av" id="tb-av">?</div>
         <div><div class="tb-uname" id="tb-uname">—</div><div class="tb-role" id="tb-role">—</div></div>
       </div>
-      <div id="weather-widget" style="display:none;align-items:center;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:3px 8px;font-size:11px;color:var(--ink2);white-space:nowrap;max-width:90px;overflow:hidden">
-        <span id="weather-icon" style="font-size:13px">🌤️</span>
+      <div id="weather-widget" style="display:none;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--ink2)">
+        <span id="weather-icon">🌤️</span>
         <span id="weather-temp" style="font-weight:700"></span>
+        <span id="weather-desc" style="color:var(--muted)"></span>
       </div>
       <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="doLogout()">Salir</button>
     </div>
@@ -2162,6 +2163,7 @@ async function loadWeather() {
       const desc = cur.lang_es?.[0]?.value || cur.weatherDesc[0].value;
       document.getElementById('weather-icon').textContent = weatherIcon(code);
       document.getElementById('weather-temp').textContent = `${temp}°C`;
+      document.getElementById('weather-desc').textContent = desc;
       widget.style.display = 'flex';
     };
     if (navigator.geolocation) {
@@ -2533,8 +2535,6 @@ function renderGestoria() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = '';
-    const totalElCob2 = document.getElementById('cobradas-total-retrib');
-    if (totalElCob2) totalElCob2.textContent = '$0';
     return;
   }
   empty.style.display = 'none';
@@ -4790,8 +4790,6 @@ function renderPrendasCobradas() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = '';
-    const _tcob = document.getElementById('cobradas-total-retrib');
-    if (_tcob) _tcob.textContent = '$0';
     return;
   }
   empty.style.display = 'none';
@@ -4890,9 +4888,6 @@ async function saveCobFechaPago(id, fecha) {
   renderPrendasCobradas();
   renderCobranzaBanco();
   renderContabilidad();
-  // Recalcular totales con todos los AVANZA
-  const dataAvanza = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
-  if (dataAvanza.length) renderTotalesCont(dataAvanza);
 }
 
 async function saveContFechaPagoBanco(id, fecha) {
@@ -4991,6 +4986,61 @@ function renderContabilidad() {
   setTimeout(initContMirror, 50);
 }
 
+
+// ══════════════════════════════════════════════
+// DETALLE TOTALES CONTABILIDAD
+// ══════════════════════════════════════════════
+function abrirDetalleTotales(key, label, src) {
+  const data = window._totalesContData || [];
+  const mon = v => v != null && v !== '' ? '$' + Math.round(parseFloat(String(v).replace(/[$,]/g,''))||0).toLocaleString('es-AR') : '—';
+  const val = v => v || '—';
+
+  document.getElementById('det-tot-title').textContent = label;
+
+  let headers, rows;
+
+  if (key === 'ganancia') {
+    headers = ['Cliente', 'Banco', 'Com. Lukaya', '−', 'Pagos Extras', '−', 'Com. Operativo', '−', 'Com. Gestor', '+', 'Retrib. Banco*', '=', 'Ganancia'];
+    rows = data.map(r => {
+      const c = CONT_DATA[r.id] || {};
+      const comLukaya = parseFloat(String(c.comLukaya||0))||0;
+      const pagEx = parseFloat(String(c.pagosExtras||0))||0;
+      const comOp = parseFloat(String(c.comOperativo||0))||0;
+      const comGest = parseFloat(String(c.comGestora||0))||0;
+      const retrib = c.fechaPagoBanco ? (parseFloat(String(c.retribBanco||0))||0) : 0;
+      const ganancia = comLukaya - pagEx - comOp - comGest + retrib;
+      return [val(r.nombrecliente), val(r.banco), mon(comLukaya), '−', mon(pagEx), '−', mon(comOp), '−', mon(comGest), '+', mon(retrib), '=', mon(ganancia)];
+    });
+  } else if (src === 'record') {
+    headers = ['Cliente', 'Banco', 'Gestor', label];
+    rows = data.map(r => [val(r.nombrecliente), val(r.banco), val(r.gestorAsignado), mon(r[key])]);
+  } else {
+    headers = ['Cliente', 'Banco', 'Gestor', label];
+    rows = data.map(r => {
+      const c = CONT_DATA[r.id] || {};
+      return [val(r.nombrecliente), val(r.banco), val(r.gestorAsignado), mon(c[key])];
+    });
+  }
+
+  const isOp = h => ['+','−','×','='].includes(h);
+  const thead = `<tr>${headers.map(h => `<th style="padding:8px 10px;font-size:10px;font-weight:700;text-transform:uppercase;color:${isOp(h)?'var(--blue)':'var(--muted)'};text-align:${isOp(h)?'center':'left'};border-bottom:2px solid var(--line);white-space:nowrap">${h}</th>`).join('')}</tr>`;
+  const tbody = rows.map(row => `<tr onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">${row.map((cell,i) => `<td style="padding:8px 10px;font-size:12px;${isOp(headers[i])?'text-align:center;color:var(--blue);font-weight:700;':''}${i===row.length-1?'font-weight:700;color:var(--ink);font-family:monospace;':''}border-bottom:1px solid var(--line)">${cell}</td>`).join('')}</tr>`).join('');
+
+  document.getElementById('det-tot-table').innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
+
+  if (key === 'ganancia') {
+    document.getElementById('det-tot-note').style.display = '';
+  } else {
+    document.getElementById('det-tot-note').style.display = 'none';
+  }
+
+  document.getElementById('det-tot-overlay').classList.add('open');
+}
+
+function cerrarDetalleTotales() {
+  document.getElementById('det-tot-overlay').classList.remove('open');
+}
+
 function renderTotalesCont(data) {
   const panel = document.getElementById('cont-totales');
   const grid  = document.getElementById('cont-totales-grid');
@@ -5004,30 +5054,27 @@ function renderTotalesCont(data) {
   const countPagoGest = data.filter(r => (CONT_DATA[r.id]||{}).pagoGest).length;
 
   const items = [
-    { label:'Imp. Solicitado',    value: fmt(sumR('importe')) },
-    { label:'A liquidar agencia', value: fmt(sum('aLiquidar')) },
-    { label:'1,2 Imp. Crédito',   value: fmt(sum('impCredito')) },
-    { label:'Gastos Gestoría',    value: fmt(sum('gastosGestoria')) },
-    { label:'Comisión LUKAYA',    value: fmt(sum('comLukaya')) },
-    { label:'Pagos Extras',        value: fmt(sum('pagosExtras')) },
-    { label:'Com. Operativo',     value: fmt(sum('comOperativo')) },
-    { label:'Com. Gestor',        value: fmt(sum('comGestora')) },
-    { label:'Retrib. Banco',      value: fmt(sum('retribBanco')) },
-    { label:'Ganancia LUKAYA',    value: fmt(data.reduce((acc, r) => {
-      const c = CONT_DATA[r.id] || {};
-      const comLukaya = parseFloat(String(c.comLukaya||0)) || 0;
-      const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
-      const comGestora = parseFloat(String(c.comGestora||0)) || 0;
-      const pagosExtras = parseFloat(String(c.pagosExtras||0)) || 0;
-      const retrib = c.fechaPagoBanco ? (parseFloat(String(c.retribBanco||0)) || 0) : 0;
-      return acc + comLukaya - comOperativo - comGestora - pagosExtras + retrib;
-    }, 0)), highlight: true },
-    { label:'Pago agencia',            value: countPagado + ' / ' + data.length },
+    { label:'Imp. Solicitado',    value: fmt(sumR('importe')),        key:'importe',        src:'record' },
+    { label:'A liquidar agencia', value: fmt(sum('aLiquidar')),       key:'aLiquidar',      src:'cont' },
+    { label:'1,2 Imp. Crédito',   value: fmt(sum('impCredito')),      key:'impCredito',     src:'cont' },
+    { label:'Gastos Gestoría',    value: fmt(sum('gastosGestoria')),  key:'gastosGestoria', src:'cont' },
+    { label:'Comisión LUKAYA',    value: fmt(sum('comLukaya')),       key:'comLukaya',      src:'cont' },
+    { label:'Pagos Extras',       value: fmt(sum('pagosExtras')),     key:'pagosExtras',    src:'cont' },
+    { label:'Com. Operativo',     value: fmt(sum('comOperativo')),    key:'comOperativo',   src:'cont' },
+    { label:'Com. Gestor',        value: fmt(sum('comGestora')),      key:'comGestora',     src:'cont' },
+    { label:'Retrib. Banco',      value: fmt(sum('retribBanco')),     key:'retribBanco',    src:'cont' },
+    { label:'Ganancia LUKAYA',    value: fmt(data.reduce((acc, r) => { const c = CONT_DATA[r.id]||{}; const comLukaya=parseFloat(String(c.comLukaya||0))||0; const comOp=parseFloat(String(c.comOperativo||0))||0; const comGest=parseFloat(String(c.comGestora||0))||0; const pagEx=parseFloat(String(c.pagosExtras||0))||0; const retrib=c.fechaPagoBanco?(parseFloat(String(c.retribBanco||0))||0):0; return acc+comLukaya-comOp-comGest-pagEx+retrib; }, 0)), key:'ganancia', src:'formula', highlight: true },
+    { label:'Pago agencia',       value: countPagado + ' / ' + data.length },
     { label:'Pago com. gest.',    value: countPagoGest + ' / ' + data.length },
   ];
 
+  // Store data for detail modal
+  window._totalesContData = data;
+
   grid.innerHTML = items.map(item => `
-    <div style="background:var(--surface);border-radius:8px;padding:10px 12px;border:1px solid var(--line)${item.highlight?';border-color:var(--green)':''}">
+    <div onclick="${item.key ? `abrirDetalleTotales('${item.key}','${item.label}','${item.src||'cont'}')` : ''}" 
+         style="background:var(--surface);border-radius:8px;padding:10px 12px;border:1px solid var(--line)${item.highlight?';border-color:var(--green)':''};${item.key?'cursor:pointer;transition:all .12s':''}${item.key?';':''}"
+         ${item.key?`onmouseenter="this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'" onmouseleave="this.style.borderColor='${item.highlight?'var(--green)':'var(--line)'}';this.style.background='var(--surface)'"`:''}>
       <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${item.label}</div>
       <div style="font-size:14px;font-weight:700;color:${item.highlight?'var(--green)':'var(--ink)'};font-family:monospace">${item.value}</div>
     </div>`).join('');
@@ -5038,15 +5085,7 @@ function renderTotalesCont(data) {
   const netoPanel = document.getElementById('cont-totales-neto');
   const netoGrid  = document.getElementById('cont-totales-neto-grid');
   if (netoPanel && netoGrid) {
-    const gananciaLukaya = data.reduce((acc, r) => {
-      const c = CONT_DATA[r.id] || {};
-      const comLukaya = parseFloat(String(c.comLukaya||0)) || 0;
-      const comOperativo = parseFloat(String(c.comOperativo||0)) || 0;
-      const comGestora = parseFloat(String(c.comGestora||0)) || 0;
-      const pagosExtras = parseFloat(String(c.pagosExtras||0)) || 0;
-      const retrib = c.fechaPagoBanco ? (parseFloat(String(c.retribBanco||0)) || 0) : 0;
-      return acc + comLukaya - comOperativo - comGestora - pagosExtras + retrib;
-    }, 0);
+    const gananciaLukaya = sum('comLukaya') - sum('comComercial') - sum('comOperativo') - sum('comGestora') + sum('retribBanco') - sum('pagosExtras');
     const totalGastos = GASTOS_DATA.reduce((acc, g) => acc + (parseFloat(g.monto) || 0), 0);
     const neto = gananciaLukaya - totalGastos;
     const fmtN = v => '$' + Math.round(v).toLocaleString('es-AR');
@@ -5217,9 +5256,7 @@ function renderTotalesTab() {
     return;
   }
   empty.style.display = 'none';
-  // Para totales usar TODOS los AVANZA (con y sin fecha de pago banco)
-  const dataTotal = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
-  renderTotalesCont(dataTotal);
+  renderTotalesCont(data);
   panel.style.display = '';
 }
 
@@ -9312,6 +9349,22 @@ function renderReportes() {
   }
 })();
 </script>
+
+<!-- MODAL DETALLE TOTALES -->
+<div class="overlay" id="det-tot-overlay" onclick="if(event.target===this)cerrarDetalleTotales()" style="z-index:600">
+  <div class="modal" style="max-width:900px;max-height:88vh;display:flex;flex-direction:column;padding:0" onclick="event.stopPropagation()">
+    <div class="mh" style="padding:16px 20px;border-bottom:1px solid var(--line);flex-shrink:0">
+      <div>
+        <div class="mt" id="det-tot-title">Detalle</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="det-tot-note" style="display:none">* Retrib. Banco se incluye solo cuando tiene fecha de pago banco</div>
+      </div>
+      <button class="xbtn" onclick="cerrarDetalleTotales()">×</button>
+    </div>
+    <div style="overflow:auto;flex:1;padding:16px">
+      <table id="det-tot-table" style="width:100%;border-collapse:collapse;font-size:12px"></table>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL PUNTO DE VENTA -->
 <div class="overlay" id="pv-modal-overlay" onclick="if(event.target===this)closePVModal()" style="z-index:700">
