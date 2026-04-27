@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v1.3</title>
+<title>Grupo Olyar — Solicitudes v1.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3188,7 +3188,8 @@ function generarImpresionPresupuesto(p) {
     <tr><td class="lbl">MARCA:</td><td colspan="3">${val(p.marca)}</td></tr>
     <tr><td class="lbl">VALUACION (DNRPA):</td><td>${mon(p.valuacion_dnrpa)}</td><td></td><td></td></tr>
     <tr><td class="lbl">BASE IMPONIBLE (RENTAS):</td><td>${mon(p.base_imponible_70)}</td><td></td><td></td></tr>
-    <tr style="background:#FFD700"><td class="lbl"><b>70 % DE BASE IMPONIBLE:</b></td><td><b>${mon(p.base_imponible_70)}</b></td><td class="lbl"><b>MONTO A COLOCAR EN 08:</b></td><td><b>${mon(p.monto_colocar)}</b></td></tr>
+    <tr style="background:#FFD700"><td class="lbl"><b>70 % DE BASE IMPONIBLE:</b></td><td colspan="3"><b>${mon(p.base_imponible_70)}</b></td></tr>
+    <tr style="background:#FFD700"><td class="lbl"><b>MONTO A COLOCAR EN 08:</b></td><td colspan="3"><b>${mon(p.monto_colocar)}</b></td></tr>
   </table>
   <div class="section-title">CERTIFICACIÓN (02, Y NOTA):</div>
   <table>
