@@ -1740,6 +1740,8 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 const SUPABASE_URL  = 'https://zohniclbfhvqmurtrhka.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpvaG5pY2xiZmh2cW11cnRyaGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ4MjIzNjIsImV4cCI6MjA5MDM5ODM2Mn0.1RTJAiwftxFFGrOFr3hV9W8DIjkESHBdV_PZnwKxOjQ';
 const SB = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const LOGO_LUKAYA = 'data:image/png;base64,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2IWOes1CLs6JzaalbgPI4PceQHqU7Kfh63XTjb1erj4svUXM7amd9o2ZREV+zIiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiICIiAiIgIiIC2KungqYXxTxMljeMOa4ZBW+sYXkxExtJG8TvHdFes9lFJU79Vp93ksuCfJ3H7WT6O76lE14tVxs9X5NcqWSCUHHnDg7wParWkAjBC42+2e3XqjdS3GljnjI4bw4t9IPYqDUNBt5G9drpPp5NRpfE+RibUXvip+quuldVXfTlSJKCpJiz58DzljvV2epTNo/aJZr81kNRIKGsP8AspXea79E9q6FrPZbcbf1lVY3OraccTCf5xg7h+Uo6kjlilMcjHRyMdgtcCC0/uVJby8zS6uW5HT6NHewtO1yjxLU7V+sd/nC2b2RzM3XNa9p55GQVrDWsbwAaB3clX3R+0W8WIsgqXuuFG3h1bz57fB37ites9pl5vIdT29zrbRHgQzjI8el3Z4BXsa9jTb557+38s3PCmd40W+nLPnv0/RJ2stoNk0818UbxWVo5Qxu4D9I9ihfVurr1qScmtqCyAHzaePgweI7T4rr7BJLJ5oc6Rx7AXE/vKkHRmzG5XRzKi6l9DRnB3cfbXD0d3rVJczczVK+S3G1P4NJY0/TtFt+Ldq3q9Z7/KHSLVbK661baShppKiZ3YwZx6T/APBSvo3ZRFEWVuoniV/whSsPmg/nHt9WFI+nbFa7JRtprdSMiAHF2Mud6Se1clut7grnB0G1a+O91n08me1Pii/k70Y/wU+vm2aSlgpIGQU0LIomDDWsbgALfHFEV/TTFMbR2ZWZmZmZnqyiIvQREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAWCsog0uBwut6s0bZdRRO8rphHUAeZPGMPHj3rsyKO7aovU8tyN4S2b9yxXFduraY9Fd9RbN9R2yrcylpnXCn5tlixvHxb3rRZNnOpbnO1klGaKInLpajIwP0eZP/wBlWLRUs8PY3Pzbz7eTQxxVmeHy7Rv6+bqWkNC2PTrGOjh8pq8edUSty71dgXa2jHDuWpFc2rNuzTy242hn8jIu5FfPdqmqfxYHJZRFKhEREBERAREQEREBERAREQEREBERAREQEREBERAR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r4rPa7faKMUVso4aOmaSWxRNDWgnnwC+1BDnSy1R/Imzd9pp5tyru7xBgHiIhxefRkYHrKpgDkZ7e0dxXo5fNP2a9PjfdLVSVroxhhniD932r4G6D0Y3GNMWoY5fczeH0IOi9FPSR07szhuFQ0trLw/yp+Rgtj5Rj+r53zlL626eKKngjggiZFDG0NYxgwGgDAAHYAtxAWiVjZInRvAc1wIcD2g9i1rB5IKB7btKP0htIudrDN2mfJ5RTHvjfxHs4j1L6dg2qnaO2k224vkDKOocKWs3jw6p5GT80hrvm47Vd276asF4qhU3WzUNbM1oaJJoWvIHdkj0r5PsH0eBw0zaf2Vv8EFVul+Li3akySrz5FLRx+RuHwS0Z3setRbpRtfJqe1x2rfNcauM0+5nIcHDB4e1X91fpDT+q7Y23321w1cLP5veGHR9mWkcRwXD6M2V6J0jXivstlZHVchLI4yOYPRnl6kHdmZDACckDBPpWpYHJZQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQEREBERAREQf/Z';
+const LOGO_OLCESE = 'data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAB3AJsDASIAAhEBAxEB/8QAHQAAAgEFAQEAAAAAAAAAAAAAAAcGAQIEBQgDCf/EADsQAAEDBAEDAQUECQMFAQAAAAECAwQABQYRBxIhMUEIEyJRYRQjcZEVMkJSgaGxwdEzcnMXNFNi4aL/xAAbAQACAwEBAQAAAAAAAAAAAAAAAwECBAYFB//EACoRAAIBAwMBCAMBAQAAAAAAAAECAAMEEQUSITEGExQiMkFRkWFxsYGh/9oADAMBAAIRAxEAPwDsuiiiiEKKKKIQoooohKbo7+tHrRUSIUfnVCQO5PaseTPhR09T0lpA+qqgsAMmWVS3AmUKDUdmZlj8XfXcGyR6Cte7yPjjZ0H1K/AVle/tU9Tj7mtNPunGVpk/5JkapUNa5Ix1Z0X1p+pFZkfOscfVpM5A/GoXULVulQfcltOul60z9ST7orBh3W3zEhUeW0vfyVWX1A+DsVqV1YZU5mRkZThhiX0VRPmq1eVhRRRRCFFFFEIUUUGiEKN0VYXWwoILiAo+AT3NRzCXHzWHeZS4dskSkDam0FQFZdazKjrHpv8AxGk1yRSYjriMoKGqqD7kRI3TP8kuAIEr7O2fRrsfzqOSZcqSorkSHHSfVSt15RmnXglDLS3FH0SkmpLZsGyG49KhFLCD+05/ivmbNeXjnGWn1JRZWSDgLIwe/mjtTPhcTSFAGXcOn6IH/wArbxuKbUlP3sh1Z+fatVPQL1x6cfuZanaKwQ43Z/UTNHbdO/8A6X2Pp195v57rFk8U2tafuZLzZ+mquezl6OmPuLHaaxPBz9RPxpEiMvrYecaX6KSrVSuwchX+2rSh577WyPKV/rfnW0uvFdzYQpcKUh7XhKvNQm6Wm42t4tTojjJHqR2P8azNTv8ATznkfyaVq6dqI28H+x6Ylm9qviUoC/cyPVtZ71KgoHxXK7DzrDqXmVqQtJ2Ck04eL82FxKbTclgSQPu1n9sf5rptI1/xDClX4b5nL6x2fNsprUOV+IyN0VQVWupnLQooqnfVEIHzWFeLpBtEFcy4yW47CBtS1nQFaTkXNbNhNjcul2fA6R920D8Sz8gK5gg3DMOfM3MZx12FYWl7W2g6ShG/BPqrVaqFsag3two94t3xwI4nuVLtlt2VZ+Pbd9qSlXS9Od7Nt/Udjup/imNvW8CZdp7twuCu6lqOkpPySPSovcb5h3EFng2WPEcdkujpZjxmyt10+pOgT6GszDeVbJkTsqMqJMt86MguLiyWylfSPUbA3UujMPIuBAHBwYwR4rzmR25UZcd0bQ4NKH0qN4Hm9rzHHZF7tqHUx2HFtqCxo7SNn+taeJyzi7uN3C/OuOx4kF5TK+tJ2pQJGgNd/FZjRZsjEuH2nOZKbPjlntSUiHCbQR+10jf51twAPApWWHmqyXG5x4cq0XO3IlHUZ6QyoJc348pGqx79zvj9lllidZ7s2C57tCzHWA4r/wBfh71NOzKeVFxJqVy/LtmNyqioPbuR7XIxCdk8qHNgRIYKlpkNqSo634BA34rxx3lKwX7CJeVW9D7kWKSHWuk9Y0NntrdT3L/EruEn1FRe25vZ52Ery1takwENlxe/I16VHneYsaaxGJkS25XRNUUxo4bJdcPbwNb13HpQKNQnGIbhGQaw7nbodxjqYlx0OoI8KTuoPhHLVjyS8CzPQ5louCh1NszGykuD5gkDdMSl1aPBVxLo5UgqeYl8/wCP121C59rBWx5W3+6KgMN9yLLbkNKKHG1bBHnddRvNodaU24kKSoaINILk+wCyX8llOo8ja0fQ+orhdc0kWxFxR4GeZ3Wg6w1yDbV+Tjgxz4ddBd7FHl9upSQF/jW6pa8GSlOWmRGJJCFbFMqus024NxapUPuJyWpW4t7p6Y9jCtZkl4h2GyyrrOdS2xHbK1En5DxWzrmD2zs4UlMXC4LpSVael9J8jfwj8wa9W2omtUCzzqj7FzE7yTl935NzlDaFrU04/wC6iMg9tb1vX4d67K4eweHg2HRbY0hJlFIVJdA7qXrvXLXsmY63eeSUznkhTdvR7wbH7XYf0Ndta7Vv1OpsxRTgCJoLnzGIPIlsx/ahguXPoCFQlfZPffq9eleN15ryWcrlWRZLpZLeiU/FdLUmOraigFOt9vkRTWz3AcdzVpkXuKVOxzth9s9Ljf4HVYGHcWYrjFyVdIjD0mepPT9okrC1gfIHVZ1uKeMkcgS5RsyBezHNiR+KbyzIktNOtzJBWhSgCn4B6VCsThY7c+L73GyOcYMSRd1/Z5Gu3X1q0ab954Swm4XSRPSzKhqlK6pDcZ0IQ4fXY1UiPH2JqxA4qbUybWR/pEDz8/xo8RTBLDPMNh6RPv3K+YdOssDJRbL9aHH0txn0BPvEHYAPYfhWf7UgZVFwxxptCUrujZA6QO3SamNk4Vwy13OPO93MlqikGO3JeC0tkfIaqTZnhViyxMBN3ZcWIDweY6Fa0oePSoNwgcMIBDgiKv2lr+wxZLPjDaFLE5xK5DbKfiLY89v41G+HrnbGuRr5jMaK/EtN4jEsNSEdOl9JB0P4U938IscjLI+TPtOOT4zXumiVfCkdvTX0FVv2F2O832Be5bK0zYB2y4hWtfQ9qBc01Qp8/wBgUOcmc1XG6zbVjN04tbUoTZd19ywj1LSypW/6VM7/AGqDjnKWGWyalCbfHj+6aKx8HX2/n4pry+OcWlZwxmL0NSrqzroX1Dp2BreteazM4wuwZlATEvcT3obPU2tJ0tB+YPpVjdoSMf7+5HdmKXnRUR/lfBW7QppU0SCXPc62G+lfnXpT9+VQXCuK8UxW6KusOO9InkdIfkrC1pHyB12qdis1aorAKPaMRSDmUNLjnSOlyxR5Gh1Nugb+mjTIpX86zk/ZYdtQfvFr69fQdv714mtFRZvmevogY3qbfmXcEtLTAlOkfCpXamfUW40tX6LxiOladOODrV/GpTTNJomjaIjfEpq1cV7x3XpmUcV0tqV8gTXz05qu673ybepy1lQ9+UI+iR6V9B5ezFd156D/AEr5vZsFJy66BW+oSVbrqdIUb2JniXRwBOhfYgitFF5lFP3gUE7+nauoDXJnsT3ZLN9ulqWsAuoDiR89aFdZ1l1IEVzmMoeiFYl0uEO2QnJ0+Q3HjtDa3FnQArLpNe1W66MMhx+tSY70xCHhvsU9/NZKKb32xrHAkps/LWDXW6ptsa7gOrPS2pbS0JWfkCQBW8OW2QZUnGftYNyW370N9J7p7d9616ilZzrYrDD4hgyIsOPHdjuMGO42kBQPWnwa1uLOOPc52R14lSzZWyonz+qitXh6ZBYRW9uket7u9uslvcuF0ltxozY2paz2FRfHOVMKvtzFuhXZIkK/00uNrQHPwKgAaiHtNEPRcfhvK3EeuDaXRvsodSfNbjOcWwRcHH5N3WxbXIzqDDcb0hSl9P6u/wCNUWkmwFuplixzgTNvXMGD2i7v2qXcliUwdOJQwtWj/BJrYwuScSlY45kH6SDUBtZbK3W1JJV27AEbPkelIixtZC5zFk4x+0wbirqHWJQGgO/jsam/I2Kzcgwi0xrku22e8NSA63FSQG3VgjtrQ34+VPe1pqQpPWVDsZPcV5Nw7JJxg265j7TraWnG1oUofMdQG61tx5mwSDcpNveuTnv4yy26lDDiukj8E0vLdcI0XPLFbs5xlq33dIKLdLjdkrIHr2FaHBmcpXnWYGwWS3XBInq6zJA+E79OxoFqnJMjvG4nSGLX+3ZJaW7pa3VORnN9KlIKT2+hANbetVirUlqxRkzIjEWSU/eNMj4Un6dq2Ti0toK1qCUp7kn0rz2HmIEcOnM8rhMjQYjkuW8llhpJUtaj2AFLmx3nBeRskeXbX1zn4XZaglQQNdvJAFLPm3kCbnd/Rx7hK1PJWvplPtnY1vv3FOTh/BIGB4s1bYyAZCwFyHNd1L9f6mm17On3I70ZJ9oUbioj5pnEmbaUobShAASnsBXoKtAq4UgADpJJlFAFBSfBGq4H9ozHnce5TubamyliUr37J12IJP8Aiu+aT3tNccnNMVE63tj9KQAVt6HdafVP8jW/T64pVeehiayblnIvGmUSMPzKBe2dlDTgDqf3kHzX0Gxa+2/I7HGu9tfS9HfQFJIPcb9DXzZfZejyHI8htTbrailaVDuCKZ3B/LVwwCamLJK5FpcUPeNE7KPqK9bULPv13r1EzUKuw7TO7N+laTNMatmWWB+zXVrrYdHkeUn0IrxwvL7Fl1sbn2ee08lQ2pAV8ST8iKkFc7hkbngzdww4iet/CKTLioveVXW7WyIsLYhPKT0J0djekjfcVn5pxJ+nMoav9tyKfZpLTIZR9mKRpIAGu6T8qaeqKZ4ipnOZGwRZNcUJl45Ls2R5FcbyHVBbLz6k9bKh4KdJFa6zcKoReYc3IMoud7ZgK6okd9SehB1oeEj503qpo0eIqD3kbBE/dOF5DuUT79aswutqdmK24mOUgfzSfnWzk8TouWKptN7yO53CW0/76POWtIdaPbxoa12+VM7vVOwNBuHOMmApqOkU+N8NIi5NFvuQ5Jcb7Ig/9oJBTpr69kisN7hWY1frndLRm13tirg8XXEMFAGz+KTTgffZYQXHnUNpA2So6pRcl8+YrjCXIlreTdbiBoIZ7pSfqabSqV6hwsqwResnNlbawrFA3fr+7N9wCVypa0hau+/QCkFybydkPJV0VhnHsd77K4roelJBHUPHn0FYFsx/kzmu5Jn31x61WHq2lOykLT9APP8AGuiuO8CsOE2xEO0xUBetLeKfjUfxpxFO3O5uX/5Kjc/4E0PCXFdtwK0JcdCZV2eHVIkKGzv5D6UydUDyarWF6jVG3NGqoAxDVFFFUloVaRvsRsVdRRCIfnPgqJlCnb3jwRGuWtrb/ZdP+a5QyfGr3jM5cO8296MtB11KQelX4GvpMflWmyPGLHkEdUe7W2PJQoftp7/nXpWuotR8rciZ6lANyJ87sbyG845OE6yXB+G8D5bVoK/H508MJ9pm8wm0MZJCTMA0PetfCf71Ocy9mLHbi4t+w3F+2uKOw2fiR/PZpXX/ANmzO7epZgvQ7igDY92SCfzAr0DXtLgeeJCVE6R42H2hsDuISHn3Yiz5Dg8fyqXQeT8HmJCmr/E0f3nAP71xnc+G+RoCQp3G5C/9ikn+9YKeNeQkkBOM3EfgpP8AmkGxtm6PiXFVx7Tuk51iXT1fp6Br/mT/AJrAm8n4PDSS7f4h/wBrgP8AeuQIHDHKEtCFIs0pCVfvvDt/+qlNk9mfN5ygblcocJHr1KUo/wBDSTZ2y+qpLCrUPQR13v2hMBt/UG5LkpSf/GPNLjIfacmzVGLi9kcW6o6SpW1H8gK3+M+y5jsQpcvV2kz1juUJASk/yBpr4xxvh2OoSm22SMhQ/bUnqP5mqF7On6QSZOKh6zmxix808puj9Jy34NvcPdCtoSB+BNN3jTgDFsZLUy6Ni5z06PU4PgB+g/8AtONpttpPS2hKEj0SNVfqk1b53G1eB+JdaQHM8mmm2W0ttoCUJGgkDWhXpVaKxxsoKrRRRCFFFFEIUUUUQhRqiiiEKKKKjEJSiiijMjMKKKKMyYHVFFFTIzzK96KKKJMKKKKIQoooohCiiiiE/9k=';
 function canEdit() { return ME?.rol !== 'invitado'; }
 function requireEdit() { if (!canEdit()) { toast('No tenés permisos para realizar esta acción', 'warn'); return false; } return true; }
 
@@ -2212,6 +2214,7 @@ function openSidebar() {
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
+  document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos') ? '' : 'none';
 
   if (ME?.rol === 'admin') renderSidebarPV();
 }
@@ -2754,6 +2757,318 @@ function initPFMirror() {
   mirror.onscroll = () => { if (syncing) return; syncing = true; scroll.scrollLeft = mirror.scrollLeft; syncing = false; };
 }
 
+
+
+// ══════════════════════════════════════════════
+// PRESUPUESTOS
+// ══════════════════════════════════════════════
+let PRESUP_CACHE = [];
+let PRESUP_EDIT_ID = null;
+
+async function loadPresupuestos() {
+  document.getElementById('v-presupuesto-form').style.display = 'none';
+  document.getElementById('presup-list-section').style.display = '';
+  const tbody = document.getElementById('presup-tbody');
+  try {
+    const { data, error } = await SB.from('presupuestos').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    PRESUP_CACHE = data || [];
+    renderPresupuestos();
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--red)">Error al cargar: ${e.message}</td></tr>`;
+  }
+}
+
+function renderPresupuestos() {
+  const tbody = document.getElementById('presup-tbody');
+  if (!PRESUP_CACHE.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Sin presupuestos cargados</td></tr>';
+    return;
+  }
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+  const mon = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
+  const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
+  tbody.innerHTML = PRESUP_CACHE.map(p => `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:9px 12px">
+        <div class="abtns">
+          <button class="ibtn" onclick="editarPresupuesto('${p.id}')" title="Editar">✏️</button>
+          <button class="ibtn" onclick="imprimirPresupuestoById('${p.id}')" title="Imprimir">🖨️</button>
+          <button class="ibtn" onclick="eliminarPresupuesto('${p.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+      <td style="padding:9px 12px">${fmtD(p.fecha)}</td>
+      <td style="padding:9px 12px;font-weight:700">${p.cliente||'—'}</td>
+      <td style="padding:9px 12px;font-family:monospace">${p.dni||'—'}</td>
+      <td style="padding:9px 12px;font-family:monospace">${p.dominio||'—'}</td>
+      <td style="padding:9px 12px;font-weight:700;font-family:monospace">${mon(p.total)}</td>
+      <td style="padding:9px 12px;font-weight:700;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
+    </tr>`).join('');
+}
+
+function nuevoPresupuesto() {
+  PRESUP_EDIT_ID = null;
+  document.getElementById('presup-form-title').textContent = 'Nuevo presupuesto';
+  document.getElementById('presup-id').value = '';
+  document.getElementById('pf-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('pf-estado').value = 'Borrador';
+  document.getElementById('pf-estado-civil').value = 'SOLTERO/A';
+  ['agencia','cliente','dni','dominio','modelo-anio','chasis','registro','marca'].forEach(id => {
+    document.getElementById('pf-'+id).value = '';
+  });
+  ['valuacion','base-imp','monto-colocar','certificacion','formularios','arancel','sellado-base','sellado-prenda','legalizaciones','anotaciones','informe-dominio','mun1-valor','mun2-valor','multas-anio','multas-valor','munjuicios-valor','rentasjuicios-valor','movilidad','altas-bajas','honorarios'].forEach(id => {
+    const el = document.getElementById('pf-'+id);
+    if (el) el.value = '';
+  });
+  ['mun1-periodo','mun2-periodo','multas-periodo','munjuicios-periodo','rentasjuicios-periodo'].forEach(id => {
+    document.getElementById('pf-'+id).value = 'PENDIENTE';
+  });
+  document.getElementById('pf-obs').value = 'EL PRESUPUESTO ESTA SUJETO A MODIFICACION DEBIDO A INCREMENTO EN DNRPA EN CONCEPTO "ARANCEL DE REGISTRO"';
+  document.getElementById('pf-total-display').textContent = '$0';
+  document.getElementById('presup-list-section').style.display = 'none';
+  document.getElementById('v-presupuesto-form').style.display = '';
+}
+
+function editarPresupuesto(id) {
+  const p = PRESUP_CACHE.find(x => x.id === id);
+  if (!p) return;
+  PRESUP_EDIT_ID = id;
+  document.getElementById('presup-form-title').textContent = 'Editar presupuesto';
+  document.getElementById('presup-id').value = id;
+  document.getElementById('pf-fecha').value = p.fecha || '';
+  document.getElementById('pf-estado').value = p.estado || 'Borrador';
+  document.getElementById('pf-estado-civil').value = p.estado_civil || 'SOLTERO/A';
+  document.getElementById('pf-agencia').value = p.agencia || '';
+  document.getElementById('pf-cliente').value = p.cliente || '';
+  document.getElementById('pf-dni').value = p.dni || '';
+  document.getElementById('pf-dominio').value = p.dominio || '';
+  document.getElementById('pf-modelo-anio').value = p.modelo_anio || '';
+  document.getElementById('pf-chasis').value = p.chasis || '';
+  document.getElementById('pf-registro').value = p.registro || '';
+  document.getElementById('pf-marca').value = p.marca || '';
+  document.getElementById('pf-valuacion').value = p.valuacion_dnrpa || '';
+  document.getElementById('pf-base-imp').value = p.base_imponible_70 || '';
+  document.getElementById('pf-monto-colocar').value = p.monto_colocar || '';
+  document.getElementById('pf-certificacion').value = p.certificacion || '';
+  document.getElementById('pf-formularios').value = p.formularios || '';
+  document.getElementById('pf-arancel').value = p.arancel_registro || '';
+  document.getElementById('pf-sellado-base').value = p.sellado_base || '';
+  document.getElementById('pf-sellado-prenda').value = p.sellado_prenda || '';
+  document.getElementById('pf-legalizaciones').value = p.legalizaciones || '';
+  document.getElementById('pf-anotaciones').value = p.anotaciones_personales || '';
+  document.getElementById('pf-informe-dominio').value = p.informe_dominio || '';
+  document.getElementById('pf-mun1-periodo').value = p.renta_municipalidad_periodo || 'PENDIENTE';
+  document.getElementById('pf-mun1-valor').value = p.renta_municipalidad_valor || '';
+  document.getElementById('pf-mun2-periodo').value = p.renta_municipalidad2_periodo || 'PENDIENTE';
+  document.getElementById('pf-mun2-valor').value = p.renta_municipalidad2_valor || '';
+  document.getElementById('pf-multas-anio').value = p.multas_caminera_anio || '';
+  document.getElementById('pf-multas-periodo').value = p.multas_caminera_periodo || 'PENDIENTE';
+  document.getElementById('pf-multas-valor').value = p.multas_caminera_valor || '';
+  document.getElementById('pf-munjuicios-periodo').value = p.municipalidad_juicios_periodo || 'PENDIENTE';
+  document.getElementById('pf-munjuicios-valor').value = p.municipalidad_juicios_valor || '';
+  document.getElementById('pf-rentasjuicios-periodo').value = p.rentas_juicios_periodo || 'PENDIENTE';
+  document.getElementById('pf-rentasjuicios-valor').value = p.rentas_juicios_valor || '';
+  document.getElementById('pf-movilidad').value = p.movilidad || '';
+  document.getElementById('pf-altas-bajas').value = p.altas_bajas || '';
+  document.getElementById('pf-honorarios').value = p.honorarios || '';
+  document.getElementById('pf-obs').value = p.observaciones || '';
+  calcPresup();
+  document.getElementById('presup-list-section').style.display = 'none';
+  document.getElementById('v-presupuesto-form').style.display = '';
+}
+
+function volverListaPresupuestos() {
+  document.getElementById('v-presupuesto-form').style.display = 'none';
+  document.getElementById('presup-list-section').style.display = '';
+}
+
+function calcPresup() {
+  const n = id => parseFloat(document.getElementById(id)?.value||0) || 0;
+  const val = n('pf-valuacion');
+  const base70 = Math.round(val * 0.70);
+  document.getElementById('pf-base-imp').value = base70 || '';
+  const total = 
+    n('pf-certificacion') + n('pf-formularios') + n('pf-arancel') +
+    n('pf-sellado-base') + n('pf-sellado-prenda') + n('pf-legalizaciones') +
+    n('pf-anotaciones') + n('pf-informe-dominio') +
+    n('pf-mun1-valor') + n('pf-mun2-valor') + n('pf-multas-valor') +
+    n('pf-munjuicios-valor') + n('pf-rentasjuicios-valor') +
+    n('pf-movilidad') + n('pf-altas-bajas') + n('pf-honorarios');
+  document.getElementById('pf-total-display').textContent = '$' + Math.round(total).toLocaleString('es-AR');
+}
+
+async function guardarPresupuesto() {
+  const n = id => { const v = parseFloat(document.getElementById(id)?.value||0); return isNaN(v) ? null : v; };
+  const t = id => document.getElementById(id)?.value.trim() || null;
+  const total = parseFloat(document.getElementById('pf-total-display').textContent.replace(/[$.,]/g,'').replace(',','.')) || 0;
+  const row = {
+    fecha: t('pf-fecha') || new Date().toISOString().slice(0,10),
+    agencia: t('pf-agencia'), cliente: t('pf-cliente'), dni: t('pf-dni'),
+    estado_civil: t('pf-estado-civil'), dominio: t('pf-dominio'),
+    modelo_anio: t('pf-modelo-anio'), chasis: t('pf-chasis'),
+    registro: t('pf-registro'), marca: t('pf-marca'),
+    valuacion_dnrpa: n('pf-valuacion'), base_imponible_70: n('pf-base-imp'),
+    monto_colocar: n('pf-monto-colocar'),
+    certificacion: n('pf-certificacion'), formularios: n('pf-formularios'),
+    arancel_registro: n('pf-arancel'), sellado_base: n('pf-sellado-base'),
+    sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'),
+    anotaciones_personales: n('pf-anotaciones'), informe_dominio: n('pf-informe-dominio'),
+    renta_municipalidad_periodo: t('pf-mun1-periodo'), renta_municipalidad_valor: n('pf-mun1-valor'),
+    renta_municipalidad2_periodo: t('pf-mun2-periodo'), renta_municipalidad2_valor: n('pf-mun2-valor'),
+    multas_caminera_anio: t('pf-multas-anio'), multas_caminera_periodo: t('pf-multas-periodo'),
+    multas_caminera_valor: n('pf-multas-valor'),
+    municipalidad_juicios_periodo: t('pf-munjuicios-periodo'), municipalidad_juicios_valor: n('pf-munjuicios-valor'),
+    rentas_juicios_periodo: t('pf-rentasjuicios-periodo'), rentas_juicios_valor: n('pf-rentasjuicios-valor'),
+    movilidad: n('pf-movilidad'), altas_bajas: n('pf-altas-bajas'),
+    honorarios: n('pf-honorarios'), total: Math.round(total),
+    observaciones: t('pf-obs'), estado: t('pf-estado'),
+    creado_por: ME?.usr || null
+  };
+  try {
+    if (PRESUP_EDIT_ID) {
+      const { error } = await SB.from('presupuestos').update(row).eq('id', PRESUP_EDIT_ID);
+      if (error) throw error;
+    } else {
+      const { error } = await SB.from('presupuestos').insert(row);
+      if (error) throw error;
+    }
+    toast('Presupuesto guardado ✓', 'ok');
+    await loadPresupuestos();
+    volverListaPresupuestos();
+  } catch(e) { toast('Error: ' + e.message, 'er'); }
+}
+
+async function eliminarPresupuesto(id) {
+  if (!confirm('¿Eliminar este presupuesto?')) return;
+  const { error } = await SB.from('presupuestos').delete().eq('id', id);
+  if (error) { toast('Error al eliminar', 'er'); return; }
+  toast('Eliminado ✓', 'ok');
+  await loadPresupuestos();
+}
+
+function imprimirPresupuesto() {
+  const p = {
+    fecha: document.getElementById('pf-fecha').value,
+    agencia: document.getElementById('pf-agencia').value,
+    cliente: document.getElementById('pf-cliente').value,
+    dni: document.getElementById('pf-dni').value,
+    estado_civil: document.getElementById('pf-estado-civil').value,
+    dominio: document.getElementById('pf-dominio').value,
+    modelo_anio: document.getElementById('pf-modelo-anio').value,
+    chasis: document.getElementById('pf-chasis').value,
+    registro: document.getElementById('pf-registro').value,
+    marca: document.getElementById('pf-marca').value,
+    valuacion_dnrpa: parseFloat(document.getElementById('pf-valuacion').value)||0,
+    base_imponible_70: parseFloat(document.getElementById('pf-base-imp').value)||0,
+    monto_colocar: parseFloat(document.getElementById('pf-monto-colocar').value)||0,
+    certificacion: parseFloat(document.getElementById('pf-certificacion').value)||0,
+    formularios: parseFloat(document.getElementById('pf-formularios').value)||0,
+    arancel_registro: parseFloat(document.getElementById('pf-arancel').value)||0,
+    sellado_base: parseFloat(document.getElementById('pf-sellado-base').value)||0,
+    sellado_prenda: parseFloat(document.getElementById('pf-sellado-prenda').value)||0,
+    legalizaciones: parseFloat(document.getElementById('pf-legalizaciones').value)||0,
+    anotaciones_personales: parseFloat(document.getElementById('pf-anotaciones').value)||0,
+    informe_dominio: parseFloat(document.getElementById('pf-informe-dominio').value)||0,
+    renta_municipalidad_periodo: document.getElementById('pf-mun1-periodo').value,
+    renta_municipalidad_valor: parseFloat(document.getElementById('pf-mun1-valor').value)||0,
+    renta_municipalidad2_periodo: document.getElementById('pf-mun2-periodo').value,
+    renta_municipalidad2_valor: parseFloat(document.getElementById('pf-mun2-valor').value)||0,
+    multas_caminera_anio: document.getElementById('pf-multas-anio').value,
+    multas_caminera_periodo: document.getElementById('pf-multas-periodo').value,
+    multas_caminera_valor: parseFloat(document.getElementById('pf-multas-valor').value)||0,
+    municipalidad_juicios_periodo: document.getElementById('pf-munjuicios-periodo').value,
+    municipalidad_juicios_valor: parseFloat(document.getElementById('pf-munjuicios-valor').value)||0,
+    rentas_juicios_periodo: document.getElementById('pf-rentasjuicios-periodo').value,
+    rentas_juicios_valor: parseFloat(document.getElementById('pf-rentasjuicios-valor').value)||0,
+    movilidad: parseFloat(document.getElementById('pf-movilidad').value)||0,
+    altas_bajas: parseFloat(document.getElementById('pf-altas-bajas').value)||0,
+    honorarios: parseFloat(document.getElementById('pf-honorarios').value)||0,
+    observaciones: document.getElementById('pf-obs').value,
+    total: parseFloat(document.getElementById('pf-total-display').textContent.replace(/[$.]/g,'').replace(/,/g,''))||0
+  };
+  generarImpresionPresupuesto(p);
+}
+
+function imprimirPresupuestoById(id) {
+  const p = PRESUP_CACHE.find(x => x.id === id);
+  if (p) generarImpresionPresupuesto(p);
+}
+
+function generarImpresionPresupuesto(p) {
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+  const mon = v => v ? '$ ' + Math.round(v).toLocaleString('es-AR') : '$';
+  const val = v => v || '';
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Presupuesto</title>
+  <style>
+    @media print { body{margin:0} @page{margin:1cm;size:A4} }
+    body{font-family:Arial,sans-serif;font-size:11px;color:#000;padding:20px}
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border-bottom:2px solid #000;padding-bottom:10px}
+    .header img{height:60px;object-fit:contain}
+    .header h1{font-size:22px;font-weight:bold;letter-spacing:2px;margin:0}
+    table{width:100%;border-collapse:collapse;margin-bottom:8px}
+    td{padding:3px 6px;vertical-align:top}
+    .lbl{font-weight:bold;width:40%}
+    .section-title{background:#f0f0f0;font-weight:bold;padding:4px 6px;margin-top:8px;font-size:11px;text-transform:uppercase}
+    .row-item td{border-bottom:1px solid #eee}
+    .total-row{background:#FFD700;font-weight:bold;font-size:13px}
+    .honorarios-row{font-weight:bold;font-size:12px}
+    .footer{margin-top:12px;border:1px solid #000;padding:8px;font-size:10px;text-align:center;font-style:italic}
+    .fecha-row{text-align:right;font-weight:bold;margin-bottom:8px}
+  </style></head><body>
+  <div class="header">
+    <img src="${LOGO_LUKAYA}" alt="Lukaya">
+    <h1>PRESUPUESTO</h1>
+    <img src="${LOGO_OLCESE}" alt="Gustavo Olcese">
+  </div>
+  <div class="fecha-row">FECHA PRESUPUESTO: ${fmtD(p.fecha)}</div>
+  <table>
+    <tr><td class="lbl">AGENCIA:</td><td>${val(p.agencia)}</td></tr>
+    <tr><td class="lbl">CLIENTE:</td><td>${val(p.cliente)}</td></tr>
+    <tr><td class="lbl">DNI:</td><td>${val(p.dni)}</td></tr>
+    <tr><td class="lbl">ESTADO CIVIL:</td><td>${val(p.estado_civil)}</td></tr>
+  </table>
+  <table>
+    <tr><td class="lbl">DOMINIO:</td><td>${val(p.dominio)}</td><td class="lbl">MODELO AÑO:</td><td>${val(p.modelo_anio)}</td></tr>
+    <tr><td class="lbl">CHASIS:</td><td>${val(p.chasis)}</td><td class="lbl">REGISTRO:</td><td>${val(p.registro)}</td></tr>
+    <tr><td class="lbl">MARCA:</td><td colspan="3">${val(p.marca)}</td></tr>
+    <tr><td class="lbl">VALUACION (DNRPA):</td><td>${mon(p.valuacion_dnrpa)}</td><td></td><td></td></tr>
+    <tr><td class="lbl">BASE IMPONIBLE (RENTAS):</td><td>${mon(p.base_imponible_70)}</td><td></td><td></td></tr>
+    <tr style="background:#FFD700"><td class="lbl"><b>70 % DE BASE IMPONIBLE:</b></td><td><b>${mon(p.base_imponible_70)}</b></td><td class="lbl"><b>MONTO A COLOCAR EN BN:</b></td><td><b>${mon(p.monto_colocar)}</b></td></tr>
+  </table>
+  <div class="section-title">CERTIFICACIÓN (02, Y NOTA):</div>
+  <table>
+    ${p.certificacion?`<tr class="row-item"><td>Certificación</td><td style="text-align:right">${mon(p.certificacion)}</td></tr>`:''}
+    ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 08</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
+    ${p.arancel_registro?`<tr class="row-item"><td>ARANCEL DE REGISTRO</td><td style="text-align:right">${mon(p.arancel_registro)}</td></tr>`:''}
+    ${p.sellado_base?`<tr class="row-item"><td>SELLADO DE BASE IMPONIBLE</td><td style="text-align:right">${mon(p.sellado_base)}</td></tr>`:''}
+    ${p.sellado_prenda?`<tr class="row-item"><td>SELLADO DE PRENDA (DOBLE SELLADO POR LOCALIDAD)</td><td style="text-align:right">${mon(p.sellado_prenda)}</td></tr>`:''}
+    ${p.legalizaciones?`<tr class="row-item"><td>LEGALIZACIONES:</td><td style="text-align:right">${mon(p.legalizaciones)}</td></tr>`:''}
+    ${p.anotaciones_personales?`<tr class="row-item"><td>ANOTACIONES PERSONALES</td><td style="text-align:right">${mon(p.anotaciones_personales)}</td></tr>`:''}
+    ${p.informe_dominio?`<tr class="row-item"><td>INFORME DE DOMINIO</td><td style="text-align:right">${mon(p.informe_dominio)}</td></tr>`:''}
+  </table>
+  <div class="section-title">RENTAS:</div>
+  <table>
+    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):''}</td></tr>
+    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):''}</td></tr>
+    <tr class="row-item"><td>MULTAS CAMINERA ${val(p.multas_caminera_anio)}:</td><td>PERÍODO: ${val(p.multas_caminera_periodo)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):''}</td></tr>
+    <tr class="row-item"><td>MUNICIPALIDAD JUICIOS:</td><td>PERÍODO: ${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):''}</td></tr>
+    <tr class="row-item"><td>RENTAS JUICIOS:</td><td>PERÍODO: ${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):''}</td></tr>
+  </table>
+  <table style="margin-top:8px">
+    <tr class="row-item"><td><b>MOVILIDAD:</b></td><td style="text-align:right">${mon(p.movilidad)}</td></tr>
+    <tr class="row-item"><td><b>ALTAS Y BAJAS:</b></td><td style="text-align:right">${mon(p.altas_bajas)}</td></tr>
+    <tr class="honorarios-row row-item"><td><b>HONORARIOS:</b></td><td style="text-align:right"><b>${mon(p.honorarios)}</b></td></tr>
+    <tr class="total-row"><td><b>TOTAL:</b></td><td style="text-align:right"><b>${mon(p.total)}</b></td></tr>
+  </table>
+  ${p.observaciones?`<div class="footer">${p.observaciones}</div>`:''}
+  <script>window.onload=()=>{window.print()}<\/script>
+  </body></html>`;
+
+  const win = window.open('','_blank','width=800,height=1000');
+  win.document.write(html);
+  win.document.close();
+}
 
 // ══════════════════════════════════════════════
 // PRENDAS RECHAZADAS
@@ -5715,7 +6030,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
     const tn = document.getElementById('tn-'+id);
@@ -5734,6 +6049,7 @@ function showV(v) {
   }
   if (v==='calendario') { loadCalendario(); }
   if (v==='creditos') { showCredTab('creditos'); setTimeout(checkRecordatoriosCreditos, 300); }
+  if (v==='presupuestos') { loadPresupuestos(); }
   // Cerrar panel lateral de créditos al salir
   if (v !== 'creditos') {
     document.getElementById('cred-panel-overlay').classList.remove('open');
@@ -8425,6 +8741,9 @@ function renderReportes() {
     <button class="sb-item" id="sb-contabilidad" onclick="closeSidebar();showV('contabilidad')" style="display:none">
       <span class="sb-icon">🧾</span> Contabilidad
     </button>
+    <button class="sb-item" id="sb-presupuestos" onclick="closeSidebar();showV('presupuestos')" style="display:none">
+      <span class="sb-icon">📄</span> Presupuestos
+    </button>
     <div class="sb-divider"></div>
     <div class="sb-section-label">Simulador</div>
     <a href="https://tolcese.github.io/simulador-prendarios/" target="_blank" style="text-decoration:none">
@@ -9476,6 +9795,137 @@ function renderReportes() {
         </div>
       </div>
     </div>
+
+    <!-- PRESUPUESTOS -->
+    <div id="v-presupuestos" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📄 Presupuestos</div><div class="ph-s">Confección y gestión de presupuestos prendarios</div></div>
+        <button class="btn btn-p" onclick="nuevoPresupuesto()">+ Nuevo presupuesto</button>
+      </div>
+      <div id="presup-list-section">
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Acciones</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Fecha</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">DNI</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Dominio</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Total</th>
+                <th style="padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Estado</th>
+              </tr>
+            </thead>
+            <tbody id="presup-tbody">
+              <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRESUPUESTO FORM -->
+    <div id="v-presupuesto-form" style="display:none">
+      <div class="ph" style="margin-bottom:16px">
+        <div>
+          <button class="btn btn-s" onclick="volverListaPresupuestos()" style="margin-bottom:8px">← Volver</button>
+          <div class="ph-t" id="presup-form-title">Nuevo presupuesto</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="guardarPresupuesto()">💾 Guardar</button>
+          <button class="btn btn-p" onclick="imprimirPresupuesto()">🖨️ Imprimir</button>
+        </div>
+      </div>
+      <input type="hidden" id="presup-id">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+        <div class="card">
+          <div class="card-t" style="margin-bottom:12px">Datos del cliente</div>
+          <div class="fg">
+            <div class="fc"><label>Agencia</label><input id="pf-agencia" type="text" placeholder="Nombre de la agencia"></div>
+            <div class="fc"><label>Cliente</label><input id="pf-cliente" type="text" placeholder="Apellido y nombre"></div>
+            <div class="fc"><label>DNI</label><input id="pf-dni" type="text" placeholder="00.000.000"></div>
+            <div class="fc"><label>Estado Civil</label>
+              <select id="pf-estado-civil">
+                <option value="SOLTERO/A">SOLTERO/A</option>
+                <option value="CASADO/A">CASADO/A</option>
+                <option value="DIVORCIADO/A">DIVORCIADO/A</option>
+                <option value="VIUDO/A">VIUDO/A</option>
+              </select>
+            </div>
+            <div class="fc"><label>Fecha presupuesto</label><input id="pf-fecha" type="date"></div>
+            <div class="fc"><label>Estado</label>
+              <select id="pf-estado">
+                <option value="Borrador">Borrador</option>
+                <option value="Enviado">Enviado</option>
+                <option value="Aprobado">Aprobado</option>
+                <option value="Rechazado">Rechazado</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-t" style="margin-bottom:12px">Datos del vehículo</div>
+          <div class="fg">
+            <div class="fc"><label>Dominio</label><input id="pf-dominio" type="text" placeholder="AA000AA"></div>
+            <div class="fc"><label>Modelo / Año</label><input id="pf-modelo-anio" type="text" placeholder="RENAULT LOGAN 2019"></div>
+            <div class="fc"><label>Chasis</label><input id="pf-chasis" type="text"></div>
+            <div class="fc"><label>Registro</label><input id="pf-registro" type="text" placeholder="CORDOBA N° 16"></div>
+            <div class="fc"><label>Marca</label><input id="pf-marca" type="text"></div>
+            <div class="fc"><label>Valuación DNRPA</label><input id="pf-valuacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+            <div class="fc"><label>Base Imponible 70%</label><input id="pf-base-imp" type="number" placeholder="0" readonly style="background:var(--surface)"></div>
+            <div class="fc"><label>Monto a colocar</label><input id="pf-monto-colocar" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Costos</div>
+        <div class="fg">
+          <div class="fc"><label>Certificación (02, Y Nota)</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Formularios 02, 03 y 08</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Sellado de Prenda (doble)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Legalizaciones</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Anotaciones Personales</label><input id="pf-anotaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Informe de Dominio</label><input id="pf-informe-dominio" type="number" placeholder="0" oninput="calcPresup()"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Rentas</div>
+        <div class="fg">
+          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
+          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">Otros</div>
+        <div class="fg">
+          <div class="fc"><label>Movilidad</label><input id="pf-movilidad" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Altas y Bajas</label><input id="pf-altas-bajas" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Honorarios</label><input id="pf-honorarios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Observaciones</label><textarea id="pf-obs" rows="2" placeholder="Nota al pie del presupuesto..."></textarea></div>
+        </div>
+      </div>
+
+      <div class="card" style="border-color:var(--green)">
+        <div class="card-t" style="color:var(--green)">TOTAL DEL PRESUPUESTO</div>
+        <div style="font-size:28px;font-weight:800;color:var(--green);font-family:monospace" id="pf-total-display">$0</div>
+      </div>
+    </div>
+
   </div>
 </div>
 
