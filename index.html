@@ -6033,6 +6033,8 @@ function showV(v) {
   ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
+    // Ocultar el form de presupuesto si no es presupuestos
+    if (id !== 'presupuestos' || v !== 'presupuestos') { const pf = document.getElementById('v-presupuesto-form'); if (pf) pf.style.display = 'none'; }
     const tn = document.getElementById('tn-'+id);
     if (tn) tn.classList.toggle('active', id===v);
   });
