@@ -2229,7 +2229,7 @@ async function enterApp() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('tb-av').textContent = ME.nom[0].toUpperCase();
   document.getElementById('tb-uname').textContent = ME.nom;
-  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : '👤 Usuario';
+  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : ME.rol === 'presupuestos' ? '📄 Presupuestos' : '👤 Usuario';
   if (ME.rol === 'admin') {
     document.getElementById('sb-usuarios').style.display = '';
     document.getElementById('th-acc').style.display = '';
@@ -2260,8 +2260,13 @@ async function enterApp() {
   // Mostrar app y cargar datos
   CONT_DATA = {};
   document.getElementById('app').style.display = 'block';
-  await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
-  Promise.all([loadGestores(), loadDatero(), loadGastos()]).catch(()=>{});
+  if (ME.rol === 'presupuestos') {
+    // Solo cargar lo necesario para presupuestos
+    await loadPresupuestos();
+  } else {
+    await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
+    Promise.all([loadGestores(), loadDatero(), loadGastos()]).catch(()=>{});
+  }
   SB.from('coeficientes').select('*').eq('id',1).single().then(({data}) => {
     if (data) COEFICIENTES = { impCredito: data.imp_credito, comLukaya: data.com_lukaya, comGestor: data.com_gestor, retribBanco: data.retrib_banco };
   }).catch(()=>{});
@@ -2272,7 +2277,17 @@ async function enterApp() {
   setTimeout(() => { const badge = document.getElementById('prend-rech-badge'); if (badge) badge.style.display = RECORDS.filter(r => r.prendaRechazada && !r.fechaReingresoPrend).length ? '' : 'none'; }, 1500);
   if (ME.rol === 'admin') setTimeout(() => checkAutoBackup(), 2000);
   loading(false);
-  showV('sol');
+  if (ME.rol === 'presupuestos') {
+    // Ocultar toda la navegacion del sistema
+    document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('btn-datero').style.display = 'none';
+    // Ocultar sidebar items excepto presupuestos
+    document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
+    document.getElementById('sb-presupuestos').style.display = '';
+    showV('presupuestos');
+  } else {
+    showV('sol');
+  }
   // AutoCalc después de que la UI está estable para evitar titileo
   setTimeout(() => autoCalcContabilidad(), 1500);
 }
