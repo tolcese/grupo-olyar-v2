@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v1.1</title>
+<title>Grupo Olyar — Solicitudes v1.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2944,7 +2944,7 @@ function renderPresupuestos() {
   const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
   tbody.innerHTML = PRESUP_CACHE.map(p => `
     <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:9px 12px">
+      <td style="padding:4px 8px;width:90px">
         <div class="abtns">
           <button class="ibtn" onclick="editarPresupuesto('${p.id}')" title="Editar">✏️</button>
           <button class="ibtn" onclick="imprimirPresupuestoById('${p.id}')" title="Imprimir">🖨️</button>
