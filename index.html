@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.0</title>
+<title>Grupo Olyar — Solicitudes v2.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -974,7 +974,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div class="fc"><label>Formularios 02, 03 y 08</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Sellado de Prenda (doble)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Sellado de Prenda (doble por localidad)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Legalizaciones</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Anotaciones Personales</label><input id="pf-anotaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Informe de Dominio</label><input id="pf-informe-dominio" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3200,7 +3200,7 @@ function generarImpresionPresupuesto(p) {
     ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 08</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
     ${p.arancel_registro?`<tr class="row-item"><td>ARANCEL DE REGISTRO</td><td style="text-align:right">${mon(p.arancel_registro)}</td></tr>`:''}
     ${p.sellado_base?`<tr class="row-item"><td>SELLADO DE BASE IMPONIBLE</td><td style="text-align:right">${mon(p.sellado_base)}</td></tr>`:''}
-    ${p.sellado_prenda?`<tr class="row-item"><td>SELLADO DE PRENDA (DOBLE SELLADO POR LOCALIDAD)</td><td style="text-align:right">${mon(p.sellado_prenda)}</td></tr>`:''}
+    ${p.sellado_prenda?`<tr class="row-item"><td>SELLADO DE PRENDA (DOBLE POR LOCALIDAD)</td><td style="text-align:right">${mon(p.sellado_prenda)}</td></tr>`:''}
     ${p.legalizaciones?`<tr class="row-item"><td>LEGALIZACIONES:</td><td style="text-align:right">${mon(p.legalizaciones)}</td></tr>`:''}
     ${p.anotaciones_personales?`<tr class="row-item"><td>ANOTACIONES PERSONALES</td><td style="text-align:right">${mon(p.anotaciones_personales)}</td></tr>`:''}
     ${p.informe_dominio?`<tr class="row-item"><td>INFORME DE DOMINIO</td><td style="text-align:right">${mon(p.informe_dominio)}</td></tr>`:''}
