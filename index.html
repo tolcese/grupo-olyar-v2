@@ -2948,7 +2948,7 @@ function renderPresupuestos() {
         </div>
       </td>
       <td style="padding:9px 12px">${fmtD(p.fecha)}</td>
-      <td style="padding:9px 12px;font-weight:700">${p.cliente||'—'}</td>
+      <td style="padding:9px 12px;font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.cliente||'''}">${p.cliente||'—'}</td>
       <td style="padding:9px 12px;font-family:monospace">${p.dni||'—'}</td>
       <td style="padding:9px 12px;font-family:monospace">${p.dominio||'—'}</td>
       <td style="padding:9px 12px;font-weight:700;font-family:monospace">${mon(p.total)}</td>
