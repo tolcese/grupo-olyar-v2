@@ -6034,8 +6034,7 @@ function showV(v) {
   ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
-    // Ocultar el form de presupuesto si no es presupuestos
-    if (id !== 'presupuestos' || v !== 'presupuestos') { const pf = document.getElementById('v-presupuesto-form'); if (pf) pf.style.display = 'none'; }
+
     const tn = document.getElementById('tn-'+id);
     if (tn) tn.classList.toggle('active', id===v);
   });
@@ -9826,8 +9825,6 @@ function renderReportes() {
           </table>
         </div>
       </div>
-    </div>
-
     <!-- PRESUPUESTO FORM -->
     <div id="v-presupuesto-form" style="display:none">
       <div class="ph" style="margin-bottom:16px">
@@ -9906,7 +9903,7 @@ function renderReportes() {
           <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
           <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
           <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
@@ -9929,6 +9926,8 @@ function renderReportes() {
         <div style="font-size:28px;font-weight:800;color:var(--green);font-family:monospace" id="pf-total-display">$0</div>
       </div>
     </div>
+    </div>
+
 
   </div>
 </div>
