@@ -558,6 +558,22 @@
       <div class="file-list" id="fileList"></div>
     </div>
 
+    <!-- 3b. FOTO DNI CONYUGE -->
+    <div class="card" id="dni-conyuge-section" style="display:none">
+      <div class="section-header">
+        <div class="section-icon">📎</div>
+        <h3>Foto DNI Cónyuge Frente y Dorso</h3>
+      </div>
+      <div class="file-drop" id="fileDropConyuge" onclick="document.getElementById('archivoInputConyuge').click()">
+        <input type="file" id="archivoInputConyuge" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.webp,.gif" onchange="handleFilesConyuge(this.files)">
+        <div class="file-drop-icon">📄</div>
+        <p><strong>Hacé click para adjuntar archivos</strong><br>
+        o arrastrá y soltá aquí<br>
+        <small>PDF, documento o imagen · Máx. 10 MB por archivo · Hasta 5 archivos</small></p>
+      </div>
+      <div class="file-list" id="fileListConyuge"></div>
+    </div>
+
     <!-- 4. INFO LABORAL -->
     <div class="card">
       <div class="section-header">
@@ -819,7 +835,37 @@
     const show = this.value === 'Casado/a';
     document.getElementById('conyuge-section').style.display = show ? '' : 'none';
     document.getElementById('conyuge-fields').style.display = show ? '' : 'none';
+    document.getElementById('dni-conyuge-section').style.display = show ? '' : 'none';
   });
+
+  // DNI Conyuge upload
+  let selectedFilesConyuge = [];
+  function handleFilesConyuge(files) {
+    const maxSize = 10 * 1024 * 1024;
+    const maxFiles = 5;
+    for (const file of files) {
+      if (selectedFilesConyuge.length >= maxFiles) break;
+      if (file.size > maxSize) { alert(`${file.name} supera el límite de 10 MB`); continue; }
+      if (!selectedFilesConyuge.find(f => f.name === file.name)) selectedFilesConyuge.push(file);
+    }
+    renderFilesConyuge();
+  }
+  function renderFilesConyuge() {
+    const list = document.getElementById('fileListConyuge');
+    list.innerHTML = selectedFilesConyuge.map((f, i) => `
+      <div class="file-item">
+        <span>📎 ${f.name} (${(f.size/1024).toFixed(0)} KB)</span>
+        <button type="button" onclick="removeFileConyuge(${i})">✕</button>
+      </div>`).join('');
+  }
+  function removeFileConyuge(i) {
+    selectedFilesConyuge.splice(i, 1);
+    renderFilesConyuge();
+  }
+  const dropZoneConyuge = document.getElementById('fileDropConyuge');
+  dropZoneConyuge.addEventListener('dragover', e => { e.preventDefault(); dropZoneConyuge.classList.add('drag-over'); });
+  dropZoneConyuge.addEventListener('dragleave', () => dropZoneConyuge.classList.remove('drag-over'));
+  dropZoneConyuge.addEventListener('drop', e => { e.preventDefault(); dropZoneConyuge.classList.remove('drag-over'); handleFilesConyuge(e.dataTransfer.files); });
 
   function fmt(n) { return Number(n).toLocaleString('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }); }
 
@@ -849,6 +895,16 @@
         if (upErr) throw upErr;
         const { data: urlData } = db.storage.from('datero-dni').getPublicUrl(path);
         archivoUrls.push(urlData.publicUrl);
+      }
+
+      // Subir DNI cónyuge
+      const conugeUrls = [];
+      for (const file of selectedFilesConyuge) {
+        const path = `conyuge/${timestamp}/${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const { error: upErr } = await db.storage.from('datero-dni').upload(path, file, { upsert: true });
+        if (upErr) throw upErr;
+        const { data: urlData } = db.storage.from('datero-dni').getPublicUrl(path);
+        conugeUrls.push(urlData.publicUrl);
       }
 
       btn.textContent = 'Guardando solicitud…';
@@ -890,6 +946,7 @@
         conyuge_actividad:    getVal('conyuge_actividad') || null,
         conyuge_telefono:     getVal('conyuge_telefono') || null,
         archivos_dni:         archivoUrls,
+        conyuge_dni_urls:     conugeUrls.length ? conugeUrls : null,
         fecha_ingreso:        getVal('fecha_ingreso'),
         nombre_empresa:       getVal('nombre_empresa'),
         fecha:                new Date().toISOString().split('T')[0],
