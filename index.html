@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.5</title>
+<title>Grupo Olyar — Solicitudes v2.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -984,16 +984,16 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="card" style="margin-bottom:16px">
         <div class="card-t" style="margin-bottom:12px">Rentas</div>
         <div class="fg">
-          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PERIODO:"></div>
           <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PERIODO:"></div>
           <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
-          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PERIODO:"></div>
           <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PERIODO:"></div>
           <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PERIODO:"></div>
           <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
         </div>
       </div>
@@ -2975,7 +2975,7 @@ function nuevoPresupuesto() {
     if (el) el.value = '';
   });
   ['mun1-periodo','mun2-periodo','multas-periodo','munjuicios-periodo','rentasjuicios-periodo'].forEach(id => {
-    document.getElementById('pf-'+id).value = 'PENDIENTE';
+    document.getElementById('pf-'+id).value = 'PERIODO:';
   });
   document.getElementById('pf-obs').value = 'EL PRESUPUESTO ESTA SUJETO A MODIFICACION DEBIDO A INCREMENTO EN DNRPA EN CONCEPTO "ARANCEL DE REGISTRO"';
   document.getElementById('pf-total-display').textContent = '$0';
@@ -3205,13 +3205,17 @@ function generarImpresionPresupuesto(p) {
     ${p.anotaciones_personales?`<tr class="row-item"><td>ANOTACIONES PERSONALES</td><td style="text-align:right">${mon(p.anotaciones_personales)}</td></tr>`:''}
     ${p.informe_dominio?`<tr class="row-item"><td>INFORME DE DOMINIO</td><td style="text-align:right">${mon(p.informe_dominio)}</td></tr>`:''}
   </table>
-  <div class="section-title">RENTAS:</div>
   <table>
-    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):''}</td></tr>
-    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):''}</td></tr>
-    <tr class="row-item"><td>MULTAS CAMINERA ${val(p.multas_caminera_anio)}:</td><td>PERÍODO: ${val(p.multas_caminera_periodo)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):''}</td></tr>
-    <tr class="row-item"><td>MUNICIPALIDAD JUICIOS:</td><td>PERÍODO: ${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):''}</td></tr>
-    <tr class="row-item"><td>RENTAS JUICIOS:</td><td>PERÍODO: ${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):''}</td></tr>
+    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase;border-top:1px solid #ccc">RENTAS:</td></tr>
+    <tr class="row-item"><td style="padding-left:16px">${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):'PENDIENTE'}</td></tr>
+    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MUNICIPALIDAD DE:</td></tr>
+    <tr class="row-item"><td style="padding-left:16px">${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):'PENDIENTE'}</td></tr>
+    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MULTAS CAMINERA:</td></tr>
+    <tr class="row-item"><td style="padding-left:16px">${val(p.multas_caminera_anio)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):'PENDIENTE'}</td></tr>
+    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MUNICIPALIDAD JUICIOS:</td></tr>
+    <tr class="row-item"><td style="padding-left:16px">${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):'PENDIENTE'}</td></tr>
+    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">RENTAS JUICIOS:</td></tr>
+    <tr class="row-item"><td style="padding-left:16px">${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):'PENDIENTE'}</td></tr>
   </table>
   <table style="margin-top:8px">
     <tr class="row-item"><td><b>MOVILIDAD:</b></td><td style="text-align:right">${mon(p.movilidad)}</td></tr>
