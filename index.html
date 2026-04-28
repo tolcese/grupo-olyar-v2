@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.7</title>
+<title>Grupo Olyar — Solicitudes v2.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -983,28 +983,18 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
       <div class="card" style="margin-bottom:16px">
         <div class="card-t" style="margin-bottom:12px">Rentas</div>
-        <div style="display:flex;flex-direction:column;gap:10px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PERIODO:"></div>
-            <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PERIODO:"></div>
-            <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-            <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
-            <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PERIODO:"></div>
-            <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PERIODO:"></div>
-            <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PERIODO:"></div>
-            <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          </div>
+        <div class="fg">
+          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
+          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
         </div>
       </div>
 
@@ -2985,7 +2975,7 @@ function nuevoPresupuesto() {
     if (el) el.value = '';
   });
   ['mun1-periodo','mun2-periodo','multas-periodo','munjuicios-periodo','rentasjuicios-periodo'].forEach(id => {
-    document.getElementById('pf-'+id).value = 'PERIODO:';
+    document.getElementById('pf-'+id).value = 'PENDIENTE';
   });
   document.getElementById('pf-obs').value = 'EL PRESUPUESTO ESTA SUJETO A MODIFICACION DEBIDO A INCREMENTO EN DNRPA EN CONCEPTO "ARANCEL DE REGISTRO"';
   document.getElementById('pf-total-display').textContent = '$0';
@@ -3215,17 +3205,13 @@ function generarImpresionPresupuesto(p) {
     ${p.anotaciones_personales?`<tr class="row-item"><td>ANOTACIONES PERSONALES</td><td style="text-align:right">${mon(p.anotaciones_personales)}</td></tr>`:''}
     ${p.informe_dominio?`<tr class="row-item"><td>INFORME DE DOMINIO</td><td style="text-align:right">${mon(p.informe_dominio)}</td></tr>`:''}
   </table>
+  <div class="section-title">RENTAS:</div>
   <table>
-    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase;border-top:1px solid #ccc">RENTAS:</td></tr>
-    <tr class="row-item"><td style="padding-left:16px">${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):'PENDIENTE'}</td></tr>
-    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MUNICIPALIDAD DE:</td></tr>
-    <tr class="row-item"><td style="padding-left:16px">${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):'PENDIENTE'}</td></tr>
-    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MULTAS CAMINERA:</td></tr>
-    <tr class="row-item"><td style="padding-left:16px">${val(p.multas_caminera_anio)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):'PENDIENTE'}</td></tr>
-    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">MUNICIPALIDAD JUICIOS:</td></tr>
-    <tr class="row-item"><td style="padding-left:16px">${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):'PENDIENTE'}</td></tr>
-    <tr><td colspan="2" style="font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">RENTAS JUICIOS:</td></tr>
-    <tr class="row-item"><td style="padding-left:16px">${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):'PENDIENTE'}</td></tr>
+    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):''}</td></tr>
+    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):''}</td></tr>
+    <tr class="row-item"><td>MULTAS CAMINERA ${val(p.multas_caminera_anio)}:</td><td>PERÍODO: ${val(p.multas_caminera_periodo)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):''}</td></tr>
+    <tr class="row-item"><td>MUNICIPALIDAD JUICIOS:</td><td>PERÍODO: ${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):''}</td></tr>
+    <tr class="row-item"><td>RENTAS JUICIOS:</td><td>PERÍODO: ${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):''}</td></tr>
   </table>
   <table style="margin-top:8px">
     <tr class="row-item"><td><b>MOVILIDAD:</b></td><td style="text-align:right">${mon(p.movilidad)}</td></tr>
@@ -5063,6 +5049,7 @@ async function loadDatero() {
     conyugeActividad: r.conyuge_actividad,
     conyugeTelefono: r.conyuge_telefono,
     fotoDni:        Array.isArray(r.archivos_dni) ? r.archivos_dni.join(', ') : (r.archivos_dni || ''),
+    fotoDniConyuge: Array.isArray(r.conyuge_dni_urls) ? r.conyuge_dni_urls.join(', ') : (r.conyuge_dni_urls || ''),
     tituloAutomotor: Array.isArray(r.titulo_automotor) ? r.titulo_automotor.join(', ') : (r.titulo_automotor || ''),
     fechaIngreso:   r.fecha_ingreso,
     nombreEmpresa:  r.nombre_empresa,
@@ -5117,7 +5104,7 @@ function renderDatero() {
       <td style="padding:9px 12px;font-family:monospace">${val(r.dni)}</td>
       <td style="padding:9px 12px">${val(r.telefono)}</td>
       <td style="padding:9px 12px">${val(r.compania)}</td>
-      <td style="padding:9px 12px">${r.fotoDni ? r.fotoDni.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📎 Foto ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
+      <td style="padding:9px 12px">${r.fotoDni ? r.fotoDni.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📎 DNI ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}${r.fotoDniConyuge ? r.fotoDniConyuge.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--purple);font-size:11px;display:block">📎 Cónyuge ${r.fotoDniConyuge.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : ''}</td>
       <td style="padding:9px 12px">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:11px;display:block">📃 Título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('') : '—'}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.montoVenta)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.dominio)}</td>
@@ -5143,8 +5130,11 @@ function openDateroPanel(idx) {
   document.getElementById('datero-panel-sub').textContent = (r.concesionaria||'') + (r.fecha ? ' · ' + r.fecha : '');
 
   const fotoLinks = r.fotoDni ? r.fotoDni.split(', ').map((l,i) =>
-    `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📎 Ver foto ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`
+    `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📎 DNI ${r.fotoDni.split(', ').length > 1 ? i+1 : ''}</a>`
   ).join('<br>') : '—';
+  const fotoLinksConyuge = r.fotoDniConyuge ? r.fotoDniConyuge.split(', ').map((l,i) =>
+    `<a href="${l.trim()}" target="_blank" style="color:var(--purple);font-size:12px">📎 DNI Cónyuge ${r.fotoDniConyuge.split(', ').length > 1 ? i+1 : ''}</a>`
+  ).join('<br>') : null;
 
   document.getElementById('datero-panel-body').innerHTML = `
     <div class="panel-section">
@@ -5173,7 +5163,7 @@ function openDateroPanel(idx) {
       <div class="prow"><span class="pl">Actividad</span><span class="pv">${val(r.conyugeActividad)}</span></div>
       <div class="prow"><span class="pl">Teléfono</span><span class="pv">${val(r.conyugeTelefono)}</span></div>
       ` : ''}
-      <div class="prow"><span class="pl">Foto DNI</span><span class="pv">${fotoLinks}</span></div>
+      <div class="prow"><span class="pl">Foto DNI</span><span class="pv">${fotoLinks}${fotoLinksConyuge ? `<br>${fotoLinksConyuge}` : ''}</span></div>
       <div class="prow"><span class="pl">Título Automotor</span><span class="pv">${r.tituloAutomotor ? r.tituloAutomotor.split(', ').map((l,i) => `<a href="${l.trim()}" target="_blank" style="color:var(--blue);font-size:12px">📃 Ver título ${r.tituloAutomotor.split(', ').length > 1 ? i+1 : ''}</a>`).join('<br>') : '—'}</span></div>
     </div>
     <div class="panel-section">
