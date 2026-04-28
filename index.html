@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.6</title>
+<title>Grupo Olyar — Solicitudes v2.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -983,18 +983,28 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
       <div class="card" style="margin-bottom:16px">
         <div class="card-t" style="margin-bottom:12px">Rentas</div>
-        <div class="fg">
-          <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PERIODO:"></div>
-          <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PERIODO:"></div>
-          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
-          <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PERIODO:"></div>
-          <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PERIODO:"></div>
-          <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PERIODO:"></div>
-          <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PERIODO:"></div>
+            <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PERIODO:"></div>
+            <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
+            <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PERIODO:"></div>
+            <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fc"><label>Municipalidad Juicios — Período</label><input id="pf-munjuicios-periodo" type="text" value="PERIODO:"></div>
+            <div class="fc"><label>Municipalidad Juicios — Importe</label><input id="pf-munjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fc"><label>Rentas Juicios — Período</label><input id="pf-rentasjuicios-periodo" type="text" value="PERIODO:"></div>
+            <div class="fc"><label>Rentas Juicios — Importe</label><input id="pf-rentasjuicios-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
         </div>
       </div>
 
