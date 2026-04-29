@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.8.8</title>
+<title>Grupo Olyar — Solicitudes v2.8.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5815,11 +5815,11 @@ async function loadCupos() {
   document.getElementById('cupos-table').style.display = 'none';
 
   const { data: cuposData } = await SB.from('cupos').select('*').order('banco');
-  const { data: solData } = await SB.from('solicitudes').select('banco, importe, estado, fecha_entregada, entregada').in('estado', ['Avanza','Entregado']);
+  const { data: solData } = await SB.from('solicitudes').select('banco, importe, estado, fecha_entregada, entregada').in('estado', ['AVANZA','ENTREGADO']);
 
   const usoMap = {};
   (solData || []).forEach(s => {
-    if (s.estado === 'Avanza' && !s.entregada && !s.fecha_entregada) {
+    if (s.estado === 'AVANZA' && !s.entregada && !s.fecha_entregada) {
       const banco = (s.banco || '').toUpperCase();
       const imp = parseFloat(String(s.importe||0).replace(/[$,]/g,'')) || 0;
       usoMap[banco] = (usoMap[banco] || 0) + imp;
