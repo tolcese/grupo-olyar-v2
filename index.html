@@ -970,7 +970,10 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="card" style="margin-bottom:16px">
         <div class="card-t" style="margin-bottom:12px">Costos</div>
         <div class="fg">
-          <div class="fc"><label>Certificación (08 Compra, 02 Y Nota)</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc span3" style="display:flex;flex-direction:row;gap:10px;align-items:flex-end">
+            <div class="fc" style="flex:2"><label>Título Certificación</label><input id="pf-certificacion-titulo" type="text" value="Certificación (08 Compra, 02 Y Nota)"></div>
+            <div class="fc" style="flex:1"><label>Importe</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+          </div>
           <div class="fc"><label>Formularios 02, 03 y 59</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3014,6 +3017,7 @@ function editarPresupuesto(id) {
   document.getElementById('pf-base-imp').value = p.base_imponible_70 || '';
   document.getElementById('pf-monto-colocar').value = p.monto_colocar || '';
   document.getElementById('pf-certificacion').value = p.certificacion || '';
+  document.getElementById('pf-certificacion-titulo').value = p.certificacion_titulo || 'Certificación (08 Compra, 02 Y Nota)';
   document.getElementById('pf-formularios').value = p.formularios || '';
   document.getElementById('pf-arancel').value = p.arancel_registro || '';
   document.getElementById('pf-sellado-base').value = p.sellado_base || '';
@@ -3074,7 +3078,7 @@ async function guardarPresupuesto() {
     registro: t('pf-registro'), marca: t('pf-marca'),
     valuacion_dnrpa: n('pf-valuacion'), base_imponible_70: n('pf-base-imp'),
     monto_colocar: n('pf-monto-colocar'),
-    certificacion: n('pf-certificacion'), formularios: n('pf-formularios'),
+    certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), formularios: n('pf-formularios'),
     arancel_registro: n('pf-arancel'), sellado_base: n('pf-sellado-base'),
     sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'),
     anotaciones_personales: n('pf-anotaciones'), informe_dominio: n('pf-informe-dominio'),
@@ -3127,6 +3131,7 @@ function imprimirPresupuesto() {
     base_imponible_70: parseFloat(document.getElementById('pf-base-imp').value)||0,
     monto_colocar: parseFloat(document.getElementById('pf-monto-colocar').value)||0,
     certificacion: parseFloat(document.getElementById('pf-certificacion').value)||0,
+    certificacion_titulo: document.getElementById('pf-certificacion-titulo').value,
     formularios: parseFloat(document.getElementById('pf-formularios').value)||0,
     arancel_registro: parseFloat(document.getElementById('pf-arancel').value)||0,
     sellado_base: parseFloat(document.getElementById('pf-sellado-base').value)||0,
@@ -3206,7 +3211,7 @@ function generarImpresionPresupuesto(p) {
     <tr style="background:#FFD700"><td class="lbl"><b>MONTO A COLOCAR EN 08:</b></td><td colspan="3"><b>${mon(p.monto_colocar)}</b></td></tr>
   </table>
   <table>
-    <tr><td style="width:60%;font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">CERTIFICACIÓN (08 COMPRA, 02 Y NOTA):</td><td style="text-align:right;font-weight:bold">${p.certificacion?mon(p.certificacion):''}</td></tr>
+    <tr><td style="width:60%;font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">${(p.certificacion_titulo||'Certificación (08 Compra, 02 Y Nota)').toUpperCase()}:</td><td style="text-align:right;font-weight:bold">${p.certificacion?mon(p.certificacion):''}</td></tr>
     ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 59</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
     ${p.arancel_registro?`<tr class="row-item"><td>ARANCEL DE REGISTRO</td><td style="text-align:right">${mon(p.arancel_registro)}</td></tr>`:''}
     ${p.sellado_base?`<tr class="row-item"><td>SELLADO DE BASE IMPONIBLE</td><td style="text-align:right">${mon(p.sellado_base)}</td></tr>`:''}
