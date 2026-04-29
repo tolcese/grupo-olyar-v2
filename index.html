@@ -971,7 +971,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="card-t" style="margin-bottom:12px">Costos</div>
         <div class="fg">
           <div class="fc"><label>Certificación (08 Compra, 02 Y Nota)</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Formularios 02, 03 y 08</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Formularios 02, 03 y 59</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Prenda (doble por localidad)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3207,7 +3207,7 @@ function generarImpresionPresupuesto(p) {
   </table>
   <table>
     <tr><td style="width:60%;font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">CERTIFICACIÓN (08 COMPRA, 02 Y NOTA):</td><td style="text-align:right;font-weight:bold">${p.certificacion?mon(p.certificacion):''}</td></tr>
-    ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 08</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
+    ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 59</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
     ${p.arancel_registro?`<tr class="row-item"><td>ARANCEL DE REGISTRO</td><td style="text-align:right">${mon(p.arancel_registro)}</td></tr>`:''}
     ${p.sellado_base?`<tr class="row-item"><td>SELLADO DE BASE IMPONIBLE</td><td style="text-align:right">${mon(p.sellado_base)}</td></tr>`:''}
     ${p.sellado_prenda?`<tr class="row-item"><td>SELLADO DE PRENDA (DOBLE POR LOCALIDAD)</td><td style="text-align:right">${mon(p.sellado_prenda)}</td></tr>`:''}
