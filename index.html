@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.8.6</title>
+<title>Grupo Olyar — Solicitudes v2.8.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5810,6 +5810,7 @@ let COEFICIENTES = {
 };
 
 async function loadCupos() {
+  const fmt = v => '$' + (parseFloat(v)||0).toLocaleString('es-AR', {minimumFractionDigits:0, maximumFractionDigits:0});
   document.getElementById('cupos-loading').style.display = '';
   document.getElementById('cupos-table').style.display = 'none';
 
@@ -5837,9 +5838,9 @@ async function loadCupos() {
     tbody.innerHTML += `
       <tr style="border-bottom:1px solid var(--line)" id="cupo-row-${c.id}">
         <td style="padding:12px 12px;font-weight:600">${banco}</td>
-        <td style="padding:12px 12px;text-align:right;font-family:monospace">${mon(total)}</td>
-        <td style="padding:12px 12px;text-align:right;font-family:monospace;color:#f59e0b">${mon(uso)} <span style="font-size:11px;color:var(--muted)">(${pct}%)</span></td>
-        <td style="padding:12px 12px;text-align:right;font-family:monospace;font-weight:700;color:${color}">${mon(disp)}</td>
+        <td style="padding:12px 12px;text-align:right;font-family:monospace">${fmt(total)}</td>
+        <td style="padding:12px 12px;text-align:right;font-family:monospace;color:#f59e0b">${fmt(uso)} <span style="font-size:11px;color:var(--muted)">(${pct}%)</span></td>
+        <td style="padding:12px 12px;text-align:right;font-family:monospace;font-weight:700;color:${color}">${fmt(disp)}</td>
         <td style="padding:12px 12px;text-align:right">
           <button onclick="editarCupo(${c.id}, ${total})" style="padding:5px 12px;font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:none;cursor:pointer;color:var(--ink)">✏️ Editar</button>
           <button onclick="eliminarCupo(${c.id}, '${banco}')" style="padding:5px 12px;font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:none;cursor:pointer;color:var(--red);margin-left:6px">🗑️</button>
