@@ -986,8 +986,8 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="fg">
           <div class="fc"><label>Municipalidad — Período</label><input id="pf-mun1-periodo" type="text" value="PENDIENTE"></div>
           <div class="fc"><label>Municipalidad — Importe</label><input id="pf-mun1-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Municipalidad 2 — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
-          <div class="fc"><label>Municipalidad 2 — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc"><label>Rentas De — Período</label><input id="pf-mun2-periodo" type="text" value="PENDIENTE"></div>
+          <div class="fc"><label>Rentas De — Importe</label><input id="pf-mun2-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Multas Caminera — Año</label><input id="pf-multas-anio" type="text" placeholder="2025"></div>
           <div class="fc"><label>Multas Caminera — Período</label><input id="pf-multas-periodo" type="text" value="PENDIENTE"></div>
           <div class="fc"><label>Multas Caminera — Importe</label><input id="pf-multas-valor" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3208,7 +3208,7 @@ function generarImpresionPresupuesto(p) {
   <div class="section-title">RENTAS:</div>
   <table>
     <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad_periodo)}</td><td style="text-align:right">${p.renta_municipalidad_valor?mon(p.renta_municipalidad_valor):''}</td></tr>
-    <tr class="row-item"><td>MUNICIPALIDAD DE:</td><td>PERÍODO: ${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):''}</td></tr>
+    <tr class="row-item"><td>RENTAS DE:</td><td>PERÍODO: ${val(p.renta_municipalidad2_periodo)}</td><td style="text-align:right">${p.renta_municipalidad2_valor?mon(p.renta_municipalidad2_valor):''}</td></tr>
     <tr class="row-item"><td>MULTAS CAMINERA ${val(p.multas_caminera_anio)}:</td><td>PERÍODO: ${val(p.multas_caminera_periodo)}</td><td style="text-align:right">${p.multas_caminera_valor?mon(p.multas_caminera_valor):''}</td></tr>
     <tr class="row-item"><td>MUNICIPALIDAD JUICIOS:</td><td>PERÍODO: ${val(p.municipalidad_juicios_periodo)}</td><td style="text-align:right">${p.municipalidad_juicios_valor?mon(p.municipalidad_juicios_valor):''}</td></tr>
     <tr class="row-item"><td>RENTAS JUICIOS:</td><td>PERÍODO: ${val(p.rentas_juicios_periodo)}</td><td style="text-align:right">${p.rentas_juicios_valor?mon(p.rentas_juicios_valor):''}</td></tr>
