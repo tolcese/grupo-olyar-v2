@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.8.5</title>
+<title>Grupo Olyar — Solicitudes v2.8.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1808,8 +1808,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         </div>
       </div>
 
-      <div id="cont-tab-cupos" style="display:none">
-        <div class="card" style="max-width:700px">
+      <div id="cont-panel-cupos" style="display:none">
           <div class="card-t">🏧 Cupos por banco</div>
           <div class="card-s" style="margin-bottom:20px">Cupo disponible por banco. Se descuenta cuando una solicitud pasa a <strong>Avanza</strong> y se recupera al marcarla como <strong>Entregada</strong>.</div>
           <div id="cupos-loading" style="text-align:center;color:var(--muted);padding:20px"><span class="spinner"></span> Cargando...</div>
@@ -5760,7 +5759,8 @@ async function recargarLiquidaciones() {
 
 function showContTab(tab) {
   ['liquidaciones','totales','gastos','cobranza','cobradas','coeficientes','cupos'].forEach(t => {
-    const el = document.getElementById('cont-tab-'+t);
+    const panelId = t === 'cupos' ? 'cont-panel-cupos' : 'cont-tab-'+t;
+    const el = document.getElementById(panelId);
     if (el) el.style.display = t === tab ? '' : 'none';
     const btnId = t === 'liquidaciones' ? 'cont-tab-liq' : t === 'totales' ? 'cont-tab-tot' : t === 'gastos' ? 'cont-tab-gas' : t === 'cobranza' ? 'cont-tab-cob' : t === 'cobradas' ? 'cont-btn-cobradas' : t === 'cupos' ? 'cont-tab-cupos' : 'cont-tab-coef';
     const btn = document.getElementById(btnId);
