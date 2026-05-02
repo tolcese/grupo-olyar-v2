@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.9.5</title>
+<title>Grupo Olyar — Solicitudes v2.9.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5993,7 +5993,7 @@ async function saveContEdit(silent = false) {
     com_gestora:     n(document.getElementById('cont-com-gestora').value),
     retrib_banco:    n(document.getElementById('cont-retrib-banco').value),
     pagos_extras:    n(document.getElementById('cont-pagos-extras').value),
-    fecha_pago_banco: document.getElementById('cont-fecha-pago-banco')?.value || null,
+    fecha_pago_banco: (CONT_DATA[id]||{}).fechaPagoBanco || null,
     ganancia:        n(document.getElementById('cont-ganancia').value),
     pagado:          document.getElementById('cont-pagado').checked,
     fecha_pagado:    document.getElementById('cont-fecha-pagado').value || null,
