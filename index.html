@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.10.2</title>
+<title>Grupo Olyar — Solicitudes v2.10.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8915,7 +8915,7 @@ function renderPrendasPendientes() {
   // Prendas = registros con gestor asignado donde al menos uno de los 3 campos no está completo, + rechazadas
   let data = RECORDS.filter(r => {
     if (!r.gestorAsignado || !r.gestorAsignado.trim()) return false;
-    if (r.prenda_rechazada) return true; // Rechazadas siempre incluidas
+    if (r.prendaRechazada) return true; // Rechazadas siempre incluidas
     const tieneEnProceso = !!r.enProceso;
     const tienePresentada = !!r.presentada;
     const tieneFinalizada = !!(r.finalizada && r.finalizada.trim());
@@ -8943,9 +8943,9 @@ function renderPrendasPendientes() {
   const fmtD = v => { if (!v) return '—'; const p=v.split('-'); return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:v; };
 
   tbody.innerHTML = data.map((r, i) => `
-    <tr style="border-bottom:1px solid var(--line);cursor:pointer;background:${r.prenda_rechazada?'#fff5f5':''}" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='${r.prenda_rechazada?'#fff5f5':''}'" onclick="openPanel('${r.id}')">
+    <tr style="border-bottom:1px solid var(--line);cursor:pointer;background:${r.prendaRechazada?'#fff5f5':''}" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='${r.prendaRechazada?'#fff5f5':''}'" onclick="openPanel('${r.id}')">
       <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
-      <td style="padding:8px 10px;font-weight:700;white-space:nowrap">${r.nombrecliente||'—'}${r.prenda_rechazada?` <span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-weight:600">RECHAZADA</span>`:''}</td>
+      <td style="padding:8px 10px;font-weight:700;white-space:nowrap">${r.nombrecliente||'—'}${r.prendaRechazada?` <span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-weight:600">RECHAZADA</span>`:''}</td>
       <td style="padding:8px 10px;font-weight:600">${colorBanco(r.banco)}</td>
       <td style="padding:8px 10px">${r.concesionaria||'—'}</td>
       <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestorAsignado||'—'}</td>
