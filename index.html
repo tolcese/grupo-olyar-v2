@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.10.6</title>
+<title>Grupo Olyar — Solicitudes v2.10.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3054,7 +3054,9 @@ function renderPresupuestos() {
 }
 
 function cerrarDetallePresupuesto() {
-  document.getElementById('presup-detalle-overlay').style.display = 'none';
+  const el = document.getElementById('presup-detalle-overlay');
+  el.classList.remove('open');
+  setTimeout(() => el.style.display = 'none', 200);
 }
 
 function verDetallePresupuesto(id) {
@@ -3112,7 +3114,9 @@ function verDetallePresupuesto(id) {
     </div>
   `;
 
-  document.getElementById('presup-detalle-overlay').style.display = 'flex';
+  const el = document.getElementById('presup-detalle-overlay');
+  el.style.display = 'flex';
+  requestAnimationFrame(() => el.classList.add('open'));
 }
 
 function nuevoPresupuesto() {
