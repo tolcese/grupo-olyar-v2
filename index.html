@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.10.5</title>
+<title>Grupo Olyar — Solicitudes v2.10.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3036,8 +3036,8 @@ function renderPresupuestos() {
   const mon = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
   const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
   tbody.innerHTML = PRESUP_CACHE.map(p => `
-    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:4px 8px;width:90px">
+    <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
+      <td style="padding:4px 8px;width:90px" onclick="event.stopPropagation()">
         <div class="abtns">
           <button class="ibtn" onclick="editarPresupuesto('${p.id}')" title="Editar">✏️</button>
           <button class="ibtn" onclick="imprimirPresupuestoById('${p.id}')" title="Imprimir">🖨️</button>
@@ -3051,6 +3051,68 @@ function renderPresupuestos() {
       <td style="padding:9px 12px;font-weight:700;font-family:monospace">${mon(p.total)}</td>
       <td style="padding:9px 12px;font-weight:700;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
     </tr>`).join('');
+}
+
+function cerrarDetallePresupuesto() {
+  document.getElementById('presup-detalle-overlay').style.display = 'none';
+}
+
+function verDetallePresupuesto(id) {
+  const p = PRESUP_CACHE.find(x => String(x.id) === String(id));
+  if (!p) return;
+  window._presupDetalleId = id;
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+  const mon  = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
+  const val  = v => v || '—';
+  const row  = (label, value) => value && value !== '—' ? `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px"><span style="color:var(--muted);font-size:12px">${label}</span><span style="font-weight:600;text-align:right;max-width:60%">${value}</span></div>` : '';
+  const sec  = (title) => `<div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 8px">${title}</div>`;
+
+  document.getElementById('pd-titulo').textContent = p.cliente || 'Sin nombre';
+  document.getElementById('pd-subtitulo').textContent = `${fmtD(p.fecha)} · ${p.dominio||'Sin dominio'} · ${p.estado||''}`;
+
+  document.getElementById('pd-body').innerHTML = `
+    ${sec('Datos del cliente')}
+    ${row('Agencia', val(p.agencia))}
+    ${row('Cliente', val(p.cliente))}
+    ${row('DNI', val(p.dni))}
+    ${row('Estado civil', val(p.estado_civil))}
+    ${sec('Vehículo')}
+    ${row('Marca', val(p.marca))}
+    ${row('Modelo / Año', val(p.modelo_anio))}
+    ${row('Dominio', val(p.dominio))}
+    ${row('Chasis', val(p.chasis))}
+    ${row('Registro', val(p.registro))}
+    ${sec('Importes')}
+    ${row('Valuación DNRPA', mon(p.valuacion_dnrpa))}
+    ${row('Base imponible 70%', mon(p.base_imponible_70))}
+    ${row('Monto a colocar (08)', mon(p.monto_colocar))}
+    ${sec('Costos')}
+    ${row(p.certificacion_titulo || 'Certificación', mon(p.certificacion))}
+    ${row('Formularios 02, 03 y 59', mon(p.formularios))}
+    ${row('Arancel de Registro', mon(p.arancel_registro))}
+    ${row('Sellado Base', mon(p.sellado_base))}
+    ${row('Sellado de Prenda', mon(p.sellado_prenda))}
+    ${row('Legalizaciones', mon(p.legalizaciones))}
+    ${row('Anotaciones Personales', mon(p.anotaciones_personales))}
+    ${row('Informe de Dominio', mon(p.informe_dominio))}
+    ${sec('Rentas')}
+    ${row('Municipalidad', p.renta_municipalidad_valor ? mon(p.renta_municipalidad_valor) + (p.renta_municipalidad_periodo ? ' · '+p.renta_municipalidad_periodo : '') : '')}
+    ${row('Rentas De', p.renta_municipalidad2_valor ? mon(p.renta_municipalidad2_valor) + (p.renta_municipalidad2_periodo ? ' · '+p.renta_municipalidad2_periodo : '') : '')}
+    ${row('Multas Caminera', p.multas_caminera_valor ? mon(p.multas_caminera_valor) + (p.multas_caminera_anio ? ' · '+p.multas_caminera_anio : '') : '')}
+    ${row('Municipalidad Juicios', p.renta_munjuicios_valor ? mon(p.renta_munjuicios_valor) : '')}
+    ${row('Rentas Juicios', p.renta_rentasjuicios_valor ? mon(p.renta_rentasjuicios_valor) : '')}
+    ${sec('Otros')}
+    ${row('Movilidad', mon(p.movilidad))}
+    ${row('Altas y Bajas', mon(p.altas_bajas))}
+    ${row('Honorarios Estudio', mon(p.honorarios))}
+    ${p.obs ? `${sec('Observaciones')}<div style="font-size:12px;color:var(--muted);line-height:1.5">${p.obs}</div>` : ''}
+    <div style="margin-top:20px;padding:14px 18px;background:var(--surface);border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:13px;font-weight:700;color:var(--muted)">TOTAL</span>
+      <span style="font-size:22px;font-weight:800;color:var(--ink)">${mon(p.total)}</span>
+    </div>
+  `;
+
+  document.getElementById('presup-detalle-overlay').style.display = 'flex';
 }
 
 function nuevoPresupuesto() {
@@ -10099,6 +10161,24 @@ function renderReportes() {
   }
 })();
 </script>
+
+<!-- MODAL DETALLE PRESUPUESTO -->
+<div class="overlay" id="presup-detalle-overlay" onclick="if(event.target===this)cerrarDetallePresupuesto()" style="z-index:600;display:none">
+  <div style="background:#fff;border-radius:16px;padding:0;width:min(720px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.18)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2">
+      <div>
+        <div id="pd-titulo" style="font-size:18px;font-weight:800;color:var(--ink)"></div>
+        <div id="pd-subtitulo" style="font-size:12px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="editarPresupuesto(window._presupDetalleId)" style="padding:7px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">✏️ Editar</button>
+        <button onclick="imprimirPresupuestoById(window._presupDetalleId)" style="padding:7px 16px;background:var(--ink);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">🖨️ Imprimir</button>
+        <button onclick="cerrarDetallePresupuesto()" style="padding:7px 14px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px">✕</button>
+      </div>
+    </div>
+    <div id="pd-body" style="padding:24px"></div>
+  </div>
+</div>
 
 <!-- MODAL DETALLE TOTALES -->
 <div class="overlay" id="det-tot-overlay" onclick="if(event.target===this)cerrarDetalleTotales()" style="z-index:600">
