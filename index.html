@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.10.4</title>
+<title>Grupo Olyar — Solicitudes v2.10.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2340,9 +2340,11 @@ async function enterApp() {
   if (ME.rol === 'presupuestos') {
     // Solo cargar lo necesario para presupuestos
     await loadPresupuestos();
+    initPresupRealtime();
   } else {
     await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
     Promise.all([loadGestores(), loadDatero(), loadGastos()]).catch(()=>{});
+    initPresupRealtime();
   }
   SB.from('coeficientes').select('*').eq('id',1).single().then(({data}) => {
     if (data) COEFICIENTES = { impCredito: data.imp_credito, comLukaya: data.com_lukaya, comGestor: data.com_gestor, retribBanco: data.retrib_banco };
@@ -3005,6 +3007,23 @@ async function loadPresupuestos() {
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="7" style="padding:40px;text-align:center;color:var(--red)">Error al cargar: ${e.message}</td></tr>`;
   }
+}
+
+// Realtime sync presupuestos — actualiza automáticamente cuando otro usuario modifica
+let _presupRealtimeChannel = null;
+function initPresupRealtime() {
+  if (_presupRealtimeChannel) return;
+  _presupRealtimeChannel = SB.channel('presupuestos-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'presupuestos' }, () => {
+      const vEl = document.getElementById('v-presupuestos');
+      if (vEl && vEl.style.display !== 'none') {
+        loadPresupuestos();
+      } else {
+        SB.from('presupuestos').select('*').order('created_at', { ascending: false })
+          .then(({ data }) => { if (data) PRESUP_CACHE = data; });
+      }
+    })
+    .subscribe();
 }
 
 function renderPresupuestos() {
