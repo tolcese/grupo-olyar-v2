@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.9.3</title>
+<title>Grupo Olyar — Solicitudes v2.9.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5824,7 +5824,7 @@ async function loadCupos() {
 
   const usoMap = {};
   (solData || []).forEach(s => {
-    if (!s.entregada && !s.prenda_rechazada) {
+    if (!s.entregada || s.prenda_rechazada) {
       const banco = (s.banco || '').toUpperCase();
       const imp = parseFloat(String(s.importe||0).replace(/[$,]/g,'')) || 0;
       usoMap[banco] = (usoMap[banco] || 0) + imp;
