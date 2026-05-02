@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.9.4</title>
+<title>Grupo Olyar — Solicitudes v2.9.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5447,8 +5447,7 @@ function renderContabilidad() {
 
   let data = RECORDS.filter(r => {
     if ((r.estado||'').toUpperCase() !== 'AVANZA') return false;
-    const c = CONT_DATA[r.id] || {};
-    return !c.fechaPagoBanco; // Excluir los que ya tienen fecha de pago banco
+    return true;
   });
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.banco, r.dni, r.concesionaria, r.provincia, r.localidad].some(v => (v||'').toLowerCase().includes(q))
