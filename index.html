@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.10.8</title>
+<title>Grupo Olyar — Solicitudes v2.10.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7185,6 +7185,11 @@ async function loadUsers() {
         const lastSeen = u.last_seen ? new Date(u.last_seen) : null;
         const isOnline = lastSeen && (ahora - lastSeen) < 5 * 60 * 1000;
         const cantSolicitudes = RECORDS.filter(r => (r.usuario||'').toLowerCase() === u.nom.toLowerCase()).length;
+        const cantPresupuestos = (PRESUP_CACHE||[]).filter(p => (p.creado_por||'').toLowerCase() === u.usr.toLowerCase()).length;
+        const esPresup = u.rol === 'presupuestos';
+        const cantLabel = esPresup
+          ? `📄 <b style="color:var(--ink2)">${cantPresupuestos}</b> presupuesto${cantPresupuestos !== 1 ? 's' : ''} cargado${cantPresupuestos !== 1 ? 's' : ''}`
+          : `📋 <b style="color:var(--ink2)">${cantSolicitudes}</b> solicitud${cantSolicitudes !== 1 ? 'es' : ''} cargada${cantSolicitudes !== 1 ? 's' : ''}`;
         return `
         <div class="user-row">
           <div class="u-info">
@@ -7198,7 +7203,7 @@ async function loadUsers() {
                 @${u.usr}
                 <span style="font-size:10px;font-weight:600;color:${isOnline?'var(--green)':'var(--muted)'}">${isOnline?'● Conectado':'○ Desconectado'}</span>
               </div>
-              <div style="font-size:11px;color:var(--muted);margin-top:2px">📋 <b style="color:var(--ink2)">${cantSolicitudes}</b> solicitud${cantSolicitudes !== 1 ? 'es' : ''} cargada${cantSolicitudes !== 1 ? 's' : ''}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">${cantLabel}</div>
             </div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
