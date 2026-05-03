@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.11.7</title>
+<title>Grupo Olyar — Solicitudes v2.11.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -897,6 +897,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
             <thead>
               <tr style="background:var(--surface)">
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">Acciones</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:80px">Fecha</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:150px">Cliente</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">DNI</th>
@@ -904,7 +905,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Total</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Estado</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">Pagado</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">Acciones</th>
               </tr>
             </thead>
             <tbody id="presup-tbody">
@@ -3038,23 +3038,23 @@ function renderPresupuestos() {
   const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
   tbody.innerHTML = PRESUP_CACHE.map(p => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
-      <td style="padding:7px 8px;white-space:nowrap;width:80px;font-size:12px">${fmtD(p.fecha)}</td>
-      <td style="padding:7px 8px;font-weight:700;width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${p.cliente||''}">${p.cliente||'—'}</td>
-      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:80px">${p.dni||'—'}</td>
-      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:70px">${p.dominio||'—'}</td>
-      <td style="padding:7px 8px;font-weight:700;font-family:monospace;white-space:nowrap;font-size:12px">${mon(p.total)}</td>
-      <td style="padding:7px 8px;font-weight:700;font-size:12px;white-space:nowrap;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
-      <td style="padding:4px 8px" onclick="event.stopPropagation()">
-        <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-start">
-          <button onclick="togglePagadoPresup('${p.id}', ${!p.pagado})" style="padding:3px 8px;font-size:11px;font-weight:700;border:none;border-radius:5px;cursor:pointer;white-space:nowrap;background:${p.pagado?'var(--green)':'var(--line)'};color:${p.pagado?'#fff':'var(--muted)'}">${p.pagado?'✓ Pagado':'Pendiente'}</button>
-          ${p.pagado ? `<span style="font-size:10px;color:var(--muted)">${fmtD(p.fecha_pago)}</span>` : ''}
-        </div>
-      </td>
-      <td style="padding:4px 6px;width:90px" onclick="event.stopPropagation()">
+      <td style="padding:4px 6px;width:85px" onclick="event.stopPropagation()">
         <div class="abtns">
           <button class="ibtn" onclick="editarPresupuesto('${p.id}')" title="Editar">✏️</button>
           <button class="ibtn" onclick="imprimirPresupuestoById('${p.id}')" title="Imprimir">🖨️</button>
           <button class="ibtn" onclick="eliminarPresupuesto('${p.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+      <td style="padding:7px 8px;white-space:nowrap;width:80px;font-size:12px">${fmtD(p.fecha)}</td>
+      <td style="padding:7px 8px;font-weight:700;width:150px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${p.cliente||''}">${p.cliente||'—'}</td>
+      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:75px">${p.dni||'—'}</td>
+      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:55px">${p.dominio||'—'}</td>
+      <td style="padding:7px 8px;font-weight:700;font-family:monospace;white-space:nowrap;font-size:12px;width:90px">${mon(p.total)}</td>
+      <td style="padding:7px 8px;font-weight:700;font-size:12px;white-space:nowrap;width:90px;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
+      <td style="padding:4px 8px;width:85px" onclick="event.stopPropagation()">
+        <div style="display:flex;flex-direction:column;gap:2px;align-items:flex-start">
+          <button onclick="togglePagadoPresup('${p.id}', ${!p.pagado})" style="padding:3px 8px;font-size:11px;font-weight:700;border:none;border-radius:5px;cursor:pointer;white-space:nowrap;background:${p.pagado?'var(--green)':'var(--line)'};color:${p.pagado?'#fff':'var(--muted)'}">${p.pagado?'✓ Pagado':'Pendiente'}</button>
+          ${p.pagado ? `<span style="font-size:10px;color:var(--muted)">${fmtD(p.fecha_pago)}</span>` : ''}
         </div>
       </td>
     </tr>`).join('');
