@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.12.1</title>
+<title>Grupo Olyar — Solicitudes v2.12.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -886,6 +886,42 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     </div>
 
     
+    <!-- HISTORICO PRESUPUESTOS -->
+    <div id="v-historico-presup" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📋 Histórico Presupuestos</div><div class="ph-s">Registro completo de todos los presupuestos</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <input id="histp-srch" placeholder="Buscar cliente, DNI, dominio..." oninput="renderHistoricoPresup()" style="padding:7px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:240px">
+          <input type="date" id="histp-desde" onchange="renderHistoricoPresup()" style="font-size:12px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px">
+          <input type="date" id="histp-hasta" onchange="renderHistoricoPresup()" style="font-size:12px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px">
+          <button class="btn btn-s" onclick="document.getElementById('histp-desde').value='';document.getElementById('histp-hasta').value='';renderHistoricoPresup()">✕ Limpiar</button>
+          <span id="histp-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:80px">Fecha</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:70px">DNI</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:60px">Dominio</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Total</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:70px">Estado</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Pagado</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:70px">Cargado por</th>
+              </tr>
+            </thead>
+            <tbody id="histp-tbody">
+              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div id="histp-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">No hay registros</div>
+      </div>
+    </div>
+
     <!-- PRESUPUESTOS -->
     <div id="v-presupuestos" style="display:none">
       <div class="ph">
@@ -2364,6 +2400,7 @@ async function enterApp() {
     // Ocultar sidebar items excepto presupuestos
     document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-presupuestos').style.display = '';
+    document.getElementById('sb-historico-presup').style.display = '';
     // Show Mi Cuenta in Cuenta section
     const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
     if (miCuentaBtn) miCuentaBtn.style.display = '';
@@ -3124,6 +3161,49 @@ function verDetallePresupuesto(id) {
   const el = document.getElementById('presup-detalle-overlay');
   el.style.display = 'flex';
   requestAnimationFrame(() => el.classList.add('open'));
+}
+
+function renderHistoricoPresup() {
+  const q     = (document.getElementById('histp-srch')?.value || '').toLowerCase();
+  const desde = document.getElementById('histp-desde')?.value || '';
+  const hasta = document.getElementById('histp-hasta')?.value || '';
+  const tbody = document.getElementById('histp-tbody');
+  const empty = document.getElementById('histp-empty');
+  const count = document.getElementById('histp-count');
+  if (!tbody) return;
+
+  let data = [...(PRESUP_CACHE || [])];
+  if (q) data = data.filter(p => [p.cliente, p.dni, p.dominio, p.creado_por].some(v => (v||'').toLowerCase().includes(q)));
+  if (desde) data = data.filter(p => p.fecha && p.fecha >= desde);
+  if (hasta) data = data.filter(p => p.fecha && p.fecha <= hasta);
+
+  count.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+  const mon  = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
+  const estadoColor = { 'Borrador':'var(--muted)', 'Enviado':'var(--blue)', 'Aprobado':'var(--green)', 'Rechazado':'var(--red)' };
+
+  tbody.innerHTML = data.map(p => `
+    <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
+      <td style="padding:7px 8px;white-space:nowrap;font-size:12px">${fmtD(p.fecha)}</td>
+      <td style="padding:7px 8px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${p.cliente||''}">${p.cliente||'—'}</td>
+      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap">${p.dni||'—'}</td>
+      <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap">${p.dominio||'—'}</td>
+      <td style="padding:7px 8px;font-weight:700;font-family:monospace;font-size:12px;white-space:nowrap">${mon(p.total)}</td>
+      <td style="padding:7px 8px;font-weight:700;font-size:12px;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
+      <td style="padding:7px 8px;font-size:12px">
+        <span style="padding:3px 8px;font-size:11px;font-weight:700;border-radius:5px;background:${p.pagado?'var(--green)':'var(--line)'};color:${p.pagado?'#fff':'var(--muted)'}">${p.pagado?'✓ Pagado':'Pendiente'}</span>
+        ${p.pagado && p.fecha_pago ? `<div style="font-size:10px;color:var(--muted);margin-top:2px">${fmtD(p.fecha_pago)}</div>` : ''}
+      </td>
+      <td style="padding:7px 8px;font-size:11px;color:var(--muted)">${p.creado_por||'—'}</td>
+    </tr>`).join('');
 }
 
 async function togglePagadoPresup(id, pagado) {
@@ -6527,7 +6607,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -6548,6 +6628,7 @@ function showV(v) {
   if (v==='calendario') { loadCalendario(); }
   if (v==='creditos') { showCredTab('creditos'); setTimeout(checkRecordatoriosCreditos, 300); }
   if (v==='presupuestos') { loadPresupuestos(); }
+  if (v==='historico-presup') { renderHistoricoPresup(); }
   // Cerrar panel lateral de créditos al salir
   if (v !== 'creditos') {
     document.getElementById('cred-panel-overlay').classList.remove('open');
@@ -9249,6 +9330,9 @@ function renderReportes() {
 
     <button class="sb-item" id="sb-presupuestos" onclick="closeSidebar();showV('presupuestos')" style="display:none">
       <span class="sb-icon">📄</span> Presupuestos
+    </button>
+    <button class="sb-item" id="sb-historico-presup" onclick="closeSidebar();showV('historico-presup')" style="display:none">
+      <span class="sb-icon">📋</span> Histórico Presupuestos
     </button>
     <div class="sb-divider"></div>
     <div class="sb-divider"></div>
