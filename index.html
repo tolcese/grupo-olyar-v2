@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.11.0</title>
+<title>Grupo Olyar — Solicitudes v2.11.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3038,12 +3038,12 @@ function renderPresupuestos() {
   const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
   tbody.innerHTML = PRESUP_CACHE.map(p => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
-      <td style="padding:9px 12px;white-space:nowrap;width:90px">${fmtD(p.fecha)}</td>
-      <td style="padding:9px 12px;font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.cliente||''}">${p.cliente||'—'}</td>
-      <td style="padding:9px 12px;font-family:monospace">${p.dni||'—'}</td>
-      <td style="padding:9px 12px;font-family:monospace">${p.dominio||'—'}</td>
-      <td style="padding:9px 12px;font-weight:700;font-family:monospace">${mon(p.total)}</td>
-      <td style="padding:9px 12px;font-weight:700;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
+      <td style="padding:7px 8px;white-space:nowrap;width:80px;font-size:12px">${fmtD(p.fecha)}</td>
+      <td style="padding:7px 8px;font-weight:700;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px" title="${p.cliente||''}">${p.cliente||'—'}</td>
+      <td style="padding:9px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:80px">${p.dni||'—'}</td>
+      <td style="padding:9px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:70px">${p.dominio||'—'}</td>
+      <td style="padding:9px 8px;font-weight:700;font-family:monospace;white-space:nowrap">${mon(p.total)}</td>
+      <td style="padding:9px 8px;font-weight:700;color:${estadoColor[p.estado]||'var(--muted)'}">${p.estado||'—'}</td>
       <td style="padding:6px 12px" onclick="event.stopPropagation()">
         <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-start">
           <button onclick="togglePagadoPresup('${p.id}', ${!p.pagado})" style="padding:3px 10px;font-size:11px;font-weight:700;border:none;border-radius:5px;cursor:pointer;background:${p.pagado?'var(--green)':'var(--line)'};color:${p.pagado?'#fff':'var(--muted)'}">${p.pagado?'✓ Pagado':'Pendiente'}</button>
