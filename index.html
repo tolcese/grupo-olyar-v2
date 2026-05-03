@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.12.6</title>
+<title>Grupo Olyar — Solicitudes v2.12.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2401,6 +2401,10 @@ async function enterApp() {
     document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
+    document.getElementById('sb-div-calc').style.display = 'none';
+    document.getElementById('sb-lbl-calc').style.display = 'none';
+    document.getElementById('sb-div-cuenta').style.display = 'none';
+    document.getElementById('sb-lbl-cuenta').style.display = 'none';
     // Show Mi Cuenta in Cuenta section
     const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
     if (miCuentaBtn) miCuentaBtn.style.display = '';
@@ -9343,8 +9347,8 @@ function renderReportes() {
       <span class="sb-icon">📅</span> Calendario
     </button>
 
-    <div class="sb-divider"></div>
-    <div class="sb-section-label">Calculadores</div>
+    <div class="sb-divider" id="sb-div-calc"></div>
+    <div class="sb-section-label" id="sb-lbl-calc">Calculadores</div>
     <a href="https://tolcese.github.io/simulador-prendarios/" target="_blank" style="text-decoration:none">
       <button class="sb-item" onclick="closeSidebar()">
         <span class="sb-icon">🧮</span> Columbia
@@ -9355,8 +9359,8 @@ function renderReportes() {
         <span class="sb-icon">🧮</span> Galicia
       </button>
     </a>
-    <div class="sb-divider"></div>
-    <div class="sb-section-label">Cuenta</div>
+    <div class="sb-divider" id="sb-div-cuenta"></div>
+    <div class="sb-section-label" id="sb-lbl-cuenta">Cuenta</div>
     <button class="sb-item" onclick="closeSidebar();showV('micuenta')">
       <span class="sb-icon">🔑</span> Mi cuenta
     </button>
