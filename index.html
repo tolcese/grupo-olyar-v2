@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.11.3</title>
+<title>Grupo Olyar — Solicitudes v2.11.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -894,21 +894,21 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
       <div id="presup-list-section">
         <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <table style="width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed">
             <thead>
               <tr style="background:var(--surface)">
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:80px">Fecha</th>
                 <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">DNI</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Dominio</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Total</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Estado</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Pagado</th>
-                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Acciones</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">DNI</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:70px">Dominio</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Total</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">Estado</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">Pagado</th>
+                <th style="padding:7px 8px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:85px">Acciones</th>
               </tr>
             </thead>
             <tbody id="presup-tbody">
-              <tr><td colspan="7" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
+              <tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">Cargando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -3039,7 +3039,7 @@ function renderPresupuestos() {
   tbody.innerHTML = PRESUP_CACHE.map(p => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
       <td style="padding:7px 8px;white-space:nowrap;width:80px;font-size:12px">${fmtD(p.fecha)}</td>
-      <td style="padding:7px 8px;font-weight:700;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px" title="${p.cliente||''}">${p.cliente||'—'}</td>
+      <td style="padding:7px 8px;font-weight:700;width:120px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px" title="${p.cliente||''}">${p.cliente||'—'}</td>
       <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:80px">${p.dni||'—'}</td>
       <td style="padding:7px 8px;font-family:monospace;font-size:12px;white-space:nowrap;width:70px">${p.dominio||'—'}</td>
       <td style="padding:7px 8px;font-weight:700;font-family:monospace;white-space:nowrap;font-size:12px">${mon(p.total)}</td>
