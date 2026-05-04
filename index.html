@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.12.9</title>
+<title>Grupo Olyar — Solicitudes v2.13.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -6620,7 +6620,7 @@ function showV(v) {
   });
   closeAllDD();
   if (v==='sol')      renderTable();
-  if (v==='nueva' && !editId) { resetForm(); document.getElementById('form-title').textContent='Nueva solicitud'; document.getElementById('save-btn').textContent='💾 Guardar solicitud'; }
+  if (v==='nueva' && !editId && !window._isDuplicating) { resetForm(); document.getElementById('form-title').textContent='Nueva solicitud'; document.getElementById('save-btn').textContent='💾 Guardar solicitud'; }
   if (v==='usuarios') loadUsers();
   if (v==='config')   { loadMantenimientoStatus(); }
   if (v==='backup')   { loadBackupList(); }
@@ -7268,12 +7268,13 @@ function editRec(id) {
 function duplicarRec(id) {
   const r=RECORDS.find(x=>x.id===id); if(!r) return;
   editId=null;
+  window._isDuplicating = true;
   document.getElementById('form-title').textContent='Nueva solicitud (duplicada)';
   document.getElementById('save-btn').textContent='💾 Guardar solicitud';
-  // Copia todos los datos pero limpia campos únicos
   const copia = {...r, id: null, fecha: new Date().toISOString().slice(0,10), estado: 'Pendiente'};
   fillForm(copia);
   showV('nueva');
+  window._isDuplicating = false;
   toast('Solicitud duplicada — revisá los datos antes de guardar', 'in');
 }
 
