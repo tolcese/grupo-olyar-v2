@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.12.8</title>
+<title>Grupo Olyar — Solicitudes v2.12.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8630,14 +8630,14 @@ function openPanel(id) {
   const existingBtns = panelHead.querySelector('.panel-btns');
   if (existingBtns) existingBtns.remove();
 
-  if (ME && ME.rol === 'admin') {
+  if (ME) {
     const btns = document.createElement('div');
     btns.className = 'panel-btns';
     btns.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
     btns.innerHTML = `
-      <button class="btn btn-p" style="font-size:12px;padding:6px 12px" onclick="closePanel();editRec('${r.id}')">✏️ Editar</button>
+      ${ME.rol === 'admin' ? `<button class="btn btn-p" style="font-size:12px;padding:6px 12px" onclick="closePanel();editRec('${r.id}')">✏️ Editar</button>` : ''}
       <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="closePanel();duplicarRec('${r.id}')">📋 Duplicar</button>
-      <button class="btn btn-d" style="font-size:12px;padding:6px 12px" onclick="closePanel();delRec('${r.id}')">🗑️ Eliminar</button>
+      ${ME.rol === 'admin' ? `<button class="btn btn-d" style="font-size:12px;padding:6px 12px" onclick="closePanel();delRec('${r.id}')">🗑️ Eliminar</button>` : ''}
     `;
     panelHead.appendChild(btns);
   }
