@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.13.7</title>
+<title>Grupo Olyar — Solicitudes v2.13.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1217,6 +1217,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             </thead>
             <tbody id="rep-hoy-tbody"></tbody>
           </table>
+        </div>
+        <div id="rep-hoy-paginacion" style="display:none;display:flex;justify-content:center;align-items:center;gap:8px;padding:14px 0">
+          <button id="rep-hoy-prev" onclick="cambiarPagHoy(-1)" style="padding:5px 14px;border:1.5px solid var(--line);border-radius:7px;background:none;cursor:pointer;font-size:13px">← Ant</button>
+          <span id="rep-hoy-pag-info" style="font-size:12px;color:var(--muted)"></span>
+          <button id="rep-hoy-next" onclick="cambiarPagHoy(1)" style="padding:5px 14px;border:1.5px solid var(--line);border-radius:7px;background:none;cursor:pointer;font-size:13px">Sig →</button>
         </div>
         <div id="rep-hoy-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">
           <div style="font-size:32px;margin-bottom:8px">📭</div>
@@ -9108,16 +9113,32 @@ function renderSolicitudesHoy() {
   if (!data.length) {
     tbody.innerHTML = '';
     empty.style.display = '';
+    document.getElementById('rep-hoy-paginacion').style.display = 'none';
     return;
   }
   empty.style.display = 'none';
 
+  const POR_PAG = 10;
+  window._hoyData = data;
+  if (window._hoyPag === undefined) window._hoyPag = 0;
+  window._hoyPag = Math.min(window._hoyPag, Math.floor((data.length - 1) / POR_PAG));
+
+  const totalPags = Math.ceil(data.length / POR_PAG);
+  const inicio = window._hoyPag * POR_PAG;
+  const pagData = data.slice(inicio, inicio + POR_PAG);
+
+  const pagDiv = document.getElementById('rep-hoy-paginacion');
+  pagDiv.style.display = totalPags > 1 ? 'flex' : 'none';
+  document.getElementById('rep-hoy-pag-info').textContent = `Página ${window._hoyPag + 1} de ${totalPags}`;
+  document.getElementById('rep-hoy-prev').disabled = window._hoyPag === 0;
+  document.getElementById('rep-hoy-next').disabled = window._hoyPag >= totalPags - 1;
+
   const mon = v => v ? '$' + Number(String(v).replace(/[$,]/g,'')).toLocaleString('es-AR') : '—';
   const val = v => v || '—';
 
-  tbody.innerHTML = data.map((r, i) => `
+  tbody.innerHTML = pagData.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:9px 12px;color:var(--muted);font-size:11px">${inicio + i + 1}</td>
       <td style="padding:9px 12px;font-weight:700">${val(r.nombrecliente)}</td>
       <td style="padding:9px 12px;font-family:monospace">${val(r.dni)}</td>
       <td style="padding:9px 12px;font-weight:600">${colorBanco(r.banco)}</td>
@@ -9127,6 +9148,11 @@ function renderSolicitudesHoy() {
       <td style="padding:9px 12px;color:var(--muted)">${val(r.usuario)}</td>
     </tr>
   `).join('');
+}
+
+function cambiarPagHoy(dir) {
+  window._hoyPag = (window._hoyPag || 0) + dir;
+  renderSolicitudesHoy();
 }
 
 function renderPrendasPendientes() {
