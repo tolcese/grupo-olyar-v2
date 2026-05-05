@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.14.1</title>
+<title>Grupo Olyar — Solicitudes v2.14.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -761,7 +761,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="ph"><div><div class="ph-t">Configuración</div><div class="ph-s">Google Sheets como base de datos central</div></div></div>
       <div class="card" style="margin-bottom:20px">
         <div class="card-t">📊 Porcentajes de préstamo por banco</div>
-        <div class="card-s" style="margin-bottom:16px">Definí cuánto presta el banco según el tipo de crédito y condición del vehículo. Se usa para calcular el monto máximo en cada solicitud.</div>
+        <div class="card-s" style="margin-bottom:16px">Definí cuánto presta el banco según tipo de crédito, condición y antigüedad del vehículo.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end">
           <div class="fc" style="flex:1;min-width:120px"><label>Banco</label><input id="pct-banco" type="text" placeholder="Ej: COLUMBIA" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%"></div>
           <div class="fc" style="flex:1;min-width:100px"><label>Tipo CTA</label>
@@ -771,11 +771,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             </select>
           </div>
           <div class="fc" style="flex:1;min-width:100px"><label>Condición</label>
-            <select id="pct-condicion" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%">
-              <option value="USADO">USADO</option>
+            <select id="pct-condicion" onchange="toggleAnioPct()" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%">
               <option value="0KM">0KM</option>
+              <option value="USADO">USADO</option>
             </select>
           </div>
+          <div class="fc" id="pct-anio-wrap" style="flex:1;min-width:90px;display:none"><label>Años antigüedad</label><input id="pct-anio" type="number" min="1" max="30" placeholder="Ej: 3" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%"></div>
           <div class="fc" style="flex:1;min-width:80px"><label>Porcentaje (%)</label><input id="pct-valor" type="number" min="0" max="100" step="0.1" placeholder="Ej: 70" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%"></div>
           <button onclick="guardarPorcentaje()" class="btn btn-p" style="padding:9px 18px;white-space:nowrap">Agregar / Actualizar</button>
         </div>
@@ -786,6 +787,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Banco</th>
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Tipo CTA</th>
               <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Condición</th>
+              <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Antigüedad</th>
               <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Porcentaje</th>
               <th style="padding:8px 12px"></th>
             </tr>
@@ -6232,10 +6234,15 @@ async function eliminarCupo(id, banco) {
 
 let PCT_CACHE = [];
 
+function toggleAnioPct() {
+  const cond = document.getElementById('pct-condicion').value;
+  document.getElementById('pct-anio-wrap').style.display = cond === 'USADO' ? '' : 'none';
+}
+
 async function loadPorcentajes() {
   document.getElementById('pct-loading').style.display = '';
   document.getElementById('pct-table').style.display = 'none';
-  const { data } = await SB.from('porcentajes_banco').select('*').order('banco').order('tipo_cta').order('condicion');
+  const { data } = await SB.from('porcentajes_banco').select('*').order('banco').order('tipo_cta').order('condicion').order('anios_antiguedad');
   PCT_CACHE = data || [];
   renderPorcentajes();
 }
@@ -6245,7 +6252,7 @@ function renderPorcentajes() {
   document.getElementById('pct-loading').style.display = 'none';
   document.getElementById('pct-table').style.display = '';
   if (!PCT_CACHE.length) {
-    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;text-align:center;color:var(--muted)">Sin porcentajes cargados</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)">Sin porcentajes cargados</td></tr>';
     return;
   }
   tbody.innerHTML = PCT_CACHE.map(p => `
@@ -6253,6 +6260,7 @@ function renderPorcentajes() {
       <td style="padding:9px 12px;font-weight:700">${colorBanco(p.banco)}</td>
       <td style="padding:9px 12px">${p.tipo_cta}</td>
       <td style="padding:9px 12px">${p.condicion}</td>
+      <td style="padding:9px 12px;text-align:center">${p.anios_antiguedad != null ? p.anios_antiguedad + ' año' + (p.anios_antiguedad !== 1 ? 's' : '') : '—'}</td>
       <td style="padding:9px 12px;text-align:right;font-weight:700;font-family:monospace">${p.porcentaje}%</td>
       <td style="padding:9px 12px;text-align:right">
         <button onclick="eliminarPorcentaje(${p.id})" style="padding:4px 10px;font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:none;cursor:pointer;color:var(--red)">🗑️</button>
@@ -6265,12 +6273,19 @@ async function guardarPorcentaje() {
   const tipo_cta = document.getElementById('pct-tipo').value;
   const condicion = document.getElementById('pct-condicion').value;
   const porcentaje = parseFloat(document.getElementById('pct-valor').value);
+  const anioInput = document.getElementById('pct-anio').value;
+  const anios_antiguedad = condicion === 'USADO' ? (parseInt(anioInput) || null) : null;
   if (!banco) return alert('Ingresá el banco');
+  if (condicion === 'USADO' && !anios_antiguedad) return alert('Ingresá los años de antigüedad');
   if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) return alert('Porcentaje inválido');
-  const { error } = await SB.from('porcentajes_banco').upsert({ banco, tipo_cta, condicion, porcentaje }, { onConflict: 'banco,tipo_cta,condicion' });
+  const { error } = await SB.from('porcentajes_banco').upsert(
+    { banco, tipo_cta, condicion, anios_antiguedad, porcentaje },
+    { onConflict: 'banco,tipo_cta,condicion,anios_antiguedad' }
+  );
   if (error) return alert('Error: ' + error.message);
   document.getElementById('pct-banco').value = '';
   document.getElementById('pct-valor').value = '';
+  document.getElementById('pct-anio').value = '';
   loadPorcentajes();
 }
 
@@ -6636,10 +6651,21 @@ function openPrendasPanel(id) {
       ${(()=>{
         const banco = (r.banco||'').toUpperCase();
         const tipo = (r.tipocta||'').toUpperCase();
-        const cond = (r.anio && String(r.anio).toUpperCase().includes('0KM')) ? '0KM' : 'USADO';
-        const pct = PCT_CACHE.find(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion.toUpperCase()===cond);
+        const anioStr = String(r.anio||'').toUpperCase();
+        const es0km = anioStr.includes('0KM');
+        let pct = null;
+        if (es0km) {
+          pct = PCT_CACHE.find(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion==='0KM');
+        } else {
+          const anioVeh = parseInt(anioStr);
+          if (anioVeh) {
+            const antiguedad = new Date().getFullYear() - anioVeh;
+            const candidatos = PCT_CACHE.filter(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion==='USADO' && p.anios_antiguedad != null && p.anios_antiguedad <= antiguedad);
+            if (candidatos.length) pct = candidatos.reduce((a,b) => b.anios_antiguedad > a.anios_antiguedad ? b : a);
+          }
+        }
         if (!pct || !r.vehiculo) return '';
-        const monto = Math.round(parseFloat(String(r.vehiculo).replace(/[$.,]/g,'').replace(',','.')) * pct.porcentaje / 100);
+        const monto = Math.round(parseFloat(String(r.vehiculo).replace(/[$.,]/g,'')) * pct.porcentaje / 100);
         return `<div class="prow"><span class="pl">Préstamo banco (${pct.porcentaje}%)</span><span class="pv mono bold" style="color:var(--blue)">${mon(monto)}</span></div>`;
       })()}
       ${ME?.rol==='admin' ? `<div class="prow"><span class="pl">Comisión</span><span class="pv mono bold" style="color:var(--green)">${mon(r.comision)}</span></div>` : ''}
@@ -8728,10 +8754,21 @@ function openPanel(id) {
       ${(()=>{
         const banco = (r.banco||'').toUpperCase();
         const tipo = (r.tipocta||'').toUpperCase();
-        const cond = (r.anio && String(r.anio).toUpperCase().includes('0KM')) ? '0KM' : 'USADO';
-        const pct = PCT_CACHE.find(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion.toUpperCase()===cond);
+        const anioStr = String(r.anio||'').toUpperCase();
+        const es0km = anioStr.includes('0KM');
+        let pct = null;
+        if (es0km) {
+          pct = PCT_CACHE.find(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion==='0KM');
+        } else {
+          const anioVeh = parseInt(anioStr);
+          if (anioVeh) {
+            const antiguedad = new Date().getFullYear() - anioVeh;
+            const candidatos = PCT_CACHE.filter(p => p.banco.toUpperCase()===banco && p.tipo_cta.toUpperCase()===tipo && p.condicion==='USADO' && p.anios_antiguedad != null && p.anios_antiguedad <= antiguedad);
+            if (candidatos.length) pct = candidatos.reduce((a,b) => b.anios_antiguedad > a.anios_antiguedad ? b : a);
+          }
+        }
         if (!pct || !r.vehiculo) return '';
-        const monto = Math.round(parseFloat(String(r.vehiculo).replace(/[$.,]/g,'').replace(',','.')) * pct.porcentaje / 100);
+        const monto = Math.round(parseFloat(String(r.vehiculo).replace(/[$.,]/g,'')) * pct.porcentaje / 100);
         return `<div class="prow"><span class="pl">Préstamo banco (${pct.porcentaje}%)</span><span class="pv mono bold" style="color:var(--blue)">${mon(monto)}</span></div>`;
       })()}
       ${ME?.rol==='admin' ? `<div class="prow"><span class="pl">Comisión</span><span class="pv mono bold" style="color:var(--green)">${mon(r.comision)}</span></div>` : ''}
