@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.14.0</title>
+<title>Grupo Olyar — Solicitudes v2.14.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -759,39 +759,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <!-- CONFIG -->
     <div id="v-config" style="display:none">
       <div class="ph"><div><div class="ph-t">Configuración</div><div class="ph-s">Google Sheets como base de datos central</div></div></div>
-      <div class="card">
-        <div class="card-t">🔗 URL del Apps Script</div>
-        <div class="card-s">Esta URL conecta el sistema con tu Google Sheet para usuarios, registros y listas</div>
-        <div class="warn-box">⚠️ <b>Importante:</b> Si cambiás la URL tenés que reimplementar el script en Google Apps Script.</div>
-        <details>
-          <summary>📋 Código para Apps Script (hacé clic para ver)</summary>
-          <pre id="script-pre"></pre>
-          <div style="padding:10px 14px;background:var(--surface);border-top:1px solid var(--line)">
-            <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="copyScript()">📋 Copiar código</button>
-          </div>
-        </details>
-        <div class="fc" style="margin-bottom:13px"><label>URL del Apps Script</label>
-          <input id="cfg-wh" placeholder="https://script.google.com/macros/s/.../exec"></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-p" onclick="saveCfg()">💾 Guardar</button>
-          <button class="btn btn-s" onclick="testWH()">🧪 Probar conexión</button>
-        </div>
-      </div>
-
-      <!-- MANTENIMIENTO -->
-      <div class="card" style="max-width:500px">
-        <div class="card-t">🔧 Modo mantenimiento</div>
-        <div class="card-s" style="margin-bottom:16px">Cuando está activo, los usuarios ven una pantalla de mantenimiento al ingresar. El admin puede seguir usando el sistema normalmente.</div>
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
-          <div id="mant-status" style="font-size:13px;font-weight:600;color:var(--muted)">Verificando...</div>
-        </div>
-        <div style="display:flex;gap:10px">
-          <button class="btn btn-p" id="btn-mant-activar" onclick="toggleMantenimiento(true)" style="display:none">🔧 Activar mantenimiento</button>
-          <button class="btn btn-d" id="btn-mant-desactivar" onclick="toggleMantenimiento(false)" style="display:none">✅ Desactivar mantenimiento</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:20px">
+      <div class="card" style="margin-bottom:20px">
         <div class="card-t">📊 Porcentajes de préstamo por banco</div>
         <div class="card-s" style="margin-bottom:16px">Definí cuánto presta el banco según el tipo de crédito y condición del vehículo. Se usa para calcular el monto máximo en cada solicitud.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:flex-end">
@@ -825,6 +793,38 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <tbody id="pct-tbody"></tbody>
         </table>
       </div>
+      <div class="card">
+        <div class="card-t">🔗 URL del Apps Script</div>
+        <div class="card-s">Esta URL conecta el sistema con tu Google Sheet para usuarios, registros y listas</div>
+        <div class="warn-box">⚠️ <b>Importante:</b> Si cambiás la URL tenés que reimplementar el script en Google Apps Script.</div>
+        <details>
+          <summary>📋 Código para Apps Script (hacé clic para ver)</summary>
+          <pre id="script-pre"></pre>
+          <div style="padding:10px 14px;background:var(--surface);border-top:1px solid var(--line)">
+            <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="copyScript()">📋 Copiar código</button>
+          </div>
+        </details>
+        <div class="fc" style="margin-bottom:13px"><label>URL del Apps Script</label>
+          <input id="cfg-wh" placeholder="https://script.google.com/macros/s/.../exec"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-p" onclick="saveCfg()">💾 Guardar</button>
+          <button class="btn btn-s" onclick="testWH()">🧪 Probar conexión</button>
+        </div>
+      </div>
+
+      <!-- MANTENIMIENTO -->
+      <div class="card" style="max-width:500px">
+        <div class="card-t">🔧 Modo mantenimiento</div>
+        <div class="card-s" style="margin-bottom:16px">Cuando está activo, los usuarios ven una pantalla de mantenimiento al ingresar. El admin puede seguir usando el sistema normalmente.</div>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+          <div id="mant-status" style="font-size:13px;font-weight:600;color:var(--muted)">Verificando...</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-p" id="btn-mant-activar" onclick="toggleMantenimiento(true)" style="display:none">🔧 Activar mantenimiento</button>
+          <button class="btn btn-d" id="btn-mant-desactivar" onclick="toggleMantenimiento(false)" style="display:none">✅ Desactivar mantenimiento</button>
+        </div>
+      </div>
+
     </div>
 
     <!-- BACKUP -->
