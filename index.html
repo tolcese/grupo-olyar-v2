@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.15.1</title>
+<title>Grupo Olyar — Solicitudes v2.15.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -9328,16 +9328,15 @@ async function enviarWhatsAppGrupo(link) {
   }
 }
 
-function enviarWhatsApp() {
-  let tel = document.getElementById('wa-tel').value.trim().replace(/\D/g,'');
+async function copiarMensajeWA() {
   const msg = document.getElementById('wa-msg').value.trim();
-  if (!tel) return alert('Ingresá un número de teléfono');
   if (!msg) return alert('El mensaje no puede estar vacío');
-  // Agregar código de Argentina si no lo tiene
-  if (!tel.startsWith('54')) tel = '54' + tel;
-  const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-  cerrarModalWA();
+  try {
+    await navigator.clipboard.writeText(msg);
+    toast('Mensaje copiado al portapapeles', 'in');
+  } catch(e) {
+    alert('No se pudo copiar. Seleccioná el texto manualmente.');
+  }
 }
 
 function renderSolicitudesAyer() {
@@ -10683,6 +10682,7 @@ function renderReportes() {
         <textarea id="wa-msg" rows="6" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%;resize:vertical;font-family:inherit"></textarea>
       </div>
       <button onclick="enviarWhatsApp()" style="padding:11px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">📱 Abrir WhatsApp</button>
+      <button onclick="copiarMensajeWA()" style="padding:11px;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">📋 Copiar mensaje</button>
       <button id="wa-btn-grupo" style="padding:11px;background:#128c7e;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:none">👥 Copiar msg y abrir Grupo</button>
     </div>
   </div>
