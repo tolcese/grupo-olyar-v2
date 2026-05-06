@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.14.2</title>
+<title>Grupo Olyar — Solicitudes v2.14.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1933,6 +1933,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <input type="date" id="hist-f-desde" onchange="renderHistoricoLiquidaciones()" style="font-size:12px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px">
           <input type="date" id="hist-f-hasta" onchange="renderHistoricoLiquidaciones()" style="font-size:12px;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px">
           <button class="btn btn-s" onclick="document.getElementById('hist-f-desde').value='';document.getElementById('hist-f-hasta').value='';renderHistoricoLiquidaciones()">✕ Limpiar</button>
+          <button class="btn btn-s" onclick="exportarHistoricoExcel()" style="background:#1d6fce;color:#fff;border-color:#1d6fce">📥 Exportar Excel</button>
         </div>
         <div style="overflow-x:auto">
           <table class="tbl" style="min-width:1400px">
@@ -5710,6 +5711,81 @@ function limpiarFiltrosCont() {
   renderContabilidad();
 }
 
+async function exportarHistoricoExcel() {
+  const q     = (document.getElementById('hist-srch')?.value || '').toLowerCase();
+  const desde = document.getElementById('hist-f-desde')?.value || '';
+  const hasta = document.getElementById('hist-f-hasta')?.value || '';
+
+  let data = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'AVANZA');
+  if (q) data = data.filter(r => [r.nombrecliente, r.banco, r.dni, r.concesionaria, r.provincia, r.localidad].some(v => (v||'').toLowerCase().includes(q)));
+  if (desde) data = data.filter(r => r.fecha && r.fecha >= desde);
+  if (hasta) data = data.filter(r => r.fecha && r.fecha <= hasta);
+
+  if (!data.length) return alert('No hay registros para exportar');
+
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '';
+  const num  = v => parseFloat(String(v||0).replace(/[$,]/g,'')) || 0;
+
+  const rows = data.map((r, i) => {
+    const c = CONT_DATA[r.id] || {};
+    return {
+      '#': i + 1,
+      'Fecha': fmtD(r.fecha),
+      'Banco': r.banco || '',
+      'Concesionaria': r.concesionaria || '',
+      'Localidad': r.localidad || '',
+      'Provincia': r.provincia || '',
+      'Cliente': r.nombrecliente || '',
+      'DNI': r.dni || '',
+      'Dominio': r.dominio || '',
+      'Gestor': r.gestorAsignado || '',
+      'Descripción': r.descripcion || '',
+      'Tipo CTA': r.tipocta || '',
+      'Importe': num(r.importe),
+      'Tasa': r.tasa || '',
+      'A Liquidar': num(c.aLiquidar),
+      '1,2 Imp. Crédito': num(c.impCredito),
+      'Gastos Gestoría': num(c.gastosGestoria),
+      'Com. Lukaya': num(c.comLukaya),
+      'Fecha Liq.': fmtD(c.fechaLiq),
+      'Com. Operativo': num(c.comOperativo),
+      'Com. Gestor': num(c.comGestora),
+      'Retrib. Banco': num(c.retribBanco),
+      'Pagos Extras': num(c.pagosExtras),
+      'Ganancia': num(c.ganancia),
+      'Pagado': c.pagado ? 'Sí' : 'No',
+      'Fecha Pago': fmtD(c.fechaPagado),
+      'Pago Gest.': c.pagoGest ? 'Sí' : 'No',
+      'Fecha Pago Gest.': fmtD(c.fechaPagoGest),
+      'Fecha Pago Banco': fmtD(c.fechaPagoBanco),
+      'Observaciones': c.obs || ''
+    };
+  });
+
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(rows);
+
+  // Ancho de columnas
+  ws['!cols'] = [
+    {wch:4},{wch:10},{wch:12},{wch:20},{wch:12},{wch:12},{wch:22},{wch:10},{wch:9},{wch:20},
+    {wch:20},{wch:7},{wch:12},{wch:6},{wch:12},{wch:14},{wch:13},{wch:12},{wch:10},{wch:13},
+    {wch:11},{wch:13},{wch:12},{wch:11},{wch:7},{wch:10},{wch:9},{wch:14},{wch:14},{wch:20}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Liquidaciones');
+  const fecha = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Liquidaciones_${fecha}.xlsx`);
+}
+
 function renderHistoricoLiquidaciones() {
   const q     = (document.getElementById('hist-srch')?.value || '').toLowerCase();
   const desde = document.getElementById('hist-f-desde')?.value || '';
@@ -7889,6 +7965,7 @@ async function saveLTEdit() {
     retrib_banco:    n(document.getElementById('lt-retrib-banco').value),
     pagos_extras:    n(document.getElementById('lt-pagos-extras').value),
     ganancia:        n(document.getElementById('lt-ganancia').value),
+    fecha_pago_banco: (CONT_DATA[id]||{}).fechaPagoBanco || (LT_DATA[id]||{}).fechaPagoBanco || null,
     pagado:          document.getElementById('lt-pagado').checked,
     fecha_pagado:    document.getElementById('lt-fecha-pagado').value || null,
     pago_gest:       document.getElementById('lt-pago-gest').checked,
