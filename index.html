@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.14.5</title>
+<title>Grupo Olyar — Solicitudes v2.14.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1295,6 +1295,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div style="font-size:32px;margin-bottom:8px">📭</div>
           <div style="font-weight:600">Sin solicitudes aprobadas el día anterior</div>
         </div>
+        <div id="rep-ayer-wa-btns" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px"></div>
       </div>
 
       <!-- CONVERSION POR CONCESIONARIA -->
@@ -9268,6 +9269,33 @@ function renderConversionConc() {
   }).join('');
 }
 
+function abrirModalWA(conc, tel, msg) {
+  document.getElementById('wa-conc-nombre').textContent = conc;
+  document.getElementById('wa-tel').value = tel;
+  document.getElementById('wa-msg').value = msg;
+  const el = document.getElementById('wa-modal-overlay');
+  el.style.display = 'flex';
+  requestAnimationFrame(() => el.classList.add('open'));
+}
+
+function cerrarModalWA() {
+  const el = document.getElementById('wa-modal-overlay');
+  el.classList.remove('open');
+  setTimeout(() => el.style.display = 'none', 200);
+}
+
+function enviarWhatsApp() {
+  let tel = document.getElementById('wa-tel').value.trim().replace(/\D/g,'');
+  const msg = document.getElementById('wa-msg').value.trim();
+  if (!tel) return alert('Ingresá un número de teléfono');
+  if (!msg) return alert('El mensaje no puede estar vacío');
+  // Agregar código de Argentina si no lo tiene
+  if (!tel.startsWith('54')) tel = '54' + tel;
+  const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  cerrarModalWA();
+}
+
 function renderSolicitudesAyer() {
   const tbody  = document.getElementById('rep-ayer-tbody');
   const empty  = document.getElementById('rep-ayer-empty');
@@ -9299,6 +9327,14 @@ function renderSolicitudesAyer() {
   const mon = v => v ? '$' + Number(String(v).replace(/[$,]/g,'')).toLocaleString('es-AR') : '—';
   const val = v => v || '—';
 
+  // Agrupar por concesionaria para el botón WhatsApp
+  const porConc = {};
+  data.forEach(r => {
+    const conc = r.concesionaria || 'Sin concesionaria';
+    if (!porConc[conc]) porConc[conc] = [];
+    porConc[conc].push(r);
+  });
+
   tbody.innerHTML = data.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
       <td style="padding:9px 12px;color:var(--muted);font-size:11px">${i+1}</td>
@@ -9310,6 +9346,18 @@ function renderSolicitudesAyer() {
       <td style="padding:9px 12px;color:var(--muted)">${val(r.usuario)}</td>
     </tr>
   `).join('');
+
+  // Botones WhatsApp por concesionaria
+  const btnsDiv = document.getElementById('rep-ayer-wa-btns');
+  if (btnsDiv) {
+    btnsDiv.innerHTML = Object.entries(porConc).map(([conc, regs]) => {
+      const concData = CONC_CACHE.find(c => c.nombre === conc);
+      const tel = concData?.telefono || '';
+      const apellidos = [...new Set(regs.map(r => (r.nombrecliente||'').split(' ')[0]))].join(', ');
+      const msg = `Hola! ¿Cómo estás? 😊\nTe escribo para hacer seguimiento de las propuestas de los créditos ${apellidos}.\nQueríamos saber si le resultó interesante el monto ofrecido y si quieren avanzar con la operación.`;
+      return `<button class="btn btn-s" style="background:#25d366;color:#fff;border-color:#25d366;font-size:12px" onclick="abrirModalWA('${conc.replace(/'/g,"\\'")}', '${tel}', \`${msg.replace(/`/g,"\\`")}\`)">📱 WhatsApp ${conc}</button>`;
+    }).join('');
+  }
 }
 
 function renderSolicitudesHoy() {
@@ -10563,6 +10611,32 @@ function renderReportes() {
       </div>
     </div>
     <div id="pd-body" style="padding:24px"></div>
+  </div>
+</div>
+
+<!-- MODAL WHATSAPP AYER -->
+<div class="overlay" id="wa-modal-overlay" onclick="if(event.target===this)cerrarModalWA()" style="z-index:600;display:none">
+  <div style="background:#fff;border-radius:16px;padding:0;width:min(520px,96vw);box-shadow:0 24px 80px rgba(0,0,0,.18)">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--line)">
+      <div style="font-size:16px;font-weight:800">📱 Enviar WhatsApp</div>
+      <button onclick="cerrarModalWA()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div class="fc">
+        <label>Concesionaria</label>
+        <div id="wa-conc-nombre" style="font-weight:700;font-size:14px;color:var(--ink);padding:4px 0"></div>
+      </div>
+      <div class="fc">
+        <label>Número de teléfono</label>
+        <input id="wa-tel" type="text" placeholder="Ej: 3516123456" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Sin 0 ni 15 — solo el número (ej: 3516123456)</div>
+      </div>
+      <div class="fc">
+        <label>Mensaje</label>
+        <textarea id="wa-msg" rows="6" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%;resize:vertical;font-family:inherit"></textarea>
+      </div>
+      <button onclick="enviarWhatsApp()" style="padding:11px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">📱 Abrir WhatsApp</button>
+    </div>
   </div>
 </div>
 
