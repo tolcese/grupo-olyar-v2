@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.14.6</title>
+<title>Grupo Olyar — Solicitudes v2.15.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -5152,6 +5152,7 @@ function nuevaConc() {
   document.getElementById('conc-edit-direccion').value = '';
   document.getElementById('conc-edit-localidad').value = '';
   document.getElementById('conc-edit-provincia').value = '';
+  document.getElementById('conc-edit-wa-grupo').value  = '';
   document.getElementById('conc-edit-overlay').classList.add('open');
 }
 
@@ -5170,6 +5171,7 @@ function editConc(nombre) {
   document.getElementById('conc-edit-direccion').value = c.direccion || '';
   document.getElementById('conc-edit-localidad').value = c.localidad || '';
   document.getElementById('conc-edit-provincia').value = c.provincia || '';
+  document.getElementById('conc-edit-wa-grupo').value  = c.whatsapp_grupo || '';
   document.getElementById('conc-edit-overlay').classList.add('open');
 }
 
@@ -5188,6 +5190,7 @@ async function saveConcEdit() {
     direccion: document.getElementById('conc-edit-direccion').value.trim(),
     localidad: document.getElementById('conc-edit-localidad').value.trim(),
     provincia: document.getElementById('conc-edit-provincia').value.trim(),
+    whatsapp_grupo: document.getElementById('conc-edit-wa-grupo').value.trim(),
   };
   try {
     const existing = CONC_CACHE.find(x => x.nombre === nombre);
@@ -9269,10 +9272,24 @@ function renderConversionConc() {
   }).join('');
 }
 
+function abrirModalWAIdx(idx) {
+  const d = window._waData && window._waData[idx];
+  if (!d) return;
+  abrirModalWA(d.conc, d.tel, d.msg);
+}
+
 function abrirModalWA(conc, tel, msg) {
+  const concData = CONC_CACHE.find(c => c.nombre === conc);
+  const grupoLink = concData?.whatsapp_grupo || '';
   document.getElementById('wa-conc-nombre').textContent = conc;
   document.getElementById('wa-tel').value = tel;
   document.getElementById('wa-msg').value = msg;
+  // Mostrar/ocultar botón grupo
+  const btnGrupo = document.getElementById('wa-btn-grupo');
+  if (btnGrupo) {
+    btnGrupo.style.display = grupoLink ? '' : 'none';
+    btnGrupo.onclick = () => enviarWhatsAppGrupo(grupoLink);
+  }
   const el = document.getElementById('wa-modal-overlay');
   el.style.display = 'flex';
   requestAnimationFrame(() => el.classList.add('open'));
@@ -9282,6 +9299,33 @@ function cerrarModalWA() {
   const el = document.getElementById('wa-modal-overlay');
   el.classList.remove('open');
   setTimeout(() => el.style.display = 'none', 200);
+}
+
+function enviarWhatsApp() {
+  let tel = document.getElementById('wa-tel').value.trim().replace(/\D/g,'');
+  const msg = document.getElementById('wa-msg').value.trim();
+  if (!tel) return alert('Ingresá un número de teléfono');
+  if (!msg) return alert('El mensaje no puede estar vacío');
+  if (!tel.startsWith('54')) tel = '54' + tel;
+  const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  cerrarModalWA();
+}
+
+async function enviarWhatsAppGrupo(link) {
+  const msg = document.getElementById('wa-msg').value.trim();
+  if (!msg) return alert('El mensaje no puede estar vacío');
+  try {
+    await navigator.clipboard.writeText(msg);
+    cerrarModalWA();
+    setTimeout(() => {
+      window.open(link, '_blank');
+      toast('Mensaje copiado — pegalo en el grupo con Ctrl+V', 'in');
+    }, 300);
+  } catch(e) {
+    alert('No se pudo copiar automáticamente. Copiá el mensaje manualmente y abrí el grupo.');
+    window.open(link, '_blank');
+  }
 }
 
 function enviarWhatsApp() {
@@ -9350,12 +9394,14 @@ function renderSolicitudesAyer() {
   // Botones WhatsApp por concesionaria
   const btnsDiv = document.getElementById('rep-ayer-wa-btns');
   if (btnsDiv) {
-    btnsDiv.innerHTML = Object.entries(porConc).map(([conc, regs]) => {
+    window._waData = {};
+    btnsDiv.innerHTML = Object.entries(porConc).map(([conc, regs], idx) => {
       const concData = CONC_CACHE.find(c => c.nombre === conc);
       const tel = concData?.telefono || '';
       const apellidos = [...new Set(regs.map(r => (r.nombrecliente||'').split(' ')[0]))].join(', ');
-      const msg = `Hola! ¿Cómo estás? 😊\nTe escribo para hacer seguimiento de las propuestas de los créditos ${apellidos}.\nQueríamos saber si le resultó interesante el monto ofrecido y si quieren avanzar con la operación.`;
-      return `<button class="btn btn-s" style="background:#25d366;color:#fff;border-color:#25d366;font-size:12px" onclick="abrirModalWA('${conc.replace(/'/g,"\\'")}', '${tel}', \`${msg.replace(/`/g,"\\`")}\`)">📱 WhatsApp ${conc}</button>`;
+      const msg = 'Hola! ¿Cómo estás? 😊\nTe escribo para hacer seguimiento de las propuestas de los créditos ' + apellidos + '.\nQueríamos saber si le resultó interesante el monto ofrecido y si quieren avanzar con la operación.';
+      window._waData[idx] = { conc, tel, msg };
+      return '<button class="btn btn-s" style="background:#25d366;color:#fff;border-color:#25d366;font-size:12px" onclick="abrirModalWAIdx(' + idx + ')">📱 WhatsApp ' + conc + '</button>';
     }).join('');
   }
 }
@@ -9458,7 +9504,7 @@ function renderPrendasPendientes() {
   tbody.innerHTML = data.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer;background:${r.prendaRechazada?'#fff5f5':''}" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background='${r.prendaRechazada?'#fff5f5':''}'" onclick="openPanel('${r.id}')">
       <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
-      <td style="padding:8px 10px;font-weight:700;white-space:nowrap">${r.nombrecliente||'—'}${r.prendaRechazada?` <span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-weight:600">RECHAZADA</span>`:''}</td>
+      <td style="padding:8px 10px;font-weight:700;white-space:nowrap">${r.nombrecliente||'—'}${r.prendaRechazada?' <span style="font-size:10px;background:#fee2e2;color:#dc2626;padding:2px 6px;border-radius:4px;font-weight:600">RECHAZADA</span>':''}</td>
       <td style="padding:8px 10px;font-weight:600">${colorBanco(r.banco)}</td>
       <td style="padding:8px 10px">${r.concesionaria||'—'}</td>
       <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestorAsignado||'—'}</td>
@@ -10470,6 +10516,7 @@ function renderReportes() {
       <div class="fc span2"><label>Dirección</label><input id="conc-edit-direccion" placeholder="Av. Ejemplo 1234"></div>
       <div class="fc"><label>Localidad</label><input id="conc-edit-localidad" placeholder="Córdoba"></div>
       <div class="fc"><label>Provincia</label><input id="conc-edit-provincia" placeholder="Córdoba"></div>
+      <div class="fc span2"><label>Link Grupo WhatsApp</label><input id="conc-edit-wa-grupo" type="url" placeholder="https://chat.whatsapp.com/..."></div>
     </div>
     <div class="mfoot">
       <button class="btn btn-s" onclick="closeConcEdit()">Cancelar</button>
@@ -10636,6 +10683,7 @@ function renderReportes() {
         <textarea id="wa-msg" rows="6" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%;resize:vertical;font-family:inherit"></textarea>
       </div>
       <button onclick="enviarWhatsApp()" style="padding:11px;background:#25d366;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">📱 Abrir WhatsApp</button>
+      <button id="wa-btn-grupo" style="padding:11px;background:#128c7e;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:none">👥 Copiar msg y abrir Grupo</button>
     </div>
   </div>
 </div>
