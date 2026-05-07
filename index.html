@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.15.5</title>
+<title>Grupo Olyar — Solicitudes v2.15.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7994,8 +7994,8 @@ async function saveLTEdit() {
     toast('Guardado ✓', 'ok');
     closeLTEdit();
     renderLiqTerceros();
-    // Sincronizar contabilidad con los datos actualizados
     renderContabilidad();
+    renderHistoricoLiquidaciones();
     renderSidebarPV();
     if (currentLTId === id) openLTPanel(id);
   } catch(e) { toast('Error: ' + e.message, 'er'); }
