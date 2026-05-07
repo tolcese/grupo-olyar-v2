@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.15.8</title>
+<title>Grupo Olyar — Solicitudes v2.15.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1996,6 +1996,25 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div style="display:flex;gap:10px">
               <button class="btn btn-p" onclick="guardarCoeficientes()">💾 Guardar coeficientes</button>
               <button class="btn btn-s" onclick="loadCoeficientes()">↺ Restaurar actuales</button>
+            </div>
+
+            <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--line)">
+              <div style="font-size:13px;font-weight:700;margin-bottom:6px">Comisión Lukaya por banco</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Cuando un banco tiene su propio porcentaje, se usa ese en lugar del general. Los que no tienen usan el valor general.</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:14px">
+                <div class="fc" style="flex:1;min-width:120px"><label>Banco</label><input id="coef-banco-nombre" type="text" placeholder="Ej: GALICIA" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%"></div>
+                <div class="fc" style="flex:1;min-width:100px"><label>Com. Lukaya (%)</label><input id="coef-banco-valor" type="number" step="0.001" min="0" placeholder="Ej: 8" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%"></div>
+                <button onclick="guardarCoefBanco()" class="btn btn-p" style="padding:9px 18px;white-space:nowrap">Agregar / Actualizar</button>
+              </div>
+              <div id="coef-banco-loading" style="text-align:center;color:var(--muted);padding:12px"><span class="spinner"></span> Cargando...</div>
+              <table id="coef-banco-table" style="width:100%;border-collapse:collapse;font-size:13px;display:none">
+                <thead><tr style="border-bottom:2px solid var(--line)">
+                  <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Banco</th>
+                  <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase">Com. Lukaya</th>
+                  <th style="padding:8px 12px"></th>
+                </tr></thead>
+                <tbody id="coef-banco-tbody"></tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -6122,7 +6141,7 @@ async function editCont(id) {
   if (c.impCredito || c.comLukaya || c.ganancia || c.aLiquidar) {
     const importe = parseFloat(String(r?.importe||0).replace(/[$,]/g,'')) || 0;
     const impCredito  = importe ? Math.round(importe * COEFICIENTES.impCredito / 100) : (c.impCredito || 0);
-    const comLukaya   = importe ? Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito) : (c.comLukaya || 0);
+    const comLukaya   = importe ? Math.round((importe * getComLukayaPct(r.banco) / 100) - impCredito) : (c.comLukaya || 0);
     const comGestora  = importe ? Math.round(importe * COEFICIENTES.comGestor / 100) : (c.comGestora || 0);
     // Usar valor guardado de retribBanco si existe, sino calcular desde coeficiente
     const retribBanco = c.retribBanco != null ? c.retribBanco : (importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : 0);
@@ -6160,7 +6179,7 @@ async function recargarLiquidaciones() {
     const importe = parseFloat(String(r.importe||0).replace(/[$,]/g,'')) || 0;
     if (!importe) continue;
     const impCredito  = Math.round(importe * COEFICIENTES.impCredito / 100);
-    const comLukaya   = Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
+    const comLukaya   = Math.round((importe * getComLukayaPct(r.banco) / 100) - impCredito);
     const comGestora  = Math.round(importe * COEFICIENTES.comGestor / 100);
     const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
     const ganancia    = Math.round(comLukaya - comGestora + retribBanco);
@@ -6375,6 +6394,14 @@ async function eliminarPorcentaje(id) {
   loadPorcentajes();
 }
 
+let COEF_BANCO = []; // {banco, com_lukaya, id}
+
+function getComLukayaPct(banco) {
+  const b = (banco || '').toUpperCase();
+  const exc = COEF_BANCO.find(c => c.banco.toUpperCase() === b);
+  return exc ? exc.com_lukaya : COEFICIENTES.comLukaya;
+}
+
 async function loadCoeficientes() {
   document.getElementById('coef-loading').style.display = '';
   document.getElementById('coef-form').style.display = 'none';
@@ -6392,6 +6419,53 @@ async function loadCoeficientes() {
   document.getElementById('coef-retrib-banco-actual').textContent = COEFICIENTES.retribBanco + '%';
   document.getElementById('coef-loading').style.display = 'none';
   document.getElementById('coef-form').style.display = '';
+  // Cargar coeficientes por banco
+  await loadCoefBanco();
+}
+
+async function loadCoefBanco() {
+  document.getElementById('coef-banco-loading').style.display = '';
+  document.getElementById('coef-banco-table').style.display = 'none';
+  const { data } = await SB.from('coeficientes_banco').select('*').order('banco');
+  COEF_BANCO = data || [];
+  renderCoefBanco();
+}
+
+function renderCoefBanco() {
+  const tbody = document.getElementById('coef-banco-tbody');
+  document.getElementById('coef-banco-loading').style.display = 'none';
+  document.getElementById('coef-banco-table').style.display = '';
+  if (!COEF_BANCO.length) {
+    tbody.innerHTML = '<tr><td colspan="3" style="padding:16px;text-align:center;color:var(--muted)">Sin excepciones por banco — se usa el coeficiente general</td></tr>';
+    return;
+  }
+  tbody.innerHTML = COEF_BANCO.map(c => `
+    <tr style="border-bottom:1px solid var(--line)">
+      <td style="padding:9px 12px;font-weight:700">${colorBanco(c.banco)}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:700;font-family:monospace">${c.com_lukaya}%</td>
+      <td style="padding:9px 12px;text-align:right">
+        <button onclick="eliminarCoefBanco(${c.id})" style="padding:4px 10px;font-size:12px;border:1.5px solid var(--line);border-radius:6px;background:none;cursor:pointer;color:var(--red)">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+async function guardarCoefBanco() {
+  const banco = document.getElementById('coef-banco-nombre').value.trim().toUpperCase();
+  const valor = parseFloat(document.getElementById('coef-banco-valor').value);
+  if (!banco) return alert('Ingresá el nombre del banco');
+  if (isNaN(valor) || valor < 0) return alert('Porcentaje inválido');
+  const { error } = await SB.from('coeficientes_banco').upsert({ banco, com_lukaya: valor }, { onConflict: 'banco' });
+  if (error) return alert('Error: ' + error.message);
+  document.getElementById('coef-banco-nombre').value = '';
+  document.getElementById('coef-banco-valor').value = '';
+  await loadCoefBanco();
+  toast('Guardado ✓', 'ok');
+}
+
+async function eliminarCoefBanco(id) {
+  if (!confirm('¿Eliminar este coeficiente?')) return;
+  await SB.from('coeficientes_banco').delete().eq('id', id);
+  await loadCoefBanco();
 }
 
 async function guardarCoeficientes() {
@@ -6431,7 +6505,7 @@ function calcContLiquidar() {
   const impCredito = Math.round(importe * COEFICIENTES.impCredito / 100);
   document.getElementById('cont-imp-credito').value = impCredito.toFixed(2);
   // Comisión LUKAYA — solo calcular si el campo está vacío
-  const comLukayaCalc = Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
+  const comLukayaCalc = Math.round((importe * getComLukayaPct(r.banco) / 100) - impCredito);
   if (!document.getElementById('cont-com-lukaya').value) {
     document.getElementById('cont-com-lukaya').value = comLukayaCalc.toFixed(2);
   }
@@ -6915,7 +6989,7 @@ async function autoCalcContabilidad() {
     const importe = parseFloat(String(r.importe||0).replace(/[$,]/g,'')) || 0;
     if (!importe) continue;
     const impCredito  = Math.round(importe * COEFICIENTES.impCredito / 100);
-    const comLukaya   = Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
+    const comLukaya   = Math.round((importe * getComLukayaPct(r.banco) / 100) - impCredito);
     const comGestora  = Math.round(importe * COEFICIENTES.comGestor / 100);
     const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
     const ganancia    = Math.round(comLukaya - comGestora + retribBanco);
@@ -7253,7 +7327,7 @@ async function saveRecord() {
           }
           if (recalcular) {
             const impCredito  = Math.round(importeNuevo * COEFICIENTES.impCredito / 100);
-            const comLukaya   = Math.round((importeNuevo * COEFICIENTES.comLukaya / 100) - impCredito);
+            const comLukaya   = Math.round((importeNuevo * getComLukayaPct(r.banco) / 100) - impCredito);
             const comGestora  = Math.round(importeNuevo * COEFICIENTES.comGestor / 100);
             const retribBanco = Math.round(importeNuevo * COEFICIENTES.retribBanco / 100);
             const aLiquidar   = Math.round(importeNuevo - comLukaya - (c.gastosGestoria||0) - impCredito);
@@ -7905,7 +7979,7 @@ async function editLT(id) {
     // Recalcular desde el importe actual de la solicitud
     const importe = parseFloat(String(r?.importe||0).replace(/[$,]/g,'')) || 0;
     const impCredito = importe ? Math.round(importe * COEFICIENTES.impCredito / 100) : (c.impCredito || 0);
-    const comLukaya  = c.comLukaya  != null ? c.comLukaya  : (importe ? Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito) : 0);
+    const comLukaya  = c.comLukaya  != null ? c.comLukaya  : (importe ? Math.round((importe * getComLukayaPct(r.banco) / 100) - impCredito) : 0);
     const comGestora = c.comGestora != null ? c.comGestora : (importe ? Math.round(importe * COEFICIENTES.comGestor / 100) : 0);
     const retribBanco = c.retribBanco != null ? c.retribBanco : (importe ? Math.round(importe * COEFICIENTES.retribBanco / 100) : 0);
     const gastosGest  = parseFloat(String(c.gastosGestoria||0)) || 0;
