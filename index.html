@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.15.9</title>
+<title>Grupo Olyar — Solicitudes v2.16.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7327,7 +7327,7 @@ async function saveRecord() {
           }
           if (recalcular) {
             const impCredito  = Math.round(importeNuevo * COEFICIENTES.impCredito / 100);
-            const comLukaya   = Math.round((importeNuevo * getComLukayaPct(r.banco) / 100) - impCredito);
+            const comLukaya   = Math.round((importeNuevo * getComLukayaPct(rec?.banco || r?.banco) / 100) - impCredito);
             const comGestora  = Math.round(importeNuevo * COEFICIENTES.comGestor / 100);
             const retribBanco = Math.round(importeNuevo * COEFICIENTES.retribBanco / 100);
             const aLiquidar   = Math.round(importeNuevo - comLukaya - (c.gastosGestoria||0) - impCredito);
@@ -7908,7 +7908,7 @@ function calcLTLiquidar() {
   const r = RECORDS.find(x => x.id === document.getElementById('lt-edit-id').value);
   const importe = parseFloat(String(r?.importe||0).replace(/[$,]/g,'')) || 0;
   const impCredito  = parseFloat(document.getElementById('lt-imp-credito').value) || Math.round(importe * COEFICIENTES.impCredito / 100);
-  const comLukaya   = parseFloat(document.getElementById('lt-com-lukaya').value)  || Math.round((importe * COEFICIENTES.comLukaya / 100) - impCredito);
+  const comLukaya   = parseFloat(document.getElementById('lt-com-lukaya').value)  || Math.round((importe * getComLukayaPct(r?.banco) / 100) - impCredito);
   const comGestora  = parseFloat(document.getElementById('lt-com-gestora').value) || Math.round(importe * COEFICIENTES.comGestor / 100);
   const retribBanco = parseFloat(document.getElementById('lt-retrib-banco').value)|| Math.round(importe * COEFICIENTES.retribBanco / 100);
   const comComercial = parseFloat(document.getElementById('lt-com-comercial').value||0) || 0;
