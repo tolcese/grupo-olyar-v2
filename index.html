@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.16.8</title>
+<title>Grupo Olyar — Solicitudes v2.16.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1399,20 +1399,20 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <span id="fin-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
         </div>
         <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">
             <thead>
               <tr style="background:var(--surface)">
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Concesionaria</th>
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap;width:80px">Banco</th>
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Tipo</th>
-                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Año/Cond.</th>
-                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Valor vehículo</th>
-                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Importe prestado</th>
-                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">% Real</th>
-                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">%Banco</th>
-                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Diferencia</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">Fecha</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:130px">Cliente</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:120px">Concesionaria</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">Banco</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:45px">Tipo</th>
+                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">Año</th>
+                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Valor veh.</th>
+                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Importe</th>
+                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">% Real</th>
+                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">%Banco</th>
+                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:60px">Diferencia</th>
               </tr>
             </thead>
             <tbody id="fin-tbody"></tbody>
@@ -9352,17 +9352,17 @@ function renderFinanciamiento() {
     const diffColor = diff === null ? 'var(--muted)' : parseFloat(diff) > 0 ? 'var(--green)' : parseFloat(diff) < 0 ? 'var(--red)' : 'var(--ink)';
 
     return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:8px 12px;font-size:12px;white-space:nowrap">${fmtD(r.fecha)}</td>
-      <td style="padding:8px 12px;font-weight:700;font-size:12px">${r.nombrecliente||'—'}</td>
-      <td style="padding:8px 12px;font-size:12px">${r.concesionaria||'—'}</td>
-      <td style="padding:8px 12px;font-size:12px;white-space:nowrap">${colorBanco(r.banco)}</td>
-      <td style="padding:8px 12px;font-size:12px">${r.tipocta||'—'}</td>
-      <td style="padding:8px 12px;font-size:12px">${r.anio||'—'}</td>
-      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px">${mon(r.vehiculo)}</td>
-      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px">${mon(r.importe)}</td>
-      <td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--blue);font-size:12px">${pctReal ? pctReal+'%' : '—'}</td>
-      <td style="padding:8px 12px;text-align:right;font-size:12px;color:var(--muted)">${pctConf ? pctConf+'%' : '—'}</td>
-      <td style="padding:8px 12px;text-align:right;font-weight:700;font-size:12px;color:${diffColor}">${diff !== null ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'}</td>
+      <td style="padding:6px 8px;font-size:11px;white-space:nowrap">${fmtD(r.fecha)}</td>
+      <td style="padding:6px 8px;font-weight:700;font-size:11px">${r.nombrecliente||'—'}</td>
+      <td style="padding:6px 8px;font-size:11px">${r.concesionaria||'—'}</td>
+      <td style="padding:6px 8px;font-size:11px;white-space:nowrap">${colorBanco(r.banco)}</td>
+      <td style="padding:6px 8px;font-size:11px">${r.tipocta||'—'}</td>
+      <td style="padding:6px 8px;font-size:11px">${r.anio||'—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:11px">${mon(r.vehiculo)}</td>
+      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:11px">${mon(r.importe)}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700;color:var(--blue);font-size:11px">${pctReal ? pctReal+'%' : '—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-size:11px;color:var(--muted)">${pctConf ? pctConf+'%' : '—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700;font-size:11px;color:${diffColor}">${diff !== null ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'}</td>
     </tr>`;
   }).join('');
 }
