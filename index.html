@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.16.0</title>
+<title>Grupo Olyar — Solicitudes v2.16.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8949,6 +8949,7 @@ function openPanel(id) {
     btns.style.cssText = 'display:flex;gap:8px;margin-top:10px;';
     btns.innerHTML = `
       ${ME.rol === 'admin' ? `<button class="btn btn-p" style="font-size:12px;padding:6px 12px" onclick="closePanel();editRec('${r.id}')">✏️ Editar</button>` : ''}
+      ${(r.gestorAsignado && ME.rol !== 'admin') ? `<button class="btn btn-p" style="font-size:12px;padding:6px 12px" onclick="closePanel();editPrenda('${r.id}')">✏️ Editar prenda</button>` : ''}
       <button class="btn btn-s" style="font-size:12px;padding:6px 12px" onclick="closePanel();duplicarRec('${r.id}')">📋 Duplicar</button>
       ${ME.rol === 'admin' ? `<button class="btn btn-d" style="font-size:12px;padding:6px 12px" onclick="closePanel();delRec('${r.id}')">🗑️ Eliminar</button>` : ''}
     `;
