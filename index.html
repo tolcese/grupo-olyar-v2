@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.16.2</title>
+<title>Grupo Olyar — Solicitudes v2.16.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1166,6 +1166,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="tab-solicitudes-ayer" onclick="showRepTab('solicitudes-ayer')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Solicitudes día anterior</button>
         <button id="tab-conversion-conc" onclick="showRepTab('conversion-conc')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📊 Conversión por concesionaria</button>
         <button id="tab-listado-prendas" onclick="showRepTab('listado-prendas')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Listado de prendas</button>
+        <button id="tab-financiamiento" onclick="showRepTab('financiamiento')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">💰 % Financiamiento</button>
       </div>
 
       <!-- TAB 1: ESTADOS TOTALES -->
@@ -1372,6 +1373,52 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         </div>
       </div>
     </div>
+
+      <div id="rep-financiamiento" class="card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="card-t">💰 % Financiamiento</div>
+            <div class="card-s">Comparación entre % real prestado y % configurado por banco — solo solicitudes aprobadas</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+          <select id="fin-banco" class="fsel" onchange="renderFinanciamiento()"><option value="">Todos los bancos</option></select>
+          <select id="fin-condicion" class="fsel" onchange="renderFinanciamiento()">
+            <option value="">Todas las condiciones</option>
+            <option value="0KM">0KM</option>
+            <option value="USADO">USADO</option>
+          </select>
+          <select id="fin-tipo" class="fsel" onchange="renderFinanciamiento()">
+            <option value="">Todos los tipos</option>
+            <option value="FIJA">FIJA</option>
+            <option value="UVA">UVA</option>
+          </select>
+          <input type="date" id="fin-desde" class="fsel" onchange="renderFinanciamiento()" placeholder="Desde">
+          <input type="date" id="fin-hasta" class="fsel" onchange="renderFinanciamiento()" placeholder="Hasta">
+          <button class="btn btn-s" onclick="document.getElementById('fin-banco').value='';document.getElementById('fin-condicion').value='';document.getElementById('fin-tipo').value='';document.getElementById('fin-desde').value='';document.getElementById('fin-hasta').value='';renderFinanciamiento()">✕ Limpiar</button>
+          <span id="fin-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Fecha</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Banco</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Tipo</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Año/Cond.</th>
+                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Valor vehículo</th>
+                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Importe prestado</th>
+                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">% Real</th>
+                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">% Config.</th>
+                <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Diferencia</th>
+              </tr>
+            </thead>
+            <tbody id="fin-tbody"></tbody>
+          </table>
+        </div>
+        <div id="fin-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">No hay solicitudes con los filtros seleccionados</div>
+      </div>
 
     <!-- LIQUIDACIONES A TERCEROS -->
     <div id="v-liq-terceros" style="display:none">
@@ -6909,6 +6956,8 @@ function showV(v) {
       if (tabConv) tabConv.style.display = '';
       const tabLP = document.getElementById('tab-listado-prendas');
       if (tabLP) tabLP.style.display = '';
+      const tabFin = document.getElementById('tab-financiamiento');
+      if (tabFin) tabFin.style.display = '';
       setTimeout(renderReportes, 50);
     }
   }
@@ -9212,7 +9261,7 @@ let chartTorta = null;
 let chartBarras = null;
 
 function showRepTab(tab) {
-  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc','listado-prendas'].forEach(t => {
+  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc','listado-prendas','financiamiento'].forEach(t => {
     document.getElementById('rep-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('tab-'+t);
     if (btn) {
@@ -9226,7 +9275,83 @@ function showRepTab(tab) {
   else if (tab === 'solicitudes-ayer') renderSolicitudesAyer();
   else if (tab === 'conversion-conc') renderConversionConc();
   else if (tab === 'listado-prendas') renderListadoPrendas();
+  else if (tab === 'financiamiento') { poblarFiltroFinBancos(); renderFinanciamiento(); }
   else setTimeout(renderReportes, 50);
+}
+
+function poblarFiltroFinBancos() {
+  const sel = document.getElementById('fin-banco');
+  if (!sel || sel.options.length > 1) return;
+  const bancos = [...new Set(RECORDS.filter(r => (r.estado||'').toUpperCase()==='APROBADO').map(r => r.banco).filter(Boolean))].sort();
+  bancos.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o); });
+}
+
+function renderFinanciamiento() {
+  const banco    = document.getElementById('fin-banco')?.value || '';
+  const condicion = document.getElementById('fin-condicion')?.value || '';
+  const tipo     = document.getElementById('fin-tipo')?.value || '';
+  const desde    = document.getElementById('fin-desde')?.value || '';
+  const hasta    = document.getElementById('fin-hasta')?.value || '';
+  const tbody    = document.getElementById('fin-tbody');
+  const empty    = document.getElementById('fin-empty');
+  const countEl  = document.getElementById('fin-count');
+  if (!tbody) return;
+
+  let data = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'APROBADO');
+  if (banco)    data = data.filter(r => (r.banco||'').toUpperCase() === banco.toUpperCase());
+  if (tipo)     data = data.filter(r => (r.tipocta||'').toUpperCase() === tipo.toUpperCase());
+  if (condicion === '0KM') data = data.filter(r => String(r.anio||'').toUpperCase().includes('0KM'));
+  if (condicion === 'USADO') data = data.filter(r => !String(r.anio||'').toUpperCase().includes('0KM') && r.anio);
+  if (desde)    data = data.filter(r => r.fecha && r.fecha >= desde);
+  if (hasta)    data = data.filter(r => r.fecha && r.fecha <= hasta);
+
+  countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  const mon  = v => v ? '$' + Math.round(parseFloat(String(v).replace(/[$,]/g,''))).toLocaleString('es-AR') : '—';
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+
+  tbody.innerHTML = data.map(r => {
+    const imp = parseFloat(String(r.importe||0).replace(/[$,]/g,''))||0;
+    const veh = parseFloat(String(r.vehiculo||0).replace(/[$,]/g,''))||0;
+    const pctReal = (imp && veh) ? ((imp/veh)*100).toFixed(1) : null;
+
+    // % configurado
+    const bancoUp = (r.banco||'').toUpperCase();
+    const tipoUp  = (r.tipocta||'').toUpperCase();
+    const anioStr = String(r.anio||'').toUpperCase();
+    const es0km   = anioStr.includes('0KM');
+    let pctConf = null;
+    if (es0km) {
+      const p = PCT_CACHE.find(p => p.banco.toUpperCase()===bancoUp && p.tipo_cta.toUpperCase()===tipoUp && p.condicion==='0KM');
+      if (p) pctConf = p.porcentaje;
+    } else {
+      const anioVeh = parseInt(anioStr);
+      if (anioVeh) {
+        const antiguedad = new Date().getFullYear() - anioVeh;
+        const candidatos = PCT_CACHE.filter(p => p.banco.toUpperCase()===bancoUp && p.tipo_cta.toUpperCase()===tipoUp && p.condicion==='USADO' && p.anios_antiguedad!=null && p.anios_antiguedad<=antiguedad);
+        if (candidatos.length) pctConf = candidatos.reduce((a,b)=>b.anios_antiguedad>a.anios_antiguedad?b:a).porcentaje;
+      }
+    }
+
+    const diff = (pctReal && pctConf) ? (parseFloat(pctReal) - pctConf).toFixed(1) : null;
+    const diffColor = diff === null ? 'var(--muted)' : parseFloat(diff) > 0 ? 'var(--green)' : parseFloat(diff) < 0 ? 'var(--red)' : 'var(--ink)';
+
+    return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:8px 12px;font-size:12px;white-space:nowrap">${fmtD(r.fecha)}</td>
+      <td style="padding:8px 12px;font-weight:700;font-size:12px">${r.nombrecliente||'—'}</td>
+      <td style="padding:8px 12px;font-size:12px">${colorBanco(r.banco)}</td>
+      <td style="padding:8px 12px;font-size:12px">${r.tipocta||'—'}</td>
+      <td style="padding:8px 12px;font-size:12px">${r.anio||'—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px">${mon(r.vehiculo)}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px">${mon(r.importe)}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:var(--blue);font-size:12px">${pctReal ? pctReal+'%' : '—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-size:12px;color:var(--muted)">${pctConf ? pctConf+'%' : '—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;font-size:12px;color:${diffColor}">${diff !== null ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'}</td>
+    </tr>`;
+  }).join('');
 }
 
 function renderListadoPrendas() {
