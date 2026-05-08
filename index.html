@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.16.7</title>
+<title>Grupo Olyar — Solicitudes v2.16.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2503,7 +2503,7 @@ async function enterApp() {
     initPresupRealtime();
   } else {
     await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
-    Promise.all([loadGestores(), loadDatero(), loadGastos()]).catch(()=>{});
+    Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
     initPresupRealtime();
   }
   SB.from('coeficientes').select('*').eq('id',1).single().then(({data}) => {
@@ -6387,6 +6387,11 @@ let PCT_CACHE = [];
 function toggleAnioPct() {
   const cond = document.getElementById('pct-condicion').value;
   document.getElementById('pct-anio-wrap').style.display = cond === 'USADO' ? '' : 'none';
+}
+
+async function loadPorcentajesBanco() {
+  const { data } = await SB.from('porcentajes_banco').select('*');
+  if (data) PCT_CACHE = data;
 }
 
 async function loadPorcentajes() {
