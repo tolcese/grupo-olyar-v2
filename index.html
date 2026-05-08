@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.16.1</title>
+<title>Grupo Olyar — Solicitudes v2.16.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -713,11 +713,14 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div class="fc"><label>Tipo de CTA</label>
             <select id="f-tipocta"><option value="">— Seleccioná —</option><option>FIJA</option><option>UVA</option></select></div>
           <div class="fc"><label>Importe solicitado ($)</label>
-            <div class="cur"><span class="cur-s">$</span><input id="f-importe" type="number" min="0" placeholder="0" oninput="calcMontoAgencia()"></div></div>
+            <div class="cur"><span class="cur-s">$</span><input id="f-importe" type="number" min="0" placeholder="0" oninput="calcMontoAgencia();calcPctPrestado()"></div></div>
           <div class="fc"><label>Monto para agencia ($)</label>
             <div class="cur"><span class="cur-s">$</span><input id="f-agencia" type="number" min="0" placeholder="0"></div></div>
           <div class="fc"><label>Monto vehículo ($)</label>
-            <div class="cur"><span class="cur-s">$</span><input id="f-vehiculo" type="number" min="0" placeholder="0"></div></div>
+            <div class="cur"><span class="cur-s">$</span><input id="f-vehiculo" type="number" min="0" placeholder="0" oninput="calcPctPrestado()"></div></div>
+          <div class="fc"><label>% prestado por el banco</label>
+            <div id="f-pct-prestado" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:14px;font-weight:700;color:var(--muted);background:var(--surface)">—</div>
+          </div>
           <div class="fc"><label>Comisión ($)</label>
             <div class="cur"><span class="cur-s">$</span><input id="f-comision" type="number" min="0" placeholder="0" style="background:#f0fdf4"></div></div>
           <div class="fc"><label>Estado</label>
@@ -6803,6 +6806,13 @@ function openPrendasPanel(id) {
       <div class="prow"><span class="pl">Monto agencia</span><span class="pv mono">${mon(r.agencia)}</span></div>
       <div class="prow"><span class="pl">Monto vehículo</span><span class="pv mono">${mon(r.vehiculo)}</span></div>
       ${(()=>{
+        const imp = parseFloat(String(r.importe||0).replace(/[$,]/g,''))||0;
+        const veh = parseFloat(String(r.vehiculo||0).replace(/[$,]/g,''))||0;
+        if (!imp || !veh) return '';
+        const pct = ((imp/veh)*100).toFixed(1);
+        return '<div class="prow"><span class="pl">% prestado por banco</span><span class="pv mono bold" style="color:var(--blue)">'+pct+'%</span></div>';
+      })()}
+      ${(()=>{
         const banco = (r.banco||'').toUpperCase();
         const tipo = (r.tipocta||'').toUpperCase();
         const anioStr = String(r.anio||'').toUpperCase();
@@ -7157,6 +7167,21 @@ document.addEventListener('mousedown', e => {
 // ══════════════════════════════════════════════
 // AUTO CALCULO MONTO AGENCIA
 // ══════════════════════════════════════════════
+function calcPctPrestado() {
+  const importe  = parseFloat(document.getElementById('f-importe')?.value) || 0;
+  const vehiculo = parseFloat(document.getElementById('f-vehiculo')?.value) || 0;
+  const el = document.getElementById('f-pct-prestado');
+  if (!el) return;
+  if (importe > 0 && vehiculo > 0) {
+    const pct = ((importe / vehiculo) * 100).toFixed(1);
+    el.textContent = pct + '%';
+    el.style.color = 'var(--blue)';
+  } else {
+    el.textContent = '—';
+    el.style.color = 'var(--muted)';
+  }
+}
+
 function calcMontoAgencia() {
   const importe = parseFloat(document.getElementById('f-importe').value) || 0;
   const tasaStr = document.getElementById('f-tasa').value.replace(',', '.');
@@ -8906,6 +8931,13 @@ function openPanel(id) {
       <div class="prow"><span class="pl">Importe solicitado</span><span class="pv mono bold">${mon(r.importe)}</span></div>
       <div class="prow"><span class="pl">Monto agencia</span><span class="pv mono">${mon(r.agencia)}</span></div>
       <div class="prow"><span class="pl">Monto vehículo</span><span class="pv mono">${mon(r.vehiculo)}</span></div>
+      ${(()=>{
+        const imp = parseFloat(String(r.importe||0).replace(/[$,]/g,''))||0;
+        const veh = parseFloat(String(r.vehiculo||0).replace(/[$,]/g,''))||0;
+        if (!imp || !veh) return '';
+        const pct = ((imp/veh)*100).toFixed(1);
+        return '<div class="prow"><span class="pl">% prestado por banco</span><span class="pv mono bold" style="color:var(--blue)">'+pct+'%</span></div>';
+      })()}
       ${(()=>{
         const banco = (r.banco||'').toUpperCase();
         const tipo = (r.tipocta||'').toUpperCase();
