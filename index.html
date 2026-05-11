@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.4</title>
+<title>Grupo Olyar — Solicitudes v2.17.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1402,21 +1402,21 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <button class="btn btn-s" onclick="document.getElementById('fin-banco').value='';document.getElementById('fin-condicion').value='';document.getElementById('fin-tipo').value='';document.getElementById('fin-desde').value='';document.getElementById('fin-hasta').value='';renderFinanciamiento()">✕ Limpiar</button>
           <span id="fin-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
         </div>
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed">
-            <thead>
+        <div style="overflow-x:auto;overflow-y:auto;max-height:600px">
+          <table style="min-width:900px;border-collapse:collapse;font-size:13px">
+            <thead style="position:sticky;top:0;z-index:2">
               <tr style="background:var(--surface)">
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">Fecha</th>
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:130px">Cliente</th>
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:120px">Concesionaria</th>
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:75px">Banco</th>
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:45px">Tipo</th>
-                <th style="padding:6px 8px;text-align:left;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">Año</th>
-                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:50px">Valor veh.</th>
-                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:50px">Importe</th>
-                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">% Real</th>
-                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:55px">%Banco</th>
-                <th style="padding:6px 8px;text-align:right;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:60px">Diferencia</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Cliente</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Concesionaria</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Banco</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Tipo</th>
+                <th style="padding:8px 10px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Año</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Valor veh.</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Importe</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">% Real</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">%Banco</th>
+                <th style="padding:8px 10px;text-align:right;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Diferencia</th>
               </tr>
             </thead>
             <tbody id="fin-tbody"></tbody>
@@ -9359,17 +9359,17 @@ function renderFinanciamiento() {
     const diffColor = diff === null ? 'var(--muted)' : parseFloat(diff) > 0 ? 'var(--green)' : parseFloat(diff) < 0 ? 'var(--red)' : 'var(--ink)';
 
     return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:6px 8px;font-size:11px;white-space:nowrap">${fmtD(r.fecha)}</td>
-      <td style="padding:6px 8px;font-weight:700;font-size:11px">${r.nombrecliente||'—'}</td>
-      <td style="padding:6px 8px;font-size:11px">${r.concesionaria||'—'}</td>
-      <td style="padding:6px 8px;font-size:11px;white-space:nowrap">${colorBanco(r.banco)}</td>
-      <td style="padding:6px 8px;font-size:11px">${r.tipocta||'—'}</td>
-      <td style="padding:6px 8px;font-size:11px">${r.anio||'—'}</td>
-      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:11px">${mon(r.vehiculo)}</td>
-      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:11px">${mon(r.importe)}</td>
-      <td style="padding:6px 8px;text-align:right;font-weight:700;color:var(--blue);font-size:11px">${pctReal ? pctReal+'%' : '—'}</td>
-      <td style="padding:6px 8px;text-align:right;font-size:11px;color:var(--muted)">${pctConf ? pctConf+'%' : '—'}</td>
-      <td style="padding:6px 8px;text-align:right;font-weight:700;font-size:11px;color:${diffColor}">${diff !== null ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'}</td>
+      <td style="padding:6px 8px;font-size:13px;white-space:nowrap">${fmtD(r.fecha)}</td>
+      <td style="padding:6px 8px;font-weight:700;font-size:13px">${r.nombrecliente||'—'}</td>
+      <td style="padding:6px 8px;font-size:13px">${r.concesionaria||'—'}</td>
+      <td style="padding:6px 8px;font-size:13px;white-space:nowrap">${colorBanco(r.banco)}</td>
+      <td style="padding:6px 8px;font-size:13px">${r.tipocta||'—'}</td>
+      <td style="padding:6px 8px;font-size:13px">${r.anio||'—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:13px">${mon(r.vehiculo)}</td>
+      <td style="padding:6px 8px;text-align:right;font-family:monospace;font-size:13px">${mon(r.importe)}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700;color:var(--blue);font-size:13px">${pctReal ? pctReal+'%' : '—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-size:13px;color:var(--muted)">${pctConf ? pctConf+'%' : '—'}</td>
+      <td style="padding:6px 8px;text-align:right;font-weight:700;font-size:13px;color:${diffColor}">${diff !== null ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'}</td>
     </tr>`;
   }).join('');
 }
