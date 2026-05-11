@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.3</title>
+<title>Grupo Olyar — Solicitudes v2.17.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -524,7 +524,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div class="login-p">Ingresá tus credenciales para continuar</div>
     <div class="login-err" id="login-err">Usuario o contraseña incorrectos</div>
     <div class="lf"><label>Usuario</label><input id="l-u" placeholder="usuario" autocomplete="username"></div>
-    <div class="lf"><label>Contraseña</label><input id="l-p" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="lf"><label>Contraseña</label>
+      <div style="position:relative">
+        <input id="l-p" type="password" placeholder="••••••••" autocomplete="current-password" style="width:100%;padding-right:38px">
+        <button type="button" onclick="const i=document.getElementById('l-p');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;padding:0;color:var(--muted)">👁️</button>
+      </div>
+    </div>
     <button class="btn-login" id="login-btn" onclick="doLogin()">Ingresar →</button>
     <div class="login-loading" id="login-loading"><span class="spinner"></span>Verificando...</div>
   </div>
