@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.5</title>
+<title>Grupo Olyar — Solicitudes v2.17.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -394,7 +394,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 .gestoria-modal{background:#fff;border-radius:18px;width:100%;max-width:1200px;max-height:92vh;display:flex;flex-direction:column;box-shadow:var(--sh-lg);transform:scale(.96) translateY(10px);transition:transform .25s cubic-bezier(.34,1.56,.64,1);}
 .gestoria-overlay.open .gestoria-modal{transform:scale(1) translateY(0);}
 .gestoria-head{padding:20px 28px;border-bottom:1.5px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.gestoria-body{overflow-y:auto;overflow-x:hidden;flex:1;padding:0;}
+.gestoria-body{overflow-y:auto;overflow-x:auto;flex:1;padding:0;}
 .gestoria-scroll-x{overflow-x:auto;overflow-y:visible;scrollbar-width:none;}
 .gestoria-scroll-x::-webkit-scrollbar{display:none;}
 /* DATERO SCROLL */
@@ -2931,7 +2931,12 @@ function closeGestoria() {
 
 function renderGestoria() {
   const q = (document.getElementById('gestoria-srch')?.value || '').toLowerCase();
-  let data = [...RECORDS];
+  let data = RECORDS.filter(r => {
+    const estado = (r.estado||'').toUpperCase();
+    if (estado !== 'AVANZA') return false;
+    if (r.entregada) return false; // ocultar entregadas
+    return true;
+  });
   if (q) data = data.filter(r =>
     [r.nombrecliente, r.dni, r.banco, r.concesionaria, r.provincia, r.localidad, r.marca].some(v => (v||'').toLowerCase().includes(q))
   );
