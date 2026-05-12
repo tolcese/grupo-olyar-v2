@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.7</title>
+<title>Grupo Olyar — Solicitudes v2.17.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -9335,6 +9335,7 @@ async function renderFinanciamiento() {
   const hasta    = document.getElementById('fin-hasta')?.value || '';
 
   let data = registros.filter(r => (r.estado||'').toUpperCase() === 'APROBADO');
+  data.sort((a, b) => (b.fecha||'').localeCompare(a.fecha||''));
   if (banco)    data = data.filter(r => (r.banco||'').toUpperCase() === banco.toUpperCase());
   if (tipo)     data = data.filter(r => (r.tipocta||'').toUpperCase() === tipo.toUpperCase());
   if (condicion === '0KM') data = data.filter(r => String(r.anio||'').toUpperCase().replace(/\s/g,'').includes('0KM'));
