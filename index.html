@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.6</title>
+<title>Grupo Olyar — Solicitudes v2.17.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -9308,18 +9308,33 @@ function poblarFiltroFinBancos() {
   bancos.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o); });
 }
 
-function renderFinanciamiento() {
-  const banco    = document.getElementById('fin-banco')?.value || '';
-  const condicion = document.getElementById('fin-condicion')?.value || '';
-  const tipo     = document.getElementById('fin-tipo')?.value || '';
-  const desde    = document.getElementById('fin-desde')?.value || '';
-  const hasta    = document.getElementById('fin-hasta')?.value || '';
+async function renderFinanciamiento() {
   const tbody    = document.getElementById('fin-tbody');
   const empty    = document.getElementById('fin-empty');
   const countEl  = document.getElementById('fin-count');
   if (!tbody) return;
 
-  let data = RECORDS.filter(r => (r.estado||'').toUpperCase() === 'APROBADO');
+  // Fetch fresco desde Supabase
+  tbody.innerHTML = '<tr><td colspan="11" style="padding:20px;text-align:center;color:var(--muted)"><span class="spinner"></span> Actualizando...</td></tr>';
+  let registros = RECORDS;
+  try {
+    const { data: freshRecs } = await SB.from('solicitudes').select('*').in('estado', ['APROBADO']);
+    if (freshRecs && freshRecs.length) {
+      registros = freshRecs.map(r => ({
+        id: r.id, nombrecliente: r.nombrecliente, banco: r.banco,
+        concesionaria: r.concesionaria, tipocta: r.tipocta, anio: r.anio,
+        importe: r.importe, vehiculo: r.vehiculo, fecha: r.fecha, estado: r.estado
+      }));
+    }
+  } catch(e) {}
+
+  const banco    = document.getElementById('fin-banco')?.value || '';
+  const condicion = document.getElementById('fin-condicion')?.value || '';
+  const tipo     = document.getElementById('fin-tipo')?.value || '';
+  const desde    = document.getElementById('fin-desde')?.value || '';
+  const hasta    = document.getElementById('fin-hasta')?.value || '';
+
+  let data = registros.filter(r => (r.estado||'').toUpperCase() === 'APROBADO');
   if (banco)    data = data.filter(r => (r.banco||'').toUpperCase() === banco.toUpperCase());
   if (tipo)     data = data.filter(r => (r.tipocta||'').toUpperCase() === tipo.toUpperCase());
   if (condicion === '0KM') data = data.filter(r => String(r.anio||'').toUpperCase().replace(/\s/g,'').includes('0KM'));
