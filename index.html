@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.0</title>
+<title>Grupo Olyar — Solicitudes v2.18.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2698,6 +2698,7 @@ function openSidebar() {
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos') ? '' : 'none';
+  document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
 
   if (ME?.rol === 'admin') renderSidebarPV();
 }
@@ -10188,7 +10189,7 @@ function renderReportes() {
     <button class="sb-item" onclick="closeSidebar();showV('calculadores')">
       <span class="sb-icon">🧮</span> Calculadores
     </button>
-    <button class="sb-item" onclick="closeSidebar();showV('genpdf')">
+    <button class="sb-item" id="sb-genpdf" onclick="closeSidebar();showV('genpdf')" style="display:none">
       <span class="sb-icon">📄</span> Generador PDF
     </button>
     <div class="sb-divider" id="sb-div-cuenta"></div>
