@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.17.9</title>
+<title>Grupo Olyar — Solicitudes v2.18.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1588,6 +1588,59 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 </div>
 
 <!-- BANCOS -->
+    <div id="v-genpdf" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📄 Generador de PDF</div><div class="ph-s">Subí imágenes, ordenalas y descargá el PDF</div></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <!-- Zona de carga -->
+        <div id="pdf-dropzone" style="border:2px dashed var(--line);border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:20px"
+          ondragover="event.preventDefault();this.style.borderColor='var(--blue)';this.style.background='var(--blue-soft)'"
+          ondragleave="this.style.borderColor='var(--line)';this.style.background=''"
+          ondrop="pdfDrop(event)"
+          onclick="document.getElementById('pdf-file-input').click()">
+          <div style="font-size:40px;margin-bottom:10px">🖼️</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Arrastrá imágenes o hacé click para seleccionar</div>
+          <div style="font-size:12px;color:var(--muted)">JPG, PNG, WEBP — podés subir varias a la vez</div>
+          <input id="pdf-file-input" type="file" accept="image/*" multiple style="display:none" onchange="pdfAgregarArchivos(this.files)">
+        </div>
+
+        <!-- Miniaturas ordenables -->
+        <div id="pdf-preview-wrap" style="display:none;margin-bottom:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:13px;font-weight:700">Imágenes (<span id="pdf-count">0</span>) — arrastrá para ordenar</div>
+            <button onclick="pdfLimpiar()" style="padding:5px 12px;font-size:12px;border:1.5px solid var(--line);border-radius:7px;background:none;cursor:pointer;color:var(--red)">🗑️ Limpiar todo</button>
+          </div>
+          <div id="pdf-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px"></div>
+        </div>
+
+        <!-- Opciones y botón generar -->
+        <div id="pdf-options" style="display:none">
+          <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:16px">
+            <div class="fc">
+              <label>Orientación</label>
+              <select id="pdf-orientacion" style="padding:8px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px">
+                <option value="portrait">Vertical (Portrait)</option>
+                <option value="landscape">Horizontal (Landscape)</option>
+              </select>
+            </div>
+            <div class="fc">
+              <label>Tamaño</label>
+              <select id="pdf-tamano" style="padding:8px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px">
+                <option value="a4">A4</option>
+                <option value="letter">Carta (Letter)</option>
+              </select>
+            </div>
+            <div class="fc">
+              <label>Nombre del archivo</label>
+              <input id="pdf-nombre" type="text" value="documento" style="padding:8px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:160px">
+            </div>
+          </div>
+          <button onclick="pdfGenerar()" id="pdf-btn-generar" style="padding:12px 28px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;width:100%">📥 Generar y descargar PDF</button>
+        </div>
+      </div>
+    </div>
+
     <div id="v-calculadores" style="display:none">
       <div class="ph">
         <div><div class="ph-t">🧮 Calculadores</div><div class="ph-s">Acceso rápido a simuladores por banco</div></div>
@@ -7006,7 +7059,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -9531,6 +9584,125 @@ function imprimirListadoPrendas() {
   setTimeout(() => win.print(), 300);
 }
 
+// ── GENERADOR DE PDF ──────────────────────────────────────
+let PDF_IMAGENES = []; // [{id, dataUrl, nombre}]
+let PDF_DRAG_IDX = null;
+
+function pdfAgregarArchivos(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      PDF_IMAGENES.push({ id: Date.now() + Math.random(), dataUrl: e.target.result, nombre: file.name });
+      pdfRenderGrid();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function pdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdf-dropzone').style.borderColor = 'var(--line)';
+  document.getElementById('pdf-dropzone').style.background = '';
+  pdfAgregarArchivos(e.dataTransfer.files);
+}
+
+function pdfRenderGrid() {
+  const grid = document.getElementById('pdf-grid');
+  const wrap = document.getElementById('pdf-preview-wrap');
+  const opts = document.getElementById('pdf-options');
+  const count = document.getElementById('pdf-count');
+  count.textContent = PDF_IMAGENES.length;
+  wrap.style.display = PDF_IMAGENES.length ? '' : 'none';
+  opts.style.display = PDF_IMAGENES.length ? '' : 'none';
+
+  grid.innerHTML = PDF_IMAGENES.map((img, i) => `
+    <div draggable="true" data-idx="${i}"
+      ondragstart="PDF_DRAG_IDX=${i};this.style.opacity='.4'"
+      ondragend="this.style.opacity='1'"
+      ondragover="event.preventDefault()"
+      ondrop="pdfReorder(${i})"
+      style="position:relative;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;overflow:hidden;cursor:grab">
+      <img src="${img.dataUrl}" style="width:100%;height:100px;object-fit:cover;display:block">
+      <div style="padding:4px 6px;font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i+1}. ${img.nombre}</div>
+      <button onclick="pdfEliminar(${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;line-height:20px;padding:0">✕</button>
+    </div>`).join('');
+}
+
+function pdfReorder(toIdx) {
+  if (PDF_DRAG_IDX === null || PDF_DRAG_IDX === toIdx) return;
+  const item = PDF_IMAGENES.splice(PDF_DRAG_IDX, 1)[0];
+  PDF_IMAGENES.splice(toIdx, 0, item);
+  PDF_DRAG_IDX = null;
+  pdfRenderGrid();
+}
+
+function pdfEliminar(idx) {
+  PDF_IMAGENES.splice(idx, 1);
+  pdfRenderGrid();
+}
+
+function pdfLimpiar() {
+  PDF_IMAGENES = [];
+  pdfRenderGrid();
+}
+
+async function pdfGenerar() {
+  if (!PDF_IMAGENES.length) return alert('Agregá al menos una imagen');
+  const btn = document.getElementById('pdf-btn-generar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando...';
+
+  try {
+    // Cargar jsPDF si no está
+    if (!window.jspdf) {
+      await new Promise((res, rej) => {
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s.onload = res; s.onerror = rej;
+        document.head.appendChild(s);
+      });
+    }
+
+    const { jsPDF } = window.jspdf;
+    const orientacion = document.getElementById('pdf-orientacion').value;
+    const tamano = document.getElementById('pdf-tamano').value;
+    const nombre = (document.getElementById('pdf-nombre').value || 'documento').trim();
+    const doc = new jsPDF({ orientation: orientacion, unit: 'mm', format: tamano });
+
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const margin = 10;
+
+    for (let i = 0; i < PDF_IMAGENES.length; i++) {
+      if (i > 0) doc.addPage();
+      const img = new Image();
+      img.src = PDF_IMAGENES[i].dataUrl;
+      await new Promise(res => { img.onload = res; });
+
+      const ratio = img.width / img.height;
+      const maxW = pageW - margin * 2;
+      const maxH = pageH - margin * 2;
+      let w = maxW;
+      let h = w / ratio;
+      if (h > maxH) { h = maxH; w = h * ratio; }
+      const x = (pageW - w) / 2;
+      const y = (pageH - h) / 2;
+
+      const fmt = PDF_IMAGENES[i].dataUrl.includes('image/png') ? 'PNG' : 'JPEG';
+      doc.addImage(PDF_IMAGENES[i].dataUrl, fmt, x, y, w, h);
+    }
+
+    doc.save(nombre + '.pdf');
+  } catch(e) {
+    alert('Error al generar el PDF: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '📥 Generar y descargar PDF';
+}
+// ── FIN GENERADOR DE PDF ───────────────────────────────────
+
 function renderConversionConc() {
   const tbody  = document.getElementById('rep-conv-tbody');
   const empty  = document.getElementById('rep-conv-empty');
@@ -10015,6 +10187,9 @@ function renderReportes() {
     <div class="sb-section-label" id="sb-lbl-calc">Calculadores</div>
     <button class="sb-item" onclick="closeSidebar();showV('calculadores')">
       <span class="sb-icon">🧮</span> Calculadores
+    </button>
+    <button class="sb-item" onclick="closeSidebar();showV('genpdf')">
+      <span class="sb-icon">📄</span> Generador PDF
     </button>
     <div class="sb-divider" id="sb-div-cuenta"></div>
     <div class="sb-section-label" id="sb-lbl-cuenta">Cuenta</div>
