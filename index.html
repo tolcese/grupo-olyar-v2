@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.4</title>
+<title>Grupo Olyar — Solicitudes v2.18.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2634,6 +2634,28 @@ function weatherIcon(code) {
   return '🌤️';
 }
 
+function weatherDesc(code) {
+  const map = {
+    113:'Despejado', 116:'Parcialmente nublado', 119:'Nublado', 122:'Muy nublado',
+    143:'Neblina', 176:'Lluvia ligera', 179:'Nieve ligera', 182:'Aguanieve',
+    185:'Llovizna helada', 200:'Tormenta con truenos', 227:'Ventisca',
+    230:'Nevasca', 248:'Niebla', 260:'Niebla helada',
+    263:'Llovizna ligera', 266:'Llovizna', 281:'Llovizna helada',
+    284:'Llovizna helada intensa', 293:'Lluvia leve', 296:'Lluvia leve',
+    299:'Lluvia moderada', 302:'Lluvia moderada', 305:'Lluvia intensa',
+    308:'Lluvia muy intensa', 311:'Lluvia helada leve', 314:'Lluvia helada',
+    317:'Aguanieve leve', 320:'Aguanieve', 323:'Nevada leve',
+    326:'Nevada leve', 329:'Nevada moderada', 332:'Nevada moderada',
+    335:'Nevada intensa', 338:'Nevada muy intensa', 350:'Granizo helado',
+    353:'Chaparrón leve', 356:'Chaparrón', 359:'Chaparrón intenso',
+    362:'Aguanieve ligera', 365:'Aguanieve', 368:'Nevada con lluvia',
+    371:'Nevada intensa', 374:'Granizo pequeño', 377:'Granizo',
+    386:'Tormenta leve', 389:'Tormenta', 392:'Tormenta con nieve',
+    395:'Tormenta con nieve intensa'
+  };
+  return map[code] || 'Parcialmente nublado';
+}
+
 async function loadWeather() {
   const widget = document.getElementById('weather-widget');
   if (!widget) return;
@@ -2645,7 +2667,7 @@ async function loadWeather() {
       const cur = data.current_condition[0];
       const temp = cur.temp_C;
       const code = parseInt(cur.weatherCode);
-      const desc = cur.lang_es?.[0]?.value || cur.weatherDesc[0].value;
+      const desc = weatherDesc(code);
       document.getElementById('weather-icon').textContent = weatherIcon(code);
       document.getElementById('weather-temp').textContent = `${temp}°C`;
       document.getElementById('weather-desc').textContent = desc;
