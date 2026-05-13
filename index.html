@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.1</title>
+<title>Grupo Olyar — Solicitudes v2.18.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1600,7 +1600,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           ondrop="pdfDrop(event)"
           onclick="document.getElementById('pdf-file-input').click()">
           <div style="font-size:40px;margin-bottom:10px">🖼️</div>
-          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Arrastrá imágenes o hacé click para seleccionar</div>
+          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px">Arrastrá imágenes, hacé click para seleccionar o pegá con Ctrl+V</div>
           <div style="font-size:12px;color:var(--muted)">JPG, PNG, WEBP — podés subir varias a la vez</div>
           <input id="pdf-file-input" type="file" accept="image/*" multiple style="display:none" onchange="pdfAgregarArchivos(this.files)">
         </div>
@@ -9588,6 +9588,26 @@ function imprimirListadoPrendas() {
 // ── GENERADOR DE PDF ──────────────────────────────────────
 let PDF_IMAGENES = []; // [{id, dataUrl, nombre}]
 let PDF_DRAG_IDX = null;
+
+// Escuchar Ctrl+V cuando se está en la sección genpdf
+document.addEventListener('paste', e => {
+  const vGenpdf = document.getElementById('v-genpdf');
+  if (!vGenpdf || vGenpdf.style.display === 'none') return;
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  Array.from(items).forEach((item, i) => {
+    if (!item.type.startsWith('image/')) return;
+    const file = item.getAsFile();
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      PDF_IMAGENES.push({ id: Date.now() + i, dataUrl: ev.target.result, nombre: 'imagen_pegada_' + (PDF_IMAGENES.length + 1) + '.png' });
+      pdfRenderGrid();
+      toast('Imagen pegada ✓', 'ok');
+    };
+    reader.readAsDataURL(file);
+  });
+});
 
 function pdfAgregarArchivos(files) {
   Array.from(files).forEach(file => {
