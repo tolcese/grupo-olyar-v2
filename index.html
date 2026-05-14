@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.5</title>
+<title>Grupo Olyar — Solicitudes v2.18.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -6348,13 +6348,14 @@ async function recargarLiquidaciones() {
     const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
     const ganancia    = Math.round(comLukaya - comGestora + retribBanco);
     const aLiquidar   = Math.round(importe - comLukaya - impCredito);
+    const existing = CONT_DATA[r.id] || {};
     const data = {
       solicitud_id: r.id,
       a_liquidar: aLiquidar, imp_credito: impCredito,
-      gastos_gestoria: null, com_lukaya: comLukaya, fecha_liq: null,
-      com_comercial: null, com_operativo: null, com_gestora: comGestora,
+      gastos_gestoria: null, com_lukaya: comLukaya, fecha_liq: existing.fechaLiq ?? null,
+      com_comercial: null, com_operativo: existing.comOperativo ?? null, com_gestora: comGestora,
       retrib_banco: retribBanco, ganancia,
-      pagado: false, fecha_pagado: null, pago_gest: false, fecha_pago_gest: null, obs: null
+      pagado: existing.pagado ?? false, fecha_pagado: existing.fechaPagado ?? null, pago_gest: existing.pagoGest ?? false, fecha_pago_gest: existing.fechaPagoGest ?? null, fecha_pago_banco: existing.fechaPagoBanco ?? null, obs: existing.obs ?? null
     };
     try {
       await SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' });
@@ -7182,13 +7183,14 @@ async function autoCalcContabilidad() {
     const retribBanco = Math.round(importe * COEFICIENTES.retribBanco / 100);
     const ganancia    = Math.round(comLukaya - comGestora + retribBanco);
     const aLiquidar   = Math.round(importe - comLukaya - impCredito);
+    const existing2 = CONT_DATA[r.id] || {};
     const data = {
       solicitud_id: r.id,
       a_liquidar: aLiquidar, imp_credito: impCredito,
-      gastos_gestoria: null, com_lukaya: comLukaya, fecha_liq: null,
-      com_comercial: null, com_operativo: null, com_gestora: comGestora,
+      gastos_gestoria: null, com_lukaya: comLukaya, fecha_liq: existing2.fechaLiq ?? null,
+      com_comercial: null, com_operativo: existing2.comOperativo ?? null, com_gestora: comGestora,
       retrib_banco: retribBanco, ganancia,
-      pagado: false, fecha_pagado: null, pago_gest: false, fecha_pago_gest: null, obs: null
+      pagado: existing2.pagado ?? false, fecha_pagado: existing2.fechaPagado ?? null, pago_gest: existing2.pagoGest ?? false, fecha_pago_gest: existing2.fechaPagoGest ?? null, fecha_pago_banco: existing2.fechaPagoBanco ?? null, obs: existing2.obs ?? null
     };
     try {
       await SB.from('contabilidad').upsert(data, { onConflict: 'solicitud_id' });
