@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.7</title>
+<title>Grupo Olyar — Solicitudes v2.18.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1401,6 +1401,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <input type="date" id="fin-hasta" class="fsel" onchange="renderFinanciamiento()">
           <button class="btn btn-s" onclick="document.getElementById('fin-banco').value='';document.getElementById('fin-condicion').value='';document.getElementById('fin-tipo').value='';document.getElementById('fin-desde').value='';document.getElementById('fin-hasta').value='';renderFinanciamiento()">✕ Limpiar</button>
           <button class="btn btn-s" onclick="exportarFinanciamientoExcel()" style="background:#1d6fce;color:#fff;border-color:#1d6fce">📥 Exportar Excel</button>
+          <button class="btn btn-s" onclick="exportarFinanciamientoPDF()" style="background:#e53e3e;color:#fff;border-color:#e53e3e">📄 Exportar PDF</button>
           <span id="fin-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
         </div>
         <div style="overflow-x:auto;overflow-y:auto;max-height:600px">
@@ -9418,6 +9419,86 @@ function poblarFiltroFinBancos() {
   if (!sel || sel.options.length > 1) return;
   const bancos = [...new Set(RECORDS.filter(r => (r.estado||'').toUpperCase()==='APROBADO').map(r => r.banco).filter(Boolean))].sort();
   bancos.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o); });
+}
+
+async function exportarFinanciamientoPDF() {
+  const data = window._finData || [];
+  if (!data.length) return alert('Primero cargá la sección % Financiamiento');
+
+  // Cargar jsPDF y autoTable
+  if (!window.jspdf) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  if (!window.jspdf?.jsPDF?.API?.autoTable) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+  const mon  = v => v ? '$' + Math.round(parseFloat(String(v).replace(/[$,]/g,''))).toLocaleString('es-AR') : '—';
+  const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
+
+  const head = [['Fecha','Cliente','Concesionaria','Banco','Tipo','Año','Valor veh.','Importe','% Real','%Banco','Diferencia']];
+  const body = data.map(r => {
+    const imp = parseFloat(String(r.importe||0).replace(/[$,]/g,''))||0;
+    const veh = parseFloat(String(r.vehiculo||0).replace(/[$,]/g,''))||0;
+    const pctReal = (imp && veh) ? ((imp/veh)*100).toFixed(1)+'%' : '—';
+    const bancoUp = (r.banco||'').toUpperCase();
+    const tipoUp  = (r.tipocta||'').toUpperCase();
+    const anioStr = String(r.anio||'').toUpperCase().replace(/\s/g,'');
+    const es0km   = anioStr.includes('0KM');
+    let pctConf = null;
+    if (es0km) {
+      const p = PCT_CACHE.find(p => p.banco.toUpperCase()===bancoUp && p.tipo_cta.toUpperCase()===tipoUp && p.condicion==='0KM');
+      if (p) pctConf = p.porcentaje;
+    } else {
+      const anioVeh = parseInt(anioStr);
+      if (anioVeh) {
+        const antiguedad = new Date().getFullYear() - anioVeh;
+        const todos = PCT_CACHE.filter(p => p.banco.toUpperCase()===bancoUp && p.tipo_cta.toUpperCase()===tipoUp && p.condicion==='USADO' && p.anios_antiguedad!=null);
+        const cands = todos.filter(p => p.anios_antiguedad<=antiguedad);
+        if (cands.length) pctConf = cands.reduce((a,b)=>b.anios_antiguedad>a.anios_antiguedad?b:a).porcentaje;
+        else if (todos.length) pctConf = todos.reduce((a,b)=>a.anios_antiguedad<b.anios_antiguedad?a:b).porcentaje;
+      }
+    }
+    const pctRealNum = (imp && veh) ? parseFloat(((imp/veh)*100).toFixed(1)) : null;
+    const diff = (pctRealNum !== null && pctConf !== null) ? (pctRealNum - pctConf).toFixed(1) : '—';
+    return [
+      fmtD(r.fecha), r.nombrecliente||'—', r.concesionaria||'—', r.banco||'—',
+      r.tipocta||'—', r.anio||'—', mon(r.vehiculo), mon(r.importe),
+      pctReal, pctConf !== null ? pctConf+'%' : '—',
+      diff !== '—' ? (parseFloat(diff)>0?'+':'')+diff+'%' : '—'
+    ];
+  });
+
+  doc.setFontSize(13);
+  doc.text('% Financiamiento — ' + new Date().toLocaleDateString('es-AR'), 14, 14);
+  doc.autoTable({
+    head, body,
+    startY: 20,
+    styles: { fontSize: 7, cellPadding: 2 },
+    headStyles: { fillColor: [29, 111, 206], textColor: 255, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: [245, 247, 250] },
+    columnStyles: {
+      0: {cellWidth: 18}, 1: {cellWidth: 30}, 2: {cellWidth: 28},
+      3: {cellWidth: 18}, 4: {cellWidth: 10}, 5: {cellWidth: 12},
+      6: {cellWidth: 22}, 7: {cellWidth: 22},
+      8: {cellWidth: 12}, 9: {cellWidth: 12}, 10: {cellWidth: 14}
+    }
+  });
+
+  const fecha = new Date().toISOString().slice(0,10);
+  doc.save(`Financiamiento_${fecha}.pdf`);
 }
 
 async function exportarFinanciamientoExcel() {
