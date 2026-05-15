@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.18.9</title>
+<title>Grupo Olyar — Solicitudes v2.19.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -682,9 +682,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div class="fc"><label>Fecha de solicitud *</label><input type="date" id="f-fecha"></div>
           <div class="fc"><label>Banco *</label><select id="f-banco"></select></div>
           <div class="fc"><label>Concesionaria</label>
-            <div class="combo"><input id="f-concesionaria" placeholder="Seleccioná o escribí...">
+            <div class="combo"><input id="f-concesionaria" placeholder="Seleccioná o escribí..." oninput="checkConcEstafadora()">
               <div class="combo-btns"><button class="cb" onclick="toggleDD('concesionaria')" type="button">▾</button><button class="cb" onclick="addOpt('concesionaria')" type="button">＋</button></div>
-              <div class="cdd" id="dd-concesionaria"></div></div></div>
+              <div class="cdd" id="dd-concesionaria"></div></div>
+            <div id="alerta-estafadora" style="display:none;margin-top:6px;padding:8px 12px;background:#fed7d7;border:1.5px solid #fc8181;border-radius:8px;font-size:12px;color:#c53030;font-weight:700">🚫 Esta concesionaria está marcada como ESTAFADORA — <span id="alerta-estafadora-motivo"></span></div>
+          </div>
           <div class="fc"><label>Provincia</label>
             <div class="combo"><input id="f-provincia" placeholder="Seleccioná o escribí...">
               <div class="combo-btns"><button class="cb" onclick="toggleDD('provincia')" type="button">▾</button><button class="cb" onclick="addOpt('provincia')" type="button">＋</button></div>
@@ -5262,8 +5264,8 @@ function renderConcesionarias(lista) {
     <div class="conc-card" onclick="openConcPanel('${(c.nombre||'').replace(/'/g,"\\'")}')">
       <div class="conc-av">${(c.nombre||'?')[0].toUpperCase()}</div>
       <div class="conc-info">
-        <div class="conc-name">${c.nombre||'—'}</div>
-        <div class="conc-sub">${[c.localidad, c.provincia].filter(Boolean).join(', ')||'Sin datos'} ${c.cuit ? '· CUIT: '+c.cuit : ''}</div>
+        <div class="conc-name">${c.nombre||'—'}${c.estafadora ? ' <span style="font-size:10px;background:#fed7d7;color:#c53030;padding:2px 7px;border-radius:4px;font-weight:700;vertical-align:middle">🚫 ESTAFADORA</span>' : ''}</div>
+        <div class="conc-sub">${[c.localidad, c.provincia].filter(Boolean).join(', ')||'Sin datos'} ${c.cuit ? '· CUIT: '+c.cuit : ''}${c.estafadora && c.motivo_estafa ? ' · '+c.motivo_estafa : ''}</div>
       </div>
       <div style="display:flex;gap:5px;flex-shrink:0;align-items:center" onclick="event.stopPropagation()">
         ${(c.direccion||c.localidad||c.provincia) ? `<a href="https://www.google.com/maps/search/${encodeURIComponent([c.direccion,c.localidad,c.provincia].filter(Boolean).join(', '))}" target="_blank" class="ibtn" title="Ver en Google Maps" style="text-decoration:none">📍</a>` : ''}
@@ -5338,6 +5340,8 @@ function nuevaConc() {
   document.getElementById('conc-edit-localidad').value = '';
   document.getElementById('conc-edit-provincia').value = '';
   document.getElementById('conc-edit-wa-grupo').value  = '';
+  document.getElementById('conc-edit-estafadora').checked = false;
+  document.getElementById('conc-edit-motivo-estafa').value = '';
   document.getElementById('conc-edit-overlay').classList.add('open');
 }
 
@@ -5357,6 +5361,8 @@ function editConc(nombre) {
   document.getElementById('conc-edit-localidad').value = c.localidad || '';
   document.getElementById('conc-edit-provincia').value = c.provincia || '';
   document.getElementById('conc-edit-wa-grupo').value  = c.whatsapp_grupo || '';
+  document.getElementById('conc-edit-estafadora').checked = !!c.estafadora;
+  document.getElementById('conc-edit-motivo-estafa').value = c.motivo_estafa || '';
   document.getElementById('conc-edit-overlay').classList.add('open');
 }
 
@@ -5376,6 +5382,8 @@ async function saveConcEdit() {
     localidad: document.getElementById('conc-edit-localidad').value.trim(),
     provincia: document.getElementById('conc-edit-provincia').value.trim(),
     whatsapp_grupo: document.getElementById('conc-edit-wa-grupo').value.trim(),
+    estafadora: document.getElementById('conc-edit-estafadora').checked,
+    motivo_estafa: document.getElementById('conc-edit-motivo-estafa').value.trim() || null,
   };
   try {
     const existing = CONC_CACHE.find(x => x.nombre === nombre);
@@ -7349,6 +7357,20 @@ document.addEventListener('mousedown', e => {
 // ══════════════════════════════════════════════
 // AUTO CALCULO MONTO AGENCIA
 // ══════════════════════════════════════════════
+function checkConcEstafadora() {
+  const val = document.getElementById('f-concesionaria')?.value?.trim();
+  const alerta = document.getElementById('alerta-estafadora');
+  const motivo = document.getElementById('alerta-estafadora-motivo');
+  if (!alerta) return;
+  const conc = CONC_CACHE.find(c => (c.nombre||'').toLowerCase() === (val||'').toLowerCase());
+  if (conc?.estafadora) {
+    motivo.textContent = conc.motivo_estafa || 'Sin detalle';
+    alerta.style.display = '';
+  } else {
+    alerta.style.display = 'none';
+  }
+}
+
 function calcPctPrestado() {
   const importe  = parseFloat(document.getElementById('f-importe')?.value) || 0;
   const vehiculo = parseFloat(document.getElementById('f-vehiculo')?.value) || 0;
@@ -11195,6 +11217,11 @@ function renderReportes() {
       <div class="fc"><label>Localidad</label><input id="conc-edit-localidad" placeholder="Córdoba"></div>
       <div class="fc"><label>Provincia</label><input id="conc-edit-provincia" placeholder="Córdoba"></div>
       <div class="fc span2"><label>Link Grupo WhatsApp</label><input id="conc-edit-wa-grupo" type="url" placeholder="https://chat.whatsapp.com/..."></div>
+      <div class="fc span2" style="background:#fff5f5;border:1.5px solid #fed7d7;border-radius:8px;padding:12px">
+        <label style="color:#c53030;font-weight:700">🚫 Estafadora</label>
+        <label class="chk-row" style="margin-top:6px"><input type="checkbox" id="conc-edit-estafadora"> Marcar esta concesionaria como estafadora</label>
+        <input id="conc-edit-motivo-estafa" type="text" placeholder="Motivo o descripción (opcional)" style="margin-top:8px;padding:8px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%">
+      </div>
     </div>
     <div class="mfoot">
       <button class="btn btn-s" onclick="closeConcEdit()">Cancelar</button>
