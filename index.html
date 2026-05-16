@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.19.2</title>
+<title>Grupo Olyar — Solicitudes v2.19.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1650,35 +1650,38 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div><div class="ph-t">🧮 Calculadores</div><div class="ph-s">Acceso rápido a simuladores por banco</div></div>
       </div>
 
-      <!-- Calculadora de crédito con tabla de escenarios -->
-      <div class="card" style="max-width:600px;margin-bottom:20px">
+      <!-- Calculadora estilo Excel -->
+      <div class="card" style="max-width:640px;margin-bottom:20px">
         <div class="card-t" style="margin-bottom:4px">📋 Calculadora de crédito</div>
-        <div class="card-s" style="margin-bottom:18px">Ingresá el importe del crédito y completá los escenarios</div>
+        <div class="card-s" style="margin-bottom:16px">Hacé click en cualquier celda para editar. Tab/Enter para navegar.</div>
 
-        <!-- Importe crédito -->
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--surface);border-radius:10px;border:1.5px solid var(--line)">
-          <label style="font-size:13px;font-weight:700;white-space:nowrap">Importe Crédito:</label>
-          <div class="cur" style="flex:1"><span class="cur-s">$</span><input id="calc-importe-credito" type="number" min="0" placeholder="0" oninput="calcFmtCredito()" style="flex:1"></div>
-          <span id="calc-importe-credito-fmt" style="font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap"></span>
+        <!-- Importe Crédito -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:#eef6ff;border:1.5px solid #bee3f8;border-radius:8px">
+          <span style="font-size:13px;font-weight:700;color:#2b6cb0;white-space:nowrap">Importe Crédito</span>
+          <div id="xls-credito" contenteditable="true" 
+            style="flex:1;padding:6px 10px;background:#fff;border:1.5px solid #bee3f8;border-radius:6px;font-size:14px;font-weight:700;color:#2b6cb0;min-width:120px;outline:none"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();document.querySelector('#xls-tbody td[contenteditable]')?.focus()}"
+            oninput="xlsFmt(this)">
+          </div>
         </div>
 
-        <!-- Tabla de escenarios -->
-        <div style="overflow-x:auto">
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <!-- Tabla Excel -->
+        <div style="border:1.5px solid var(--line);border-radius:8px;overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;font-size:13px" id="xls-table">
             <thead>
-              <tr style="background:var(--surface)">
-                <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Importe Solicitado</th>
-                <th style="padding:9px 12px;text-align:center;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);width:90px">Cuotas</th>
-                <th style="padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line)">Importe Cuota</th>
-                <th style="padding:9px 12px;border-bottom:2px solid var(--line);width:36px"></th>
+              <tr style="background:#f0f4f8">
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line)">Importe Solicitado</th>
+                <th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line);width:90px">Cuotas</th>
+                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line)">Importe Cuota</th>
+                <th style="padding:9px 14px;border-bottom:1.5px solid var(--line);width:32px"></th>
               </tr>
             </thead>
-            <tbody id="calc-tbody"></tbody>
+            <tbody id="xls-tbody"></tbody>
           </table>
         </div>
-        <div style="display:flex;gap:10px;margin-top:14px">
-          <button onclick="calcAgregarFila()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">＋ Agregar fila</button>
-          <button onclick="calcLimpiarTabla()" style="padding:8px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted)">🗑️ Limpiar todo</button>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button onclick="xlsAgregarFila()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">＋ Fila</button>
+          <button onclick="xlsLimpiar()" style="padding:8px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted)">🗑️ Limpiar</button>
         </div>
       </div>
 
@@ -9968,66 +9971,73 @@ async function pdfGenerar() {
 }
 // ── FIN GENERADOR DE PDF ───────────────────────────────────
 
-let _calcFilaId = 0;
+let _xlsFilaId = 0;
 
-function calcFmtCredito() {
-  const val = parseFloat(document.getElementById('calc-importe-credito')?.value) || 0;
-  const fmt = document.getElementById('calc-importe-credito-fmt');
-  if (fmt) fmt.textContent = val > 0 ? '= $' + Math.round(val).toLocaleString('es-AR') : '';
+function xlsFmt(el) {
+  // Sin formateo automático — el usuario escribe libremente
 }
 
-function calcFmtInput(input) {
-  const val = parseFloat(input.value) || 0;
-  const fmtId = input.dataset.fmt;
-  const fmt = fmtId ? document.getElementById(fmtId) : null;
-  if (fmt) fmt.textContent = val > 0 ? '$' + Math.round(val).toLocaleString('es-AR') : '';
+function xlsCelda(content, align, extra) {
+  return `<td contenteditable="true"
+    style="padding:8px 14px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:${align||'left'};outline:none;min-width:80px;cursor:text;${extra||''}"
+    onkeydown="xlsNav(event,this)"
+    onfocus="xlsSelect(this)"
+    onblur="this.style.background=''">${content}</td>`;
 }
 
-function calcAgregarFila(solicitado='', cuotas='', cuota='') {
-  const tbody = document.getElementById('calc-tbody');
-  const id = ++_calcFilaId;
+function xlsNav(e, td) {
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    const cells = Array.from(document.querySelectorAll('#xls-tbody td[contenteditable]'));
+    const idx = cells.indexOf(td);
+    const next = cells[idx + (e.shiftKey ? -1 : 1)];
+    if (next) next.focus();
+  }
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const cells = Array.from(document.querySelectorAll('#xls-tbody td[contenteditable]'));
+    const idx = cells.indexOf(td);
+    // Avanzar 3 celdas (siguiente fila, misma columna)
+    const col = idx % 3;
+    const nextRow = cells[idx - col + 3 + col];
+    if (nextRow) nextRow.focus();
+  }
+}
+
+function xlsSelect(td) {
+  td.style.background = '#ebf8ff';
+  td.style.outline = '2px solid var(--blue)';
+  const range = document.createRange();
+  range.selectNodeContents(td);
+  window.getSelection().removeAllRanges();
+  window.getSelection().addRange(range);
+}
+
+function xlsAgregarFila(sol='', cuotas='', cuota='') {
+  const tbody = document.getElementById('xls-tbody');
+  const id = ++_xlsFilaId;
   const tr = document.createElement('tr');
-  tr.id = 'calc-fila-' + id;
-  tr.style.borderBottom = '1px solid var(--line)';
-  tr.innerHTML = `
-    <td style="padding:6px 8px">
-      <div class="cur"><span class="cur-s">$</span>
-        <input type="number" min="0" placeholder="0" value="${solicitado}" 
-          data-fmt="calc-fmt-sol-${id}" oninput="calcFmtInput(this)"
-          style="flex:1;padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;font-size:13px">
-      </div>
-      <div id="calc-fmt-sol-${id}" style="font-size:10px;color:var(--blue);font-weight:600;padding-left:2px"></div>
-    </td>
-    <td style="padding:6px 8px;text-align:center">
-      <input type="number" min="1" placeholder="0" value="${cuotas}"
-        style="width:70px;padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;font-size:13px;text-align:center">
-    </td>
-    <td style="padding:6px 8px">
-      <div class="cur"><span class="cur-s">$</span>
-        <input type="number" min="0" placeholder="0" value="${cuota}"
-          data-fmt="calc-fmt-cuota-${id}" oninput="calcFmtInput(this)"
-          style="flex:1;padding:7px 8px;border:1.5px solid var(--line);border-radius:7px;font-size:13px">
-      </div>
-      <div id="calc-fmt-cuota-${id}" style="font-size:10px;color:var(--blue);font-weight:600;padding-left:2px"></div>
-    </td>
-    <td style="padding:6px 8px;text-align:center">
-      <button onclick="document.getElementById('calc-fila-${id}').remove()" 
-        style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);padding:2px">✕</button>
+  tr.id = 'xls-fila-' + id;
+  tr.innerHTML =
+    xlsCelda(sol, 'left') +
+    xlsCelda(cuotas, 'center') +
+    xlsCelda(cuota, 'left') +
+    `<td style="padding:4px 8px;border-bottom:1px solid var(--line);text-align:center">
+      <button onclick="document.getElementById('xls-fila-${id}').remove()"
+        style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:15px;line-height:1">✕</button>
     </td>`;
   tbody.appendChild(tr);
 }
 
-function calcLimpiarTabla() {
-  document.getElementById('calc-importe-credito').value = '';
-  document.getElementById('calc-importe-credito-fmt').textContent = '';
-  document.getElementById('calc-tbody').innerHTML = '';
-  _calcFilaId = 0;
+function xlsLimpiar() {
+  document.getElementById('xls-credito').textContent = '';
+  document.getElementById('xls-tbody').innerHTML = '';
+  _xlsFilaId = 0;
 }
 
-// Inicializar con filas por defecto al entrar
 function initCalcTabla() {
-  if (document.getElementById('calc-tbody').children.length === 0) {
-    [12, 18, 24, 36, 48, 60].forEach(c => calcAgregarFila('', c, ''));
+  if (document.getElementById('xls-tbody').children.length === 0) {
+    [12, 18, 24, 36, 48, 60].forEach(c => xlsAgregarFila('', c, ''));
   }
 }
 
