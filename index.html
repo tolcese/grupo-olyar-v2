@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.19.0</title>
+<title>Grupo Olyar — Solicitudes v2.19.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1649,6 +1649,35 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="ph">
         <div><div class="ph-t">🧮 Calculadores</div><div class="ph-s">Acceso rápido a simuladores por banco</div></div>
       </div>
+
+      <!-- Calculadora simple de crédito -->
+      <div class="card" style="max-width:420px;margin-bottom:20px">
+        <div class="card-t" style="margin-bottom:4px">📋 Calculadora de crédito</div>
+        <div class="card-s" style="margin-bottom:18px">Completá los datos del crédito</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="fc">
+            <label>Monto que solicita el cliente ($)</label>
+            <div class="cur"><span class="cur-s">$</span><input id="calc-monto-solicitado" type="number" min="0" placeholder="0" style="flex:1" oninput="calcFormatear('calc-monto-solicitado')"></div>
+            <div id="calc-monto-solicitado-fmt" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:600"></div>
+          </div>
+          <div class="fc">
+            <label>Monto que le presta el banco ($)</label>
+            <div class="cur"><span class="cur-s">$</span><input id="calc-monto-banco" type="number" min="0" placeholder="0" style="flex:1" oninput="calcFormatear('calc-monto-banco')"></div>
+            <div id="calc-monto-banco-fmt" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:600"></div>
+          </div>
+          <div class="fc">
+            <label>Cantidad de cuotas</label>
+            <input id="calc-cuotas" type="number" min="1" placeholder="Ej: 24" style="padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;width:100%">
+          </div>
+          <div class="fc">
+            <label>Importe de cuota ($)</label>
+            <div class="cur"><span class="cur-s">$</span><input id="calc-importe-cuota" type="number" min="0" placeholder="0" style="flex:1" oninput="calcFormatear('calc-importe-cuota')"></div>
+            <div id="calc-importe-cuota-fmt" style="font-size:11px;color:var(--blue);margin-top:3px;font-weight:600"></div>
+          </div>
+          <button onclick="calcLimpiar()" style="padding:8px;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted)">🗑️ Limpiar</button>
+        </div>
+      </div>
+
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;max-width:800px">
         <a href="https://tolcese.github.io/simulador-prendarios/" target="_blank" style="text-decoration:none">
           <div class="card" style="display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;transition:all .12s" onmouseenter="this.style.borderColor='#1d6fce';this.style.background='var(--blue-soft)'" onmouseleave="this.style.borderColor='var(--line)';this.style.background='#fff'">
@@ -9933,6 +9962,21 @@ async function pdfGenerar() {
   btn.textContent = '📥 Generar y descargar PDF';
 }
 // ── FIN GENERADOR DE PDF ───────────────────────────────────
+
+function calcFormatear(id) {
+  const val = parseFloat(document.getElementById(id)?.value) || 0;
+  const fmt = document.getElementById(id + '-fmt');
+  if (fmt) fmt.textContent = val > 0 ? '= $' + Math.round(val).toLocaleString('es-AR') : '';
+}
+
+function calcLimpiar() {
+  ['calc-monto-solicitado','calc-monto-banco','calc-cuotas','calc-importe-cuota'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+    const fmt = document.getElementById(id + '-fmt');
+    if (fmt) fmt.textContent = '';
+  });
+}
 
 function renderConversionConc() {
   const tbody  = document.getElementById('rep-conv-tbody');
