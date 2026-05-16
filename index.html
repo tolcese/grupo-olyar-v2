@@ -9,7 +9,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.19.3</title>
+<title>Grupo Olyar — Solicitudes v2.19.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1648,41 +1648,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div id="v-calculadores" style="display:none">
       <div class="ph">
         <div><div class="ph-t">🧮 Calculadores</div><div class="ph-s">Acceso rápido a simuladores por banco</div></div>
-      </div>
-
-      <!-- Calculadora estilo Excel -->
-      <div class="card" style="max-width:640px;margin-bottom:20px">
-        <div class="card-t" style="margin-bottom:4px">📋 Calculadora de crédito</div>
-        <div class="card-s" style="margin-bottom:16px">Hacé click en cualquier celda para editar. Tab/Enter para navegar.</div>
-
-        <!-- Importe Crédito -->
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 14px;background:#eef6ff;border:1.5px solid #bee3f8;border-radius:8px">
-          <span style="font-size:13px;font-weight:700;color:#2b6cb0;white-space:nowrap">Importe Crédito</span>
-          <div id="xls-credito" contenteditable="true" 
-            style="flex:1;padding:6px 10px;background:#fff;border:1.5px solid #bee3f8;border-radius:6px;font-size:14px;font-weight:700;color:#2b6cb0;min-width:120px;outline:none"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();document.querySelector('#xls-tbody td[contenteditable]')?.focus()}"
-            oninput="xlsFmt(this)">
-          </div>
-        </div>
-
-        <!-- Tabla Excel -->
-        <div style="border:1.5px solid var(--line);border-radius:8px;overflow:hidden">
-          <table style="width:100%;border-collapse:collapse;font-size:13px" id="xls-table">
-            <thead>
-              <tr style="background:#f0f4f8">
-                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line)">Importe Solicitado</th>
-                <th style="padding:9px 14px;text-align:center;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line);width:90px">Cuotas</th>
-                <th style="padding:9px 14px;text-align:left;font-size:11px;font-weight:700;color:#4a5568;text-transform:uppercase;border-bottom:1.5px solid var(--line);border-right:1px solid var(--line)">Importe Cuota</th>
-                <th style="padding:9px 14px;border-bottom:1.5px solid var(--line);width:32px"></th>
-              </tr>
-            </thead>
-            <tbody id="xls-tbody"></tbody>
-          </table>
-        </div>
-        <div style="display:flex;gap:10px;margin-top:12px">
-          <button onclick="xlsAgregarFila()" style="padding:8px 16px;background:var(--blue);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600">＋ Fila</button>
-          <button onclick="xlsLimpiar()" style="padding:8px 16px;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;color:var(--muted)">🗑️ Limpiar</button>
-        </div>
       </div>
 
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;max-width:800px">
