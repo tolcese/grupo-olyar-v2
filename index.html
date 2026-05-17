@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0d1e3c">
@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.0</title>
+<title>Grupo Olyar — Solicitudes v2.20.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -85,8 +85,8 @@ body::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:10px;}
 body::-webkit-scrollbar-thumb:hover{background:#cbd5e1;}
 
 /* LOGIN */
-#login-wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 60%,#1d4ed8 100%);}
-.login-card{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:var(--sh-lg);animation:fadeUp .35s ease;}
+#login-wrap{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#0f172a 0%,#1e3a8a 60%,#1d4ed8 100%);overflow-y:auto;padding:env(safe-area-inset-top,16px) 16px env(safe-area-inset-bottom,16px);}
+.login-card{background:#fff;border-radius:20px;padding:44px 40px;width:100%;max-width:400px;box-shadow:var(--sh-lg);animation:fadeUp .35s ease;margin:auto;flex-shrink:0;}
 .login-brand{display:flex;align-items:center;gap:10px;margin-bottom:30px;}
 .login-icon{width:42px;height:42px;border-radius:11px;background:#059669;display:flex;align-items:center;justify-content:center;font-size:20px;}
 .login-name{font-size:17px;font-weight:800;color:var(--ink);}
@@ -103,7 +103,7 @@ body::-webkit-scrollbar-thumb:hover{background:#cbd5e1;}
 .login-loading{display:none;text-align:center;color:var(--muted);font-size:13px;margin-top:12px;}
 
 /* TOPBAR */
-#app{display:none;min-height:100vh;}
+#app{display:none;min-height:100vh;padding-top:env(safe-area-inset-top,0);}
 .topbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1.5px solid var(--line);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .tb-left{display:flex;align-items:center;gap:16px;}
 .tb-brand{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;display:flex;align-items:center;gap:8px;}
