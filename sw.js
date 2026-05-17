@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grupo-olyar-v2';
+const CACHE_NAME = 'grupo-olyar-v2.20.2';
 
 // Solo cacheamos el shell estático — los datos de Supabase siempre van a la red
 const STATIC_ASSETS = [
@@ -35,8 +35,10 @@ self.addEventListener('fetch', event => {
   if (url.hostname.includes('supabase.co') ||
       url.hostname.includes('wttr.in') ||
       url.hostname.includes('cdnjs') ||
-      url.hostname.includes('unpkg')) {
-    return; // comportamiento default del browser
+      url.hostname.includes('unpkg') ||
+      url.hostname.includes('fonts.googleapis') ||
+      url.hostname.includes('fonts.gstatic')) {
+    return;
   }
 
   // Assets propios: cache-first con fallback a red
