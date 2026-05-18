@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.4</title>
+<title>Grupo Olyar — Solicitudes v2.20.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -31,7 +31,7 @@
   --r:10px;--sh:0 1px 4px rgba(0,0,0,.07);--sh-md:0 4px 16px rgba(0,0,0,.1);--sh-lg:0 12px 48px rgba(0,0,0,.15);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html{height:100%;-webkit-text-size-adjust:100%;}
+html{height:100%;-webkit-text-size-adjust:100%;overflow-x:hidden;}
 body{font-family:'Inter',sans-serif;background:#fff;color:var(--ink);font-size:13.5px;min-height:100%;min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent;}
 /* Fix autofill Android Chrome - texto invisible */
 input:-webkit-autofill,input:-webkit-autofill:hover,input:-webkit-autofill:focus{-webkit-text-fill-color:var(--ink) !important;-webkit-box-shadow:0 0 0px 1000px #f8fafc inset !important;transition:background-color 5000s ease-in-out 0s;}
@@ -107,7 +107,7 @@ body::-webkit-scrollbar-thumb:hover{background:#cbd5e1;}
 .login-loading{display:none;text-align:center;color:var(--muted);font-size:13px;margin-top:12px;}
 
 /* TOPBAR */
-#app{display:none;min-height:100vh;padding-top:env(safe-area-inset-top,0);}
+#app{display:none;min-height:100vh;padding-top:env(safe-area-inset-top,0);overflow-x:hidden;max-width:100vw;}
 .topbar{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1.5px solid var(--line);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;-webkit-backface-visibility:hidden;backface-visibility:hidden;}
 .tb-left{display:flex;align-items:center;gap:16px;}
 .tb-brand{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.03em;display:flex;align-items:center;gap:8px;}
@@ -273,81 +273,109 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 
 @media(max-width:768px){
-  /* TOPBAR */
-  .topbar{padding:0 10px;height:52px;}
+  /* ===== TOPBAR ===== */
+  .topbar{padding:0 12px;height:52px;}
   .tb-nav{display:none;}
-  .tb-brand{font-size:13px;}
+  .tb-brand{font-size:14px;}
   .tb-right{gap:6px;}
   .sync-badge{display:none;}
-  .tb-uname{font-size:12px;}
-  .tb-role{font-size:10px;}
-  /* Ocultar fecha/hora y clima en topbar mobile para no cortar */
   #tb-datetime{display:none;}
   #weather-widget{display:none !important;}
+  .tb-uname{display:none;}
+  .tb-role{display:none;}
   .tb-user{gap:4px;}
-  .tb-av{width:28px;height:28px;font-size:12px;}
+  .tb-av{width:32px;height:32px;font-size:13px;flex-shrink:0;}
+  /* Ocultar botón salir en mobile — se sale desde el sidebar */
+  .topbar .btn-s:last-child{display:none;}
 
-  /* MAIN */
-  .main{padding:12px 10px;min-width:0;width:100%;}
+  /* ===== MAIN ===== */
+  .main{padding:12px 10px;min-width:0;width:100%;box-sizing:border-box;}
 
-  /* STATS */
+  /* ===== PAGE HEADER ===== */
+  .ph{flex-direction:column;align-items:flex-start;gap:10px;}
+  .ph>div:last-child{width:100%;display:flex;flex-wrap:wrap;gap:6px;}
+  .ph>div:last-child .btn{flex:1;min-width:calc(50% - 3px);justify-content:center;}
+  .ph .btn-p{min-height:44px;}
+
+  /* ===== STATS ===== */
   .stats{grid-template-columns:repeat(2,1fr);gap:8px;}
   .stat-card{padding:12px;}
+  .sc{padding:12px 14px;}
+  .sl{font-size:11px;}
+  .sv{font-size:22px;}
 
-  /* FORMS */
-  .fg{grid-template-columns:1fr;}
+  /* ===== TOOLBAR / FILTROS ===== */
+  .toolbar{flex-direction:column;gap:8px;}
+  .filter-bar{flex-direction:column;gap:8px;}
+  .searchbox{width:100%;}
+  .fsel{width:100%;font-size:16px;padding:10px 12px;}
+  #srch{font-size:16px;}
+
+  /* ===== TABLAS ===== */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;}
+  .main table{min-width:520px;font-size:12px;}
+  .main table th,.main table td{padding:8px 10px;}
+
+  /* ===== FORMS ===== */
+  .fg{grid-template-columns:1fr !important;}
   .fc.span2,.fc.span3{grid-column:1/-1;}
-  .chk-grid{grid-template-columns:1fr;}
-  .fc input,.fc select,.fc textarea{font-size:16px;}
+  .chk-grid{grid-template-columns:1fr 1fr;}
+  .fc input,.fc select,.fc textarea{font-size:16px;padding:10px 12px;}
+  .fc label{font-size:11.5px;}
 
-  /* TABLES - horizontal scroll */
-  .main table{min-width:600px;}
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-
-  /* MODALS */
-  .modal{padding:16px;border-radius:12px;max-height:95vh;}
+  /* ===== MODALS ===== */
+  .modal{padding:16px;border-radius:14px 14px 0 0;max-height:95vh;width:100%;margin:0;}
   .mh{padding:14px 16px;}
+  .overlay{align-items:flex-end;}
 
-  /* CARDS */
+  /* ===== CARDS ===== */
   .card{padding:14px;}
 
-  /* BUTTONS */
-  .btn{padding:8px 14px;font-size:12.5px;}
-  .btn-p{min-height:44px;}
+  /* ===== BUTTONS ===== */
+  .btn{padding:9px 14px;font-size:13px;}
 
-  /* PANEL LATERAL */
-  .panel{width:100vw;}
+  /* ===== PANEL LATERAL — full screen en mobile ===== */
+  .panel{width:100vw;border-radius:0;}
+  .panel-head{padding:16px;}
+  .panel-body{padding:16px;}
+  .pl{width:120px;font-size:11px;}
+  .pv{font-size:12.5px;}
 
-  /* PH */
-  .ph{flex-direction:column;align-items:flex-start;gap:8px;}
-  .ph .btn{width:100%;}
+  /* ===== GESTOR CARDS ===== */
+  .gestor-card{padding:12px 14px;}
+  .gestor-name{font-size:13px;}
+  .gestor-av{width:34px;height:34px;font-size:13px;}
 
-  /* FILTER BAR */
-  .filter-bar{flex-direction:column;}
-  .searchbox{width:100%;}
-  .fsel{width:100%;font-size:16px;}
+  /* ===== GESTORIA / PRENDAS MODALS ===== */
+  .gestoria-modal,.prendas-modal,.cont-modal{max-height:98vh;border-radius:14px 14px 0 0;}
 
-  /* GESTORIA MODAL */
-  .gestoria-modal{max-height:98vh;border-radius:12px;}
+  /* ===== SIDEBAR ===== */
+  .sidebar{width:88vw;max-width:320px;}
 
-  /* PRENDAS MODAL */
-  .prendas-modal{max-height:98vh;border-radius:12px;}
+  /* ===== CONTABILIDAD ===== */
+  #cont-panel-cupos,#cont-panel-historico{width:100vw !important;max-width:100vw !important;}
 
-  /* CONTABILIDAD MODAL */
-  .cont-modal{max-height:98vh;border-radius:12px;}
-
-  /* SIDEBAR */
-  .sidebar{width:85vw;}
-
-  /* LOGIN */
+  /* ===== LOGIN ===== */
   .login-card{padding:28px 20px;}
+
+  /* ===== SCROLL MIRROR — oculto en mobile ===== */
+  #scroll-mirror-wrap{display:none !important;}
+
+  /* ===== PAGINACION ===== */
+  .pagination{flex-wrap:wrap;gap:4px;justify-content:center;}
+
+  /* ===== REPORTES ===== */
+  .tab-bar{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;padding-bottom:4px;}
+  .tab-bar .tab{white-space:nowrap;font-size:12px;padding:7px 12px;}
 }
 
 @media(max-width:480px){
   .stats{grid-template-columns:1fr 1fr;}
-  .tb-brand span:last-child{display:none;}
-  #weather-widget{display:none !important;}
+  .ph>div:last-child .btn{flex:1 1 100%;}
+  .main table{min-width:440px;}
+  .chk-grid{grid-template-columns:1fr;}
 }
+
 
 /* SLIDE PANEL */
 .panel-overlay{position:fixed;inset:0;background:rgba(15,23,42,.4);z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;}
