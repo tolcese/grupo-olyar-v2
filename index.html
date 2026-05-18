@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.5</title>
+<title>Grupo Olyar — Solicitudes v2.20.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -9271,7 +9271,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 (function() {
   function updateClock() {
     const el = document.getElementById('tb-datetime');
-    if (!el) return;
+    if (!el || el.offsetParent === null) return; // no actualizar si está oculto
     const now = new Date();
     const d = String(now.getDate()).padStart(2,'0');
     const m = String(now.getMonth()+1).padStart(2,'0');
@@ -9281,7 +9281,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
     el.textContent = `${d}/${m}/${y} ${h}:${min}`;
   }
   updateClock();
-  setInterval(updateClock, 1000);
+  // En mobile el reloj está oculto — no correr cada segundo innecesariamente
+  setInterval(updateClock, window.innerWidth <= 768 ? 60000 : 1000);
 })();
 
 // Poblar selector de años
@@ -9307,12 +9308,16 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelect
 })();
 
 // Auto refresh cada 1 minuto
-// Auto-refresh cada 30 segundos — solo recarga la sección visible
+// Auto-refresh — 60s en mobile, 30s en desktop
 let _lastScroll = 0;
+let _appVisible = true;
 window.addEventListener('scroll', () => { _lastScroll = Date.now(); }, { passive: true });
+document.addEventListener('visibilitychange', () => { _appVisible = !document.hidden; });
 
+const _refreshInterval = window.innerWidth <= 768 ? 60000 : 30000;
 setInterval(() => {
   if (!ME) return;
+  if (!_appVisible) return; // no refrescar si la app está en background
   // En móvil, no refrescar si el usuario scrolleó en los últimos 3 segundos
   if (window.innerWidth <= 768 && Date.now() - _lastScroll < 3000) return;
 
@@ -9348,7 +9353,7 @@ setInterval(() => {
   if (document.getElementById('prendas-overlay')?.classList.contains('open')) {
     if (typeof loadPrendas === 'function') loadPrendas();
   }
-}, 30000);
+}, _refreshInterval);
 
 // Heartbeat cada 30 segundos
 setInterval(() => {
@@ -11636,6 +11641,19 @@ function renderReportes() {
   <style id="acuse-print-style"></style>
   <div id="acuse-print-content"></div>
 </div>
+
+<!-- FIX ALTURA REAL EN MOBILE (evita que el login-wrap quede cortado) -->
+<script>
+function fixMobileHeight() {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  const lw = document.getElementById('login-wrap');
+  if (lw) { lw.style.height = window.innerHeight + 'px'; }
+}
+fixMobileHeight();
+window.addEventListener('resize', fixMobileHeight);
+window.addEventListener('orientationchange', () => setTimeout(fixMobileHeight, 300));
+</script>
 
 <!-- PWA: registro del Service Worker -->
 <script>
