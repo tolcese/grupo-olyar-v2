@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.2</title>
+<title>Grupo Olyar — Solicitudes v2.21.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -917,9 +917,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           </div>
           <div style="display:flex;gap:8px">
             <button class="btn btn-s" onclick="loadBackupList()">🔄 Actualizar</button>
+            <button class="btn btn-s" onclick="checkAutoBackupForzado()" title="Forzar backup ahora">⚡ Forzar backup</button>
             <button class="btn btn-d" id="btn-delete-backups" onclick="eliminarBackupsSeleccionados()" style="display:none">🗑️ Eliminar seleccionados</button>
           </div>
         </div>
+        <div id="backup-auto-status" style="font-size:12px;color:var(--muted);margin-bottom:12px;padding:8px 12px;background:var(--surface);border-radius:8px;display:none"></div>
         <div id="backup-list-loading" style="color:var(--muted);font-size:13px;padding:20px 0">Cargando backups...</div>
         <div id="backup-list-empty" style="display:none;color:var(--muted);font-size:13px;padding:20px 0;text-align:center">
           <div style="font-size:32px;margin-bottom:8px">📭</div>
@@ -5562,45 +5564,78 @@ let DATERO_LAST_COUNT = null;
 
 let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
 
-async function checkAutoBackup() {
-  try {
-    const ahora = Date.now();
-    const VEINTICUATRO_HS = 24 * 60 * 60 * 1000;
+function _mostrarStatusBackup() {
+  const lastDate = localStorage.getItem('last_auto_backup_date');
+  const hoy = new Date().toISOString().slice(0, 10);
+  if (lastDate === hoy) {
+    _setBackupStatus(`✅ Backup automático ya generado hoy (${hoy})`, '#059669');
+  } else if (lastDate) {
+    _setBackupStatus(`ℹ️ Último backup registrado: ${lastDate} — hoy aún no se generó uno`, 'var(--muted)');
+  } else {
+    _setBackupStatus('ℹ️ No hay registro local de backup en este navegador', 'var(--muted)');
+  }
+}
 
-    // Primero verificar localStorage — evita múltiples backups en el mismo día
-    const lastLocal = localStorage.getItem('last_auto_backup');
-    if (lastLocal && ahora - parseInt(lastLocal) < VEINTICUATRO_HS) {
-      console.log('⏭️ Backup reciente (local), no es necesario');
+function _setBackupStatus(msg, color) {
+  const el = document.getElementById('backup-auto-status');
+  if (!el) return;
+  el.style.display = '';
+  el.style.color = color || 'var(--muted)';
+  el.innerHTML = msg;
+}
+
+async function checkAutoBackupForzado() {
+  localStorage.removeItem('last_auto_backup_date');
+  _setBackupStatus('⚙️ Forzando backup...', 'var(--blue)');
+  await checkAutoBackup(true);
+  loadBackupList();
+}
+
+async function checkAutoBackup(forzado) {
+  try {
+    const ahora = new Date();
+    const hoy = ahora.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+
+    // Verificar localStorage — ¿ya se hizo backup HOY?
+    const lastLocal = localStorage.getItem('last_auto_backup_date');
+    if (!forzado && lastLocal === hoy) {
+      _setBackupStatus(`⏭️ Ya se generó un backup hoy (${hoy})`, 'var(--muted)');
+      console.log('⏭️ Backup de hoy ya existe (local)');
       return;
     }
 
-    // Verificar también en Supabase Storage
-    const { data: archivos } = await SB.storage.from('backups').list('', { limit: 1, sortBy: { column: 'created_at', order: 'desc' } });
-    if (archivos && archivos.length && archivos[0].created_at) {
-      const ultimoBackup = new Date(archivos[0].created_at).getTime();
-      if (ahora - ultimoBackup < VEINTICUATRO_HS) {
-        localStorage.setItem('last_auto_backup', ahora.toString());
-        console.log('⏭️ Backup reciente (storage), no es necesario:', archivos[0].name);
+    // Verificar Supabase Storage — ¿existe un archivo de hoy?
+    const { data: archivos } = await SB.storage.from('backups').list('', { limit: 5, sortBy: { column: 'created_at', order: 'desc' } });
+    if (!forzado && archivos && archivos.length) {
+      const backupHoy = archivos.find(a => a.created_at && a.created_at.slice(0, 10) === hoy);
+      if (backupHoy) {
+        localStorage.setItem('last_auto_backup_date', hoy);
+        _setBackupStatus(`⏭️ Ya existe backup de hoy en storage: <b>${backupHoy.name}</b>`, 'var(--muted)');
+        console.log('⏭️ Backup de hoy en storage:', backupHoy.name);
         return;
       }
     }
 
+    _setBackupStatus('⚙️ Generando backup automático...', 'var(--blue)');
     const resp = await fetch('https://zohniclbfhvqmurtrhka.supabase.co/functions/v1/auto-backup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${SUPABASE_ANON}`,
       },
-      body: JSON.stringify({ trigger: 'auto' }),
+      body: JSON.stringify({ trigger: forzado ? 'manual' : 'auto' }),
     });
     const data = await resp.json();
     if (data.ok) {
-      localStorage.setItem('last_auto_backup', ahora.toString());
+      localStorage.setItem('last_auto_backup_date', hoy);
+      _setBackupStatus(`✅ Backup generado: <b>${data.archivo}</b>`, '#059669');
       console.log('✅ Backup automático:', data.archivo);
     } else {
+      _setBackupStatus(`❌ Error: ${data.error || 'respuesta inesperada'}`, 'var(--red)');
       console.warn('Backup falló:', data.error);
     }
   } catch(e) {
+    _setBackupStatus(`❌ Excepción: ${e.message}`, 'var(--red)');
     console.warn('Backup automático falló:', e);
   }
 }
@@ -7219,7 +7254,7 @@ function showV(v) {
   if (v==='nueva' && !editId && !window._isDuplicating) { resetForm(); document.getElementById('form-title').textContent='Nueva solicitud'; document.getElementById('save-btn').textContent='💾 Guardar solicitud'; }
   if (v==='usuarios') loadUsers();
   if (v==='config')   { loadMantenimientoStatus(); loadPorcentajes(); }
-  if (v==='backup')   { loadBackupList(); }
+  if (v==='backup')   { loadBackupList(); _mostrarStatusBackup(); }
   if (v==='datero') {
     markDateroSeen();
     if (DATERO_CACHE.length) { renderDatero(); loadDatero(); }
