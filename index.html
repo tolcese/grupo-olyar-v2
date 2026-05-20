@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.1</title>
+<title>Grupo Olyar — Solicitudes v2.21.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -9622,7 +9622,6 @@ function renderBrecha() {
   const countEl = document.getElementById('brecha-count');
   if (!tbody) return;
 
-  // Poblar filtro de bancos la primera vez
   const selBanco = document.getElementById('brecha-banco');
   if (selBanco && selBanco.options.length === 1) {
     const bancos = [...new Set(RECORDS.filter(r => (r.estado||'').toUpperCase()==='APROBADO').map(r=>r.banco).filter(Boolean))].sort();
@@ -9633,7 +9632,8 @@ function renderBrecha() {
   const fUmbral  = parseFloat(document.getElementById('brecha-umbral')?.value || '') || null;
   const fDesde   = document.getElementById('brecha-desde')?.value || '';
   const fHasta   = document.getElementById('brecha-hasta')?.value || '';
-  const mon = v => v ? '$' + Number(v).toLocaleString('es-AR') : '—';
+  const fAgrup   = document.getElementById('brecha-agrup')?.value || 'banco';
+  const mon = v => v ? '$' + Math.round(Number(v)).toLocaleString('es-AR') : '—';
   const pctColor = p => p <= 20 ? '#059669' : p <= 25 ? '#d97706' : '#dc2626';
 
   let data = RECORDS.filter(r => {
@@ -9654,10 +9654,13 @@ function renderBrecha() {
   if (fDesde)  data = data.filter(r => (r.fecha || r.fechaReg || '') >= fDesde);
   if (fHasta)  data = data.filter(r => (r.fecha || r.fechaReg || '') <= fHasta);
 
-  // Ordenar
   const col = _brechaSort.col;
   const dir = _brechaSort.dir;
   data.sort((a, b) => {
+    const ga = (fAgrup === 'banco' ? a.banco : a.concesionaria) || '';
+    const gb = (fAgrup === 'banco' ? b.banco : b.concesionaria) || '';
+    const gCmp = ga.localeCompare(gb, 'es');
+    if (gCmp !== 0) return gCmp;
     if (col === 'cliente')       return String(a.nombrecliente||'').localeCompare(String(b.nombrecliente||''), 'es') * dir;
     if (col === 'banco')         return String(a.banco||'').localeCompare(String(b.banco||''), 'es') * dir;
     if (col === 'concesionaria') return String(a.concesionaria||'').localeCompare(String(b.concesionaria||''), 'es') * dir;
@@ -9668,7 +9671,6 @@ function renderBrecha() {
     return 0;
   });
 
-  // Actualizar íconos de sort
   ['cliente','banco','concesionaria','vehiculo','importe','brecha','pct'].forEach(c => {
     const el = document.getElementById('bsort-'+c);
     if (el) el.textContent = col === c ? (dir === 1 ? ' ↑' : ' ↓') : '';
@@ -9677,24 +9679,51 @@ function renderBrecha() {
   if (countEl) countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
   window._brechaData = data;
 
-  if (!data.length) {
-    tbody.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
   empty.style.display = 'none';
 
-  tbody.innerHTML = data.map(r => `
-    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
-      <td style="padding:9px 12px;font-weight:600">${r.nombrecliente||'—'}</td>
-      <td style="padding:9px 12px">${r.banco ? colorBanco(r.banco) : '—'}</td>
-      <td style="padding:9px 12px;font-size:12px;color:var(--ink2)">${r.concesionaria||'—'}</td>
-      <td style="padding:9px 12px;text-align:right;font-family:monospace">${mon(r._veh)}</td>
-      <td style="padding:9px 12px;text-align:right;font-family:monospace">${mon(r._imp)}</td>
-      <td style="padding:9px 12px;text-align:right;font-family:monospace;font-weight:600">${mon(r._brecha)}</td>
-      <td style="padding:9px 12px;text-align:right;font-weight:700;color:${pctColor(r._pct)}">${r._pct.toFixed(1)}%</td>
-    </tr>
-  `).join('');
+  const grupos = {};
+  data.forEach(r => {
+    const key = fAgrup === 'banco' ? (r.banco || '—') : (r.concesionaria || '—');
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(r);
+  });
+
+  let html = '';
+  Object.entries(grupos).forEach(([grupo, regs]) => {
+    const totalVeh    = regs.reduce((s, r) => s + r._veh, 0);
+    const totalImp    = regs.reduce((s, r) => s + r._imp, 0);
+    const totalBrecha = regs.reduce((s, r) => s + r._brecha, 0);
+    const avgPct      = totalVeh > 0 ? (totalBrecha / totalVeh) * 100 : 0;
+
+    html += `<tr style="background:var(--surface);border-bottom:2px solid var(--line)">
+      <td colspan="7" style="padding:8px 12px;font-weight:700;font-size:13px">
+        ${fAgrup === 'banco' ? colorBanco(grupo) : '🏢 ' + grupo}
+        <span style="font-weight:400;color:var(--muted);font-size:12px;margin-left:8px">${regs.length} solicitud${regs.length !== 1 ? 'es' : ''}</span>
+      </td></tr>`;
+
+    regs.forEach(r => {
+      html += `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background=''">
+        <td style="padding:8px 12px;font-weight:600">${r.nombrecliente||'—'}</td>
+        <td style="padding:8px 12px">${r.banco ? colorBanco(r.banco) : '—'}</td>
+        <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${r.concesionaria||'—'}</td>
+        <td style="padding:8px 12px;text-align:right;font-family:monospace">${mon(r._veh)}</td>
+        <td style="padding:8px 12px;text-align:right;font-family:monospace">${mon(r._imp)}</td>
+        <td style="padding:8px 12px;text-align:right;font-family:monospace;font-weight:600">${mon(r._brecha)}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:700;color:${pctColor(r._pct)}">${r._pct.toFixed(1)}%</td>
+      </tr>`;
+    });
+
+    html += `<tr style="background:#e8f4fd;border-bottom:3px solid var(--line)">
+      <td colspan="3" style="padding:8px 12px;font-weight:700;font-size:12px;color:var(--ink2)">Subtotal ${grupo}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-weight:700">${mon(totalVeh)}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-weight:700">${mon(totalImp)}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-weight:700">${mon(totalBrecha)}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:${pctColor(avgPct)}">${avgPct.toFixed(1)}%</td>
+    </tr>`;
+  });
+
+  tbody.innerHTML = html;
 }
 
 function poblarFiltroFinBancos() {
