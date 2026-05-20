@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.0</title>
+<title>Grupo Olyar — Solicitudes v2.21.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1456,6 +1456,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <input type="date" id="brecha-desde" class="fsel" onchange="renderBrecha()" style="font-size:12px" title="Desde">
             <input type="date" id="brecha-hasta" class="fsel" onchange="renderBrecha()" style="font-size:12px" title="Hasta">
             <button class="btn btn-s" style="font-size:12px;padding:6px 10px" onclick="document.getElementById('brecha-desde').value='';document.getElementById('brecha-hasta').value='';renderBrecha()">✕ Fechas</button>
+            <button class="btn btn-s" style="font-size:12px;padding:6px 10px;background:#059669;color:#fff;border-color:#059669" onclick="exportBrechaExcel()">⬇ Excel</button>
             <span id="brecha-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
           </div>
         </div>
@@ -9563,6 +9564,50 @@ function showRepTab(tab) {
   else setTimeout(renderReportes, 50);
 }
 
+async function exportBrechaExcel() {
+  const rows = [...document.querySelectorAll('#brecha-tbody tr')];
+  if (!rows.length) { toast('Sin datos para exportar', 'warn'); return; }
+
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+
+  const fBanco   = document.getElementById('brecha-banco')?.value || '';
+  const fUmbral  = document.getElementById('brecha-umbral')?.value || '';
+  const fDesde   = document.getElementById('brecha-desde')?.value || '';
+  const fHasta   = document.getElementById('brecha-hasta')?.value || '';
+  const mon = v => v ? '$' + Number(v).toLocaleString('es-AR') : '—';
+
+  let data = window._brechaData || [];
+
+  const exportRows = data.map(r => ({
+    'Cliente':         r.nombrecliente || '—',
+    'DNI':             r.dni || '—',
+    'Banco':           r.banco || '—',
+    'Concesionaria':   r.concesionaria || '—',
+    'Fecha':           r.fecha || r.fechaReg || '—',
+    'Valor auto ($)':  r._veh || 0,
+    'Importe banco ($)': r._imp || 0,
+    'Brecha ($)':      Math.round(r._brecha) || 0,
+    '% Faltante':      parseFloat(r._pct.toFixed(2)) || 0,
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.json_to_sheet(exportRows);
+  ws['!cols'] = [
+    {wch:28},{wch:12},{wch:14},{wch:24},{wch:12},
+    {wch:16},{wch:18},{wch:16},{wch:12}
+  ];
+  XLSX.utils.book_append_sheet(wb, ws, 'Brecha');
+  const fecha = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `Brecha_Financiamiento_${fecha}.xlsx`);
+}
+
 let _brechaSort = { col: 'pct', dir: 1 };
 
 function sortBrecha(col) {
@@ -9630,6 +9675,7 @@ function renderBrecha() {
   });
 
   if (countEl) countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+  window._brechaData = data;
 
   if (!data.length) {
     tbody.innerHTML = '';
