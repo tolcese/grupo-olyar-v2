@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.8</title>
+<title>Grupo Olyar — Solicitudes v2.20.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1225,6 +1225,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button id="tab-conversion-conc" onclick="showRepTab('conversion-conc')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📊 Conversión por concesionaria</button>
         <button id="tab-listado-prendas" onclick="showRepTab('listado-prendas')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📋 Listado de prendas</button>
         <button id="tab-financiamiento" onclick="showRepTab('financiamiento')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">💰 % Financiamiento</button>
+        <button id="tab-brecha" onclick="showRepTab('brecha')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;display:none">📉 Brecha financiamiento</button>
       </div>
 
       <!-- TAB 1: ESTADOS TOTALES -->
@@ -1429,6 +1430,49 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div style="font-size:32px;margin-bottom:8px">📭</div>
           <div style="font-weight:600">Sin prendas para mostrar</div>
         </div>
+      </div>
+
+      <!-- BRECHA FINANCIAMIENTO -->
+      <div id="rep-brecha" class="card" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="card-t">📉 Brecha de financiamiento</div>
+            <div class="card-s">Solicitudes APROBADAS — diferencia entre valor del auto e importe prestado</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <select id="brecha-banco" class="fsel" onchange="renderBrecha()" style="font-size:12px">
+              <option value="">Todos los bancos</option>
+            </select>
+            <select id="brecha-agrup" class="fsel" onchange="renderBrecha()" style="font-size:12px">
+              <option value="banco">Agrupar por banco</option>
+              <option value="concesionaria">Agrupar por concesionaria</option>
+            </select>
+            <select id="brecha-umbral" class="fsel" onchange="renderBrecha()" style="font-size:12px">
+              <option value="">Sin límite</option>
+              <option value="20">Hasta 20% faltante</option>
+              <option value="25">Hasta 25% faltante</option>
+              <option value="30">Hasta 30% faltante</option>
+            </select>
+            <span id="brecha-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;min-width:700px;font-size:13px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:10px 12px;text-align:left;font-weight:700;cursor:pointer" onclick="sortBrecha('cliente')">Cliente <span id="bsort-cliente"></span></th>
+                <th style="padding:10px 12px;text-align:left;font-weight:700;cursor:pointer" onclick="sortBrecha('banco')">Banco <span id="bsort-banco"></span></th>
+                <th style="padding:10px 12px;text-align:left;font-weight:700;cursor:pointer" onclick="sortBrecha('concesionaria')">Concesionaria <span id="bsort-concesionaria"></span></th>
+                <th style="padding:10px 12px;text-align:right;font-weight:700;cursor:pointer" onclick="sortBrecha('vehiculo')">Valor auto <span id="bsort-vehiculo"></span></th>
+                <th style="padding:10px 12px;text-align:right;font-weight:700;cursor:pointer" onclick="sortBrecha('importe')">Importe banco <span id="bsort-importe"></span></th>
+                <th style="padding:10px 12px;text-align:right;font-weight:700;cursor:pointer" onclick="sortBrecha('brecha')">Brecha $ <span id="bsort-brecha"></span></th>
+                <th style="padding:10px 12px;text-align:right;font-weight:700;cursor:pointer" onclick="sortBrecha('pct')">% Faltante <span id="bsort-pct"></span></th>
+              </tr>
+            </thead>
+            <tbody id="brecha-tbody"></tbody>
+          </table>
+        </div>
+        <div id="brecha-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin datos para mostrar</div>
       </div>
 
       <div id="rep-financiamiento" class="card" style="display:none">
@@ -7139,12 +7183,16 @@ function showV(v) {
     if (!isAdmin) {
       showRepTab('solicitudes-hoy');
       if (tabAyer) tabAyer.style.display = '';
+      const tabBrecha = document.getElementById('tab-brecha');
+      if (tabBrecha) tabBrecha.style.display = '';
     } else {
       if (tabConv) tabConv.style.display = '';
       const tabLP = document.getElementById('tab-listado-prendas');
       if (tabLP) tabLP.style.display = '';
       const tabFin = document.getElementById('tab-financiamiento');
       if (tabFin) tabFin.style.display = '';
+      const tabBrecha = document.getElementById('tab-brecha');
+      if (tabBrecha) tabBrecha.style.display = '';
       setTimeout(renderReportes, 50);
     }
   }
@@ -9493,7 +9541,7 @@ let chartTorta = null;
 let chartBarras = null;
 
 function showRepTab(tab) {
-  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc','listado-prendas','financiamiento'].forEach(t => {
+  ['torta','barras','comisiones','prendas-pend','solicitudes-hoy','solicitudes-ayer','conversion-conc','listado-prendas','financiamiento','brecha'].forEach(t => {
     document.getElementById('rep-'+t).style.display = t===tab ? '' : 'none';
     const btn = document.getElementById('tab-'+t);
     if (btn) {
@@ -9508,7 +9556,92 @@ function showRepTab(tab) {
   else if (tab === 'conversion-conc') renderConversionConc();
   else if (tab === 'listado-prendas') renderListadoPrendas();
   else if (tab === 'financiamiento') { poblarFiltroFinBancos(); renderFinanciamiento(); }
+  else if (tab === 'brecha') renderBrecha();
   else setTimeout(renderReportes, 50);
+}
+
+let _brechaSort = { col: 'pct', dir: 1 };
+
+function sortBrecha(col) {
+  if (_brechaSort.col === col) _brechaSort.dir *= -1;
+  else { _brechaSort.col = col; _brechaSort.dir = 1; }
+  renderBrecha();
+}
+
+function renderBrecha() {
+  const tbody   = document.getElementById('brecha-tbody');
+  const empty   = document.getElementById('brecha-empty');
+  const countEl = document.getElementById('brecha-count');
+  if (!tbody) return;
+
+  // Poblar filtro de bancos la primera vez
+  const selBanco = document.getElementById('brecha-banco');
+  if (selBanco && selBanco.options.length === 1) {
+    const bancos = [...new Set(RECORDS.filter(r => (r.estado||'').toUpperCase()==='APROBADO').map(r=>r.banco).filter(Boolean))].sort();
+    bancos.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; selBanco.appendChild(o); });
+  }
+
+  const fBanco   = document.getElementById('brecha-banco')?.value || '';
+  const fUmbral  = parseFloat(document.getElementById('brecha-umbral')?.value || '') || null;
+  const mon = v => v ? '$' + Number(v).toLocaleString('es-AR') : '—';
+  const pctColor = p => p <= 20 ? '#059669' : p <= 25 ? '#d97706' : '#dc2626';
+
+  let data = RECORDS.filter(r => {
+    if ((r.estado||'').toUpperCase() !== 'APROBADO') return false;
+    const veh = parseFloat(String(r.vehiculo||0).replace(/[$,.]/g,'')) || 0;
+    const imp = parseFloat(String(r.importe||0).replace(/[$,.]/g,'')) || 0;
+    return veh > 0 && imp > 0;
+  }).map(r => {
+    const veh    = parseFloat(String(r.vehiculo||0).replace(/[$,.]/g,'')) || 0;
+    const imp    = parseFloat(String(r.importe||0).replace(/[$,.]/g,'')) || 0;
+    const brecha = veh - imp;
+    const pct    = (brecha / veh) * 100;
+    return { ...r, _veh: veh, _imp: imp, _brecha: brecha, _pct: pct };
+  });
+
+  if (fBanco)  data = data.filter(r => r.banco === fBanco);
+  if (fUmbral) data = data.filter(r => r._pct <= fUmbral);
+
+  // Ordenar
+  const col = _brechaSort.col;
+  const dir = _brechaSort.dir;
+  data.sort((a, b) => {
+    if (col === 'cliente')       return String(a.nombrecliente||'').localeCompare(String(b.nombrecliente||''), 'es') * dir;
+    if (col === 'banco')         return String(a.banco||'').localeCompare(String(b.banco||''), 'es') * dir;
+    if (col === 'concesionaria') return String(a.concesionaria||'').localeCompare(String(b.concesionaria||''), 'es') * dir;
+    if (col === 'vehiculo')      return (a._veh - b._veh) * dir;
+    if (col === 'importe')       return (a._imp - b._imp) * dir;
+    if (col === 'brecha')        return (a._brecha - b._brecha) * dir;
+    if (col === 'pct')           return (a._pct - b._pct) * dir;
+    return 0;
+  });
+
+  // Actualizar íconos de sort
+  ['cliente','banco','concesionaria','vehiculo','importe','brecha','pct'].forEach(c => {
+    const el = document.getElementById('bsort-'+c);
+    if (el) el.textContent = col === c ? (dir === 1 ? ' ↑' : ' ↓') : '';
+  });
+
+  if (countEl) countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(r => `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:9px 12px;font-weight:600">${r.nombrecliente||'—'}</td>
+      <td style="padding:9px 12px">${r.banco ? colorBanco(r.banco) : '—'}</td>
+      <td style="padding:9px 12px;font-size:12px;color:var(--ink2)">${r.concesionaria||'—'}</td>
+      <td style="padding:9px 12px;text-align:right;font-family:monospace">${mon(r._veh)}</td>
+      <td style="padding:9px 12px;text-align:right;font-family:monospace">${mon(r._imp)}</td>
+      <td style="padding:9px 12px;text-align:right;font-family:monospace;font-weight:600">${mon(r._brecha)}</td>
+      <td style="padding:9px 12px;text-align:right;font-weight:700;color:${pctColor(r._pct)}">${r._pct.toFixed(1)}%</td>
+    </tr>
+  `).join('');
 }
 
 function poblarFiltroFinBancos() {
