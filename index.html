@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.7</title>
+<title>Grupo Olyar — Solicitudes v2.20.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -659,11 +659,17 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <select class="fsel" id="f-conc" onchange="renderTable()">
           <option value="">Todas las concesionarias</option>
         </select>
-        <select class="fsel" id="f-prov" onchange="renderTable()">
+        <select class="fsel" id="f-prov" onchange="renderTable()" title="Provincia">
           <option value="">Todas las provincias</option>
         </select>
         <select class="fsel" id="f-usu" onchange="renderTable()" style="display:none">
           <option value="">Todos los usuarios</option>
+        </select>
+        <select class="fsel" id="f-pct-faltante" onchange="renderTable()" title="% faltante a financiar">
+          <option value="">% faltante (todos)</option>
+          <option value="20">Hasta 20% faltante</option>
+          <option value="25">Hasta 25% faltante</option>
+          <option value="30">Hasta 30% faltante</option>
         </select>
       </div>
       <div class="tw">
@@ -7726,6 +7732,20 @@ function renderTable() {
   const fHasta = document.getElementById('f-fecha-hasta')?.value||'';
   if (fDesde) data=data.filter(r=>r.fecha && r.fecha >= fDesde);
   if (fHasta) data=data.filter(r=>r.fecha && r.fecha <= fHasta);
+
+  // Filtro % faltante — solo solicitudes APROBADAS con vehiculo e importe
+  const fPctFalt = document.getElementById('f-pct-faltante')?.value||'';
+  if (fPctFalt) {
+    const umbral = parseFloat(fPctFalt);
+    data = data.filter(r => {
+      if ((r.estado||'').toUpperCase() !== 'APROBADO') return false;
+      const veh = parseFloat(String(r.vehiculo||0).replace(/[$,.]/g,''))||0;
+      const imp = parseFloat(String(r.importe||0).replace(/[$,.]/g,''))||0;
+      if (!veh || !imp) return false;
+      const pctFalt = ((veh - imp) / veh) * 100;
+      return pctFalt <= umbral;
+    });
+  }
 
   if (SORT_COL) {
     data.sort((a,b) => {
