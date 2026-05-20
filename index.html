@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.20.9</title>
+<title>Grupo Olyar — Solicitudes v2.21.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -1453,6 +1453,9 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
               <option value="25">Hasta 25% faltante</option>
               <option value="30">Hasta 30% faltante</option>
             </select>
+            <input type="date" id="brecha-desde" class="fsel" onchange="renderBrecha()" style="font-size:12px" title="Desde">
+            <input type="date" id="brecha-hasta" class="fsel" onchange="renderBrecha()" style="font-size:12px" title="Hasta">
+            <button class="btn btn-s" style="font-size:12px;padding:6px 10px" onclick="document.getElementById('brecha-desde').value='';document.getElementById('brecha-hasta').value='';renderBrecha()">✕ Fechas</button>
             <span id="brecha-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
           </div>
         </div>
@@ -9583,6 +9586,8 @@ function renderBrecha() {
 
   const fBanco   = document.getElementById('brecha-banco')?.value || '';
   const fUmbral  = parseFloat(document.getElementById('brecha-umbral')?.value || '') || null;
+  const fDesde   = document.getElementById('brecha-desde')?.value || '';
+  const fHasta   = document.getElementById('brecha-hasta')?.value || '';
   const mon = v => v ? '$' + Number(v).toLocaleString('es-AR') : '—';
   const pctColor = p => p <= 20 ? '#059669' : p <= 25 ? '#d97706' : '#dc2626';
 
@@ -9601,6 +9606,8 @@ function renderBrecha() {
 
   if (fBanco)  data = data.filter(r => r.banco === fBanco);
   if (fUmbral) data = data.filter(r => r._pct <= fUmbral);
+  if (fDesde)  data = data.filter(r => (r.fecha || r.fechaReg || '') >= fDesde);
+  if (fHasta)  data = data.filter(r => (r.fecha || r.fechaReg || '') <= fHasta);
 
   // Ordenar
   const col = _brechaSort.col;
