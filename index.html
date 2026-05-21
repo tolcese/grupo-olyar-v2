@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.5</title>
+<title>Grupo Olyar — Solicitudes v2.21.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7109,11 +7109,6 @@ async function savePrenda() {
     const { error } = await SB.from('solicitudes').update({ en_proceso: enProceso, presentada, finalizada: finalizada || null, entregada }).eq('id', id);
     if (error) throw error;
     if (r) { r.enProceso = enProceso; r.presentada = presentada; r.finalizada = finalizada; r.entregada = entregada; }
-
-    // Descontar stock si la prenda acaba de marcarse como presentada al gestor
-    if (presentada && !viejaPrenda.presentada && r?.banco) {
-      await descontarStockPrenda(r.banco, 'salida_gestor', id, `Gestor: ${r.gestor_asignado || r.nombrecliente || id}`);
-    }
     const cambiosPrenda = diffObjetos(viejaPrenda, { enProceso, presentada, finalizada, entregada }, ['enProceso','presentada','finalizada','entregada']);
     registrarHistorial('prenda', id, cambiosPrenda);
     toast('Prenda actualizada ✓', 'ok');
@@ -8969,6 +8964,78 @@ async function descontarStockPrenda(banco, tipo, solicitudId, nota) {
   });
   // Actualizar cache local
   if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+}
+
+async function abrirModalEnvioGestor() {
+  // Cargar gestores en el select
+  const sel = document.getElementById('envio-gestor-sel');
+  if (sel && sel.options.length === 1) {
+    const { data: gestores } = await SB.from('gestores').select('id, nombre').order('nombre');
+    (gestores || []).forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.nombre; o.textContent = g.nombre;
+      sel.appendChild(o);
+    });
+  }
+  document.getElementById('envio-gestor-banco').value = '';
+  document.getElementById('envio-gestor-fecha').value = new Date().toISOString().slice(0,10);
+  document.getElementById('envio-gestor-cantidad').value = '';
+  document.getElementById('envio-gestor-nota').value = '';
+  document.getElementById('envio-gestor-stock-info').style.display = 'none';
+  document.getElementById('envio-gestor-overlay').style.display = 'flex';
+
+  // Mostrar stock al cambiar banco
+  document.getElementById('envio-gestor-banco').onchange = function() {
+    const banco = this.value;
+    const infoEl = document.getElementById('envio-gestor-stock-info');
+    if (banco && STOCK_DATA[banco] !== undefined) {
+      const cant = STOCK_DATA[banco]?.cantidad ?? '?';
+      infoEl.style.display = '';
+      infoEl.innerHTML = `Stock actual de <b>${banco}</b>: <b style="color:${cant<=5?'#dc2626':'#059669'}">${cant} prendas</b>`;
+    } else {
+      infoEl.style.display = 'none';
+    }
+  };
+}
+
+function cerrarModalEnvioGestor() {
+  document.getElementById('envio-gestor-overlay').style.display = 'none';
+}
+
+async function guardarEnvioGestor() {
+  const gestor   = document.getElementById('envio-gestor-sel').value;
+  const banco    = document.getElementById('envio-gestor-banco').value;
+  const fecha    = document.getElementById('envio-gestor-fecha').value;
+  const cantidad = parseInt(document.getElementById('envio-gestor-cantidad').value) || 0;
+  const nota     = document.getElementById('envio-gestor-nota').value.trim();
+
+  if (!gestor)    { toast('Seleccioná un gestor', 'warn'); return; }
+  if (!banco)     { toast('Seleccioná un banco', 'warn'); return; }
+  if (!fecha)     { toast('Ingresá la fecha', 'warn'); return; }
+  if (cantidad < 1) { toast('La cantidad debe ser mayor a 0', 'warn'); return; }
+
+  const stockActual = STOCK_DATA[banco]?.cantidad || 0;
+  if (cantidad > stockActual) {
+    const ok = confirm(`Stock actual de ${banco}: ${stockActual} prendas. Querés registrar ${cantidad} de todas formas?`);
+    if (!ok) return;
+  }
+
+  // Descontar del stock
+  const nueva = Math.max(0, stockActual - cantidad);
+  await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+
+  // Registrar movimiento
+  await SB.from('stock_prendas_movimientos').insert({
+    banco, tipo: 'salida_gestor', cantidad,
+    nota: `Gestor: ${gestor}${nota ? ' — ' + nota : ''} | Fecha envío: ${fecha}`,
+    usuario: ME?.usr || null
+  });
+
+  // Actualizar cache local
+  if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+
+  cerrarModalEnvioGestor();
+  toast(`✅ Envío registrado: ${cantidad} prendas ${banco} → ${gestor}`);
 }
 
 async function loadBackupList() {
@@ -11131,6 +11198,7 @@ function renderReportes() {
         <div style="font-size:12px;color:var(--muted);margin-top:2px" id="gestoria-count">—</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-s" onclick="abrirModalEnvioGestor()" style="font-size:12px;padding:6px 12px">📦 Envío al gestor</button>
         <div class="searchbox" style="min-width:220px">
           <span style="color:var(--muted)">🔍</span>
           <input id="gestoria-srch" placeholder="Buscar cliente, banco..." oninput="renderGestoria()">
@@ -11177,6 +11245,49 @@ function renderReportes() {
     <!-- Barra scroll espejo fija al fondo del modal -->
     <div class="gestoria-scroll-mirror" id="gestoria-mirror">
       <div class="gestoria-scroll-mirror-inner" id="gestoria-mirror-inner"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ENVÍO AL GESTOR -->
+<div class="overlay" id="envio-gestor-overlay" onclick="if(event.target===this)cerrarModalEnvioGestor()" style="display:none;z-index:700">
+  <div class="modal" style="max-width:420px">
+    <div class="mh">
+      <div class="mt">📦 Registrar envío al gestor</div>
+      <button class="mc" onclick="cerrarModalEnvioGestor()">✕</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <div class="fc">
+        <label>Gestor</label>
+        <select id="envio-gestor-sel" class="fsel" style="font-size:16px">
+          <option value="">Seleccioná un gestor</option>
+        </select>
+      </div>
+      <div class="fc">
+        <label>Banco</label>
+        <select id="envio-gestor-banco" class="fsel" style="font-size:16px">
+          <option value="">Seleccioná un banco</option>
+          <option value="Columbia">Columbia</option>
+          <option value="Galicia">Galicia</option>
+          <option value="Santander">Santander</option>
+          <option value="Supervielle">Supervielle</option>
+          <option value="Bancor">Bancor</option>
+        </select>
+      </div>
+      <div class="fc">
+        <label>Fecha de envío</label>
+        <input type="date" id="envio-gestor-fecha" style="font-size:16px">
+      </div>
+      <div class="fc">
+        <label>Cantidad de prendas</label>
+        <input type="number" id="envio-gestor-cantidad" min="1" placeholder="Ej: 5" style="font-size:16px">
+      </div>
+      <div class="fc">
+        <label>Nota (opcional)</label>
+        <input type="text" id="envio-gestor-nota" placeholder="Observaciones">
+      </div>
+      <div id="envio-gestor-stock-info" style="font-size:12px;color:var(--muted);padding:8px 12px;background:var(--surface);border-radius:8px;display:none"></div>
+      <button class="btn btn-p" onclick="guardarEnvioGestor()">💾 Registrar envío</button>
     </div>
   </div>
 </div>
