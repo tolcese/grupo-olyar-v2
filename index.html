@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.6</title>
+<title>Grupo Olyar — Solicitudes v2.21.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -936,6 +936,45 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           </table>
         </div>
         <div id="stock-mov-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin movimientos registrados</div>
+      </div>
+    </div>
+
+    <!-- ENVÍOS AL GESTOR -->
+    <div id="v-envios-gestor" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📦 Stock de prendas</div><div class="ph-s">Registro de prendas enviadas a gestores</div></div>
+        <button class="btn btn-p" onclick="abrirModalEnvioGestor()">＋ Registrar envío</button>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <select id="envios-list-banco" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
+            <option value="">Todos los bancos</option>
+            <option value="Columbia">Columbia</option>
+            <option value="Galicia">Galicia</option>
+            <option value="Santander">Santander</option>
+            <option value="Supervielle">Supervielle</option>
+            <option value="Bancor">Bancor</option>
+          </select>
+          <input type="date" id="envios-list-desde" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
+          <input type="date" id="envios-list-hasta" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
+          <span id="envios-list-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;min-width:550px;font-size:13px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Fecha</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Banco</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Gestor</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Cantidad</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Nota</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Usuario</th>
+              </tr>
+            </thead>
+            <tbody id="envios-list-tbody"></tbody>
+          </table>
+        </div>
+        <div id="envios-list-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin envíos registrados</div>
       </div>
     </div>
 
@@ -2903,7 +2942,7 @@ function openSidebar() {
   document.getElementById('sb-nueva').style.display = ME?.rol === 'admin' ? 'none' : '';
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-stock-prendas').style.display = ME?.rol === 'admin' ? '' : 'none';
+  document.getElementById('sb-envios-gestor').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos') ? '' : 'none';
@@ -7316,7 +7355,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','stock-prendas'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','stock-prendas','envios-gestor'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -7354,6 +7393,7 @@ function showV(v) {
     if (sp) sp.style.transform = 'translateX(100%)';
   }
   if (v==='stock-prendas') { loadStockPrendas(); }
+  if (v==='envios-gestor') { loadEnviosGestor(); }
   if (v !== 'datero') closeDateroPanel();
 
   if (v === 'contabilidad') {
@@ -8966,6 +9006,55 @@ async function descontarStockPrenda(banco, tipo, solicitudId, nota) {
   if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
 }
 
+let ENVIOS_DATA = [];
+
+async function loadEnviosGestor() {
+  const { data } = await SB.from('stock_prendas_movimientos')
+    .select('*').eq('tipo','salida_gestor')
+    .order('fecha', { ascending: false }).limit(300);
+  ENVIOS_DATA = data || [];
+  renderEnviosGestor();
+}
+
+function renderEnviosGestor() {
+  const tbody  = document.getElementById('envios-list-tbody');
+  const empty  = document.getElementById('envios-list-empty');
+  const countEl= document.getElementById('envios-list-count');
+  if (!tbody) return;
+
+  const fBanco = document.getElementById('envios-list-banco')?.value || '';
+  const fDesde = document.getElementById('envios-list-desde')?.value || '';
+  const fHasta = document.getElementById('envios-list-hasta')?.value || '';
+  const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
+
+  let data = [...ENVIOS_DATA];
+  if (fBanco) data = data.filter(m => m.banco === fBanco);
+  if (fDesde) data = data.filter(m => (m.fecha||'') >= fDesde);
+  if (fHasta) data = data.filter(m => (m.fecha||'') <= fHasta);
+
+  if (countEl) countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(m => {
+    const fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+    const color = COLORES[m.banco] || 'var(--ink)';
+    // Extraer gestor de la nota
+    const gestorMatch = (m.nota||'').match(/^Gestor: ([^|—]+)/);
+    const gestor = gestorMatch ? gestorMatch[1].trim() : (m.nota || '—');
+    const notaExtra = (m.nota||'').includes('—') ? m.nota.split('—').slice(1).join('—').trim() : '';
+    return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${fecha}</td>
+      <td style="padding:8px 12px;font-weight:700;color:${color}">${m.banco||'—'}</td>
+      <td style="padding:8px 12px;font-weight:600">${gestor}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:#dc2626">−${m.cantidad}</td>
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${notaExtra || '—'}</td>
+      <td style="padding:8px 12px;font-size:12px;color:var(--muted)">${m.usuario||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
 async function abrirModalEnvioGestor() {
   // Cargar gestores en el select
   const sel = document.getElementById('envio-gestor-sel');
@@ -9036,6 +9125,10 @@ async function guardarEnvioGestor() {
 
   cerrarModalEnvioGestor();
   toast(`✅ Envío registrado: ${cantidad} prendas ${banco} → ${gestor}`);
+  // Refrescar si estamos en la sección de envíos
+  if (document.getElementById('v-envios-gestor')?.style.display !== 'none') loadEnviosGestor();
+  // Refrescar stock si estamos en esa sección
+  if (document.getElementById('v-stock-prendas')?.style.display !== 'none') loadStockPrendas();
 }
 
 async function loadBackupList() {
@@ -11072,8 +11165,8 @@ function renderReportes() {
       <span class="sb-icon">🧾</span> Contabilidad
     </button>
 
-    <button class="sb-item" id="sb-stock-prendas" onclick="closeSidebar();showV('stock-prendas')" style="display:none">
-      <span class="sb-icon">📦</span> Stock de prendas
+    <button class="sb-item" id="sb-envios-gestor" onclick="closeSidebar();showV('envios-gestor')" style="display:none">
+      <span class="sb-icon">🚚</span> Stock de prendas
     </button>
 
     <button class="sb-item" id="sb-presupuestos" onclick="closeSidebar();showV('presupuestos')" style="display:none">
@@ -11198,7 +11291,6 @@ function renderReportes() {
         <div style="font-size:12px;color:var(--muted);margin-top:2px" id="gestoria-count">—</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn btn-s" onclick="abrirModalEnvioGestor()" style="font-size:12px;padding:6px 12px">📦 Envío al gestor</button>
         <div class="searchbox" style="min-width:220px">
           <span style="color:var(--muted)">🔍</span>
           <input id="gestoria-srch" placeholder="Buscar cliente, banco..." oninput="renderGestoria()">
