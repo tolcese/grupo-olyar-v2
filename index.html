@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.4</title>
+<title>Grupo Olyar — Solicitudes v2.22.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8893,11 +8893,11 @@ function abrirModalCargaStock() {
   document.getElementById('stock-modal-banco').value = '';
   document.getElementById('stock-modal-cantidad').value = '';
   document.getElementById('stock-modal-nota').value = '';
-  document.getElementById('stock-modal-overlay').style.display = 'flex';
+  document.getElementById('stock-modal-overlay').classList.add('open');
 }
 
 function cerrarModalStock() {
-  document.getElementById('stock-modal-overlay').style.display = 'none';
+  document.getElementById('stock-modal-overlay').classList.remove('open');
 }
 
 async function guardarCargaStock() {
@@ -9030,7 +9030,7 @@ async function abrirModalEnvioGestor() {
   document.getElementById('envio-gestor-cantidad').value = '';
   document.getElementById('envio-gestor-nota').value = '';
   document.getElementById('envio-gestor-stock-info').style.display = 'none';
-  document.getElementById('envio-gestor-overlay').style.display = 'flex';
+  document.getElementById('envio-gestor-overlay').classList.add('open');
 
   // Mostrar stock al cambiar banco
   document.getElementById('envio-gestor-banco').onchange = function() {
@@ -9047,7 +9047,7 @@ async function abrirModalEnvioGestor() {
 }
 
 function cerrarModalEnvioGestor() {
-  document.getElementById('envio-gestor-overlay').style.display = 'none';
+  document.getElementById('envio-gestor-overlay').classList.remove('open');
 }
 
 async function guardarEnvioGestor() {
@@ -11298,7 +11298,7 @@ function renderReportes() {
 </div>
 
 <!-- MODAL CARGA STOCK -->
-<div class="overlay" id="stock-modal-overlay" onclick="if(event.target===this)cerrarModalStock()" style="display:none;z-index:800">
+<div class="overlay" id="stock-modal-overlay" onclick="if(event.target===this)cerrarModalStock()" style="z-index:800">
   <div class="modal" style="max-width:400px">
     <div class="mh">
       <div class="mt">📦 Cargar stock de prendas</div>
@@ -11328,7 +11328,7 @@ function renderReportes() {
 </div>
 
 <!-- MODAL ENVÍO AL GESTOR -->
-<div class="overlay" id="envio-gestor-overlay" onclick="if(event.target===this)cerrarModalEnvioGestor()" style="display:none;z-index:800">
+<div class="overlay" id="envio-gestor-overlay" onclick="if(event.target===this)cerrarModalEnvioGestor()" style="z-index:800">
   <div class="modal" style="max-width:420px">
     <div class="mh">
       <div class="mt">📦 Registrar envío al gestor</div>
