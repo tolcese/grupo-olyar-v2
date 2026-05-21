@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.5</title>
+<title>Grupo Olyar — Solicitudes v2.22.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -904,6 +904,24 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
       <!-- CARDS STOCK POR BANCO -->
       <div id="envios-stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px"></div>
+
+      <!-- STOCK POR GESTOR -->
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-t" style="margin-bottom:12px">👤 Stock por gestor</div>
+        <div class="table-wrap">
+          <table style="width:100%;min-width:400px;font-size:13px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Gestor</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Banco</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Prendas disponibles</th>
+              </tr>
+            </thead>
+            <tbody id="stock-gestor-tbody"></tbody>
+          </table>
+        </div>
+        <div id="stock-gestor-empty" style="display:none;text-align:center;padding:24px;color:var(--muted)">Sin stock asignado a gestores</div>
+      </div>
       <div class="card">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
           <select id="envios-list-banco" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
@@ -7723,7 +7741,7 @@ async function saveRecord() {
     const estadoNuevo = (rec.estado||'').toUpperCase();
     const estadoViejo = (viejo?.estado||'').toUpperCase();
     if (estadoNuevo === 'AVANZA' && estadoViejo !== 'AVANZA' && rec.banco) {
-      await descontarStockPrenda(rec.banco, 'salida_avanza', rec.id, `Solicitud ${rec.nombrecliente||rec.id}`);
+      await descontarStockPrenda(rec.banco, 'salida_avanza', rec.id, `Solicitud ${rec.nombrecliente||rec.id}`, rec.gestorAsignado || null);
     }
 
     if ((rec.estado||'').toUpperCase() === 'AVANZA') {
@@ -8922,27 +8940,44 @@ async function guardarCargaStock() {
   toast(`✅ Se agregaron ${cantidad} prendas de ${banco}`);
 }
 
-async function descontarStockPrenda(banco, tipo, solicitudId, nota) {
+async function descontarStockPrenda(banco, tipo, solicitudId, nota, gestor) {
   if (!banco) return;
-  const s = STOCK_DATA[banco];
-  if (!s) return;
-  const nueva = Math.max(0, (s.cantidad || 0) - 1);
-  await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+
+  if (tipo === 'salida_avanza' && gestor) {
+    // Descontar del stock del gestor
+    const { data: sg } = await SB.from('stock_prendas_gestor').select('*').eq('gestor', gestor).eq('banco', banco).single();
+    if (sg) {
+      const nueva = Math.max(0, (sg.cantidad || 0) - 1);
+      await SB.from('stock_prendas_gestor').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('gestor', gestor).eq('banco', banco);
+    }
+  } else {
+    // Descontar del stock general
+    const s = STOCK_DATA[banco];
+    if (!s) return;
+    const nueva = Math.max(0, (s.cantidad || 0) - 1);
+    await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+    if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+  }
+
+  // Registrar movimiento
   await SB.from('stock_prendas_movimientos').insert({
-    banco, tipo, cantidad: 1, solicitud_id: solicitudId || null, nota: nota || null, usuario: ME?.usr || null
+    banco, tipo, cantidad: 1, solicitud_id: solicitudId || null,
+    nota: nota || null, usuario: ME?.usr || null
   });
-  // Actualizar cache local
-  if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
 }
 
 let ENVIOS_DATA = [];
 
 async function loadEnviosGestor() {
-  // Cargar stock
+  // Cargar stock general
   const { data: stock } = await SB.from('stock_prendas').select('*').order('banco');
   STOCK_DATA = {};
   (stock || []).forEach(s => { STOCK_DATA[s.banco] = s; });
   renderStockCardsEnvios();
+
+  // Cargar stock por gestor
+  const { data: stockGestor } = await SB.from('stock_prendas_gestor').select('*').order('gestor').order('banco');
+  renderStockGestor(stockGestor || []);
 
   // Cargar movimientos de envíos
   const { data } = await SB.from('stock_prendas_movimientos')
@@ -8950,6 +8985,23 @@ async function loadEnviosGestor() {
     .order('fecha', { ascending: false }).limit(300);
   ENVIOS_DATA = data || [];
   renderEnviosGestor();
+}
+
+function renderStockGestor(data) {
+  const tbody = document.getElementById('stock-gestor-tbody');
+  const empty = document.getElementById('stock-gestor-empty');
+  if (!tbody) return;
+  const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000' };
+  const activos = data.filter(d => d.cantidad > 0);
+  if (!activos.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+  tbody.innerHTML = activos.map(d => `
+    <tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:8px 12px;font-weight:600">${d.gestor}</td>
+      <td style="padding:8px 12px;font-weight:700;color:${COLORES[d.banco]||'var(--ink)'}">${d.banco}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;font-size:15px">${d.cantidad}</td>
+    </tr>
+  `).join('');
 }
 
 function renderStockCardsEnvios() {
@@ -9068,9 +9120,17 @@ async function guardarEnvioGestor() {
     if (!ok) return;
   }
 
-  // Descontar del stock
+  // Descontar del stock general
   const nueva = Math.max(0, stockActual - cantidad);
   await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+
+  // Sumar al stock del gestor
+  const { data: sg } = await SB.from('stock_prendas_gestor').select('*').eq('gestor', gestor).eq('banco', banco).single();
+  const cantGestor = sg ? sg.cantidad : 0;
+  await SB.from('stock_prendas_gestor').upsert(
+    { gestor, banco, cantidad: cantGestor + cantidad, updated_at: new Date().toISOString() },
+    { onConflict: 'gestor,banco' }
+  );
 
   // Registrar movimiento
   await SB.from('stock_prendas_movimientos').insert({
