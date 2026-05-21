@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.8</title>
+<title>Grupo Olyar — Solicitudes v2.21.9</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -943,8 +943,14 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div id="v-envios-gestor" style="display:none">
       <div class="ph">
         <div><div class="ph-t">📦 Stock de prendas</div><div class="ph-s">Registro de prendas enviadas a gestores</div></div>
-        <button class="btn btn-p" onclick="abrirModalEnvioGestor()">＋ Registrar envío</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="abrirModalCargaStock()">＋ Cargar stock</button>
+          <button class="btn btn-p" onclick="abrirModalEnvioGestor()">＋ Registrar envío</button>
+        </div>
       </div>
+
+      <!-- CARDS STOCK POR BANCO -->
+      <div id="envios-stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-bottom:20px"></div>
       <div class="card">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
           <select id="envios-list-banco" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
@@ -8990,6 +8996,7 @@ async function guardarCargaStock() {
 
   cerrarModalStock();
   await loadStockPrendas();
+  await loadEnviosGestor();
   toast(`✅ Se agregaron ${cantidad} prendas de ${banco}`);
 }
 
@@ -9009,11 +9016,36 @@ async function descontarStockPrenda(banco, tipo, solicitudId, nota) {
 let ENVIOS_DATA = [];
 
 async function loadEnviosGestor() {
+  // Cargar stock
+  const { data: stock } = await SB.from('stock_prendas').select('*').order('banco');
+  STOCK_DATA = {};
+  (stock || []).forEach(s => { STOCK_DATA[s.banco] = s; });
+  renderStockCardsEnvios();
+
+  // Cargar movimientos de envíos
   const { data } = await SB.from('stock_prendas_movimientos')
     .select('*').eq('tipo','salida_gestor')
     .order('fecha', { ascending: false }).limit(300);
   ENVIOS_DATA = data || [];
   renderEnviosGestor();
+}
+
+function renderStockCardsEnvios() {
+  const cont = document.getElementById('envios-stock-cards');
+  if (!cont) return;
+  const bancos = ['Columbia','Galicia','Santander','Supervielle','Bancor'];
+  const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
+  cont.innerHTML = bancos.map(banco => {
+    const s = STOCK_DATA[banco];
+    const cant = s ? s.cantidad : 0;
+    const color = COLORES[banco] || 'var(--blue)';
+    const alerta = cant <= 5 ? 'border:2px solid #dc2626' : '';
+    return `<div class="card" style="padding:16px;${alerta}">
+      <div style="font-size:12px;font-weight:700;color:${color};margin-bottom:6px">${banco}</div>
+      <div style="font-size:32px;font-weight:800;color:${cant<=5?'#dc2626':'var(--ink)'};line-height:1">${cant}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant<=5?'⚠️ Stock bajo':'disponibles'}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderEnviosGestor() {
@@ -9056,6 +9088,11 @@ function renderEnviosGestor() {
 }
 
 async function abrirModalEnvioGestor() {
+  // Cargar stock si no está en memoria
+  if (!Object.keys(STOCK_DATA).length) {
+    const { data: stock } = await SB.from('stock_prendas').select('*');
+    (stock || []).forEach(s => { STOCK_DATA[s.banco] = s; });
+  }
   // Cargar gestores en el select
   const sel = document.getElementById('envio-gestor-sel');
   if (sel && sel.options.length === 1) {
@@ -9125,9 +9162,7 @@ async function guardarEnvioGestor() {
 
   cerrarModalEnvioGestor();
   toast(`✅ Envío registrado: ${cantidad} prendas ${banco} → ${gestor}`);
-  // Refrescar si estamos en la sección de envíos
   if (document.getElementById('v-envios-gestor')?.style.display !== 'none') loadEnviosGestor();
-  // Refrescar stock si estamos en esa sección
   if (document.getElementById('v-stock-prendas')?.style.display !== 'none') loadStockPrendas();
 }
 
