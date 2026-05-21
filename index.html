@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.3</title>
+<title>Grupo Olyar — Solicitudes v2.22.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2708,6 +2708,10 @@ async function enterApp() {
   } else {
     document.getElementById('th-acc').style.display = 'none';
   }
+  // Sidebar items por rol
+  const isAdmin = ME.rol === 'admin';
+  const isUser  = ME.rol === 'user';
+  document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser) ? '' : 'none';
   document.getElementById('script-pre').textContent = SCRIPT_CODE;
   document.getElementById('sc-imp').style.display = ME.rol === 'admin' ? '' : 'none';
   document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
