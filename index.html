@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.0</title>
+<title>Grupo Olyar — Solicitudes v2.22.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -958,8 +958,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <option value="Columbia">Columbia</option>
             <option value="Galicia">Galicia</option>
             <option value="Santander">Santander</option>
-            <option value="Supervielle">Supervielle</option>
-            <option value="Bancor">Bancor</option>
           </select>
           <input type="date" id="envios-list-desde" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
           <input type="date" id="envios-list-hasta" class="fsel" onchange="renderEnviosGestor()" style="font-size:12px">
@@ -999,8 +997,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
               <option value="Columbia">Columbia</option>
               <option value="Galicia">Galicia</option>
               <option value="Santander">Santander</option>
-              <option value="Supervielle">Supervielle</option>
-              <option value="Bancor">Bancor</option>
             </select>
           </div>
           <div class="fc">
@@ -8921,7 +8917,7 @@ async function loadStockPrendas() {
 function renderStockCards() {
   const cont = document.getElementById('stock-cards');
   if (!cont) return;
-  const bancos = ['Columbia','Galicia','Santander','Supervielle','Bancor'];
+  const bancos = ['Columbia','Galicia','Santander'];
   const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
   cont.innerHTML = bancos.map(banco => {
     const s = STOCK_DATA[banco];
@@ -9033,7 +9029,7 @@ async function loadEnviosGestor() {
 function renderStockCardsEnvios() {
   const cont = document.getElementById('envios-stock-cards');
   if (!cont) return;
-  const bancos = ['Columbia','Galicia','Santander','Supervielle','Bancor'];
+  const bancos = ['Columbia','Galicia','Santander'];
   const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
   cont.innerHTML = bancos.map(banco => {
     const s = STOCK_DATA[banco];
@@ -11397,8 +11393,6 @@ function renderReportes() {
           <option value="Columbia">Columbia</option>
           <option value="Galicia">Galicia</option>
           <option value="Santander">Santander</option>
-          <option value="Supervielle">Supervielle</option>
-          <option value="Bancor">Bancor</option>
         </select>
       </div>
       <div class="fc">
