@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.2</title>
+<title>Grupo Olyar — Solicitudes v2.22.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -892,53 +892,6 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
     <!-- BACKUP -->
     <!-- STOCK DE PRENDAS -->
-    <div id="v-stock-prendas" style="display:none">
-      <div class="ph">
-        <div><div class="ph-t">📦 Stock de prendas</div><div class="ph-s">Control de prendas en blanco por banco</div></div>
-        <button class="btn btn-p" onclick="abrirModalCargaStock()">＋ Cargar stock</button>
-      </div>
-
-      <!-- CARDS DE STOCK POR BANCO -->
-      <div id="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px"></div>
-
-      <!-- MOVIMIENTOS -->
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-          <div>
-            <div class="card-t">📋 Historial de movimientos</div>
-            <div class="card-s">Entradas y salidas de prendas</div>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <select id="stock-mov-banco" class="fsel" onchange="renderMovimientos()" style="font-size:12px">
-              <option value="">Todos los bancos</option>
-            </select>
-            <select id="stock-mov-tipo" class="fsel" onchange="renderMovimientos()" style="font-size:12px">
-              <option value="">Todos los tipos</option>
-              <option value="entrada">Entrada</option>
-              <option value="salida_avanza">Salida AVANZA</option>
-              <option value="salida_gestor">Salida gestor</option>
-            </select>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table style="width:100%;min-width:600px;font-size:13px;border-collapse:collapse">
-            <thead>
-              <tr style="background:var(--surface)">
-                <th style="padding:9px 12px;text-align:left;font-weight:700">Fecha</th>
-                <th style="padding:9px 12px;text-align:left;font-weight:700">Banco</th>
-                <th style="padding:9px 12px;text-align:left;font-weight:700">Tipo</th>
-                <th style="padding:9px 12px;text-align:right;font-weight:700">Cantidad</th>
-                <th style="padding:9px 12px;text-align:left;font-weight:700">Nota / Referencia</th>
-                <th style="padding:9px 12px;text-align:left;font-weight:700">Usuario</th>
-              </tr>
-            </thead>
-            <tbody id="stock-mov-tbody"></tbody>
-          </table>
-        </div>
-        <div id="stock-mov-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin movimientos registrados</div>
-      </div>
-    </div>
-
     <!-- ENVÍOS AL GESTOR -->
     <div id="v-envios-gestor" style="display:none">
       <div class="ph">
@@ -7327,7 +7280,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','stock-prendas','envios-gestor'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -7364,7 +7317,6 @@ function showV(v) {
     const sp = document.getElementById('cred-side-panel');
     if (sp) sp.style.transform = 'translateX(100%)';
   }
-  if (v==='stock-prendas') { loadStockPrendas(); }
   if (v==='envios-gestor') { loadEnviosGestor(); }
   if (v !== 'datero') closeDateroPanel();
 
@@ -9129,7 +9081,6 @@ async function guardarEnvioGestor() {
   cerrarModalEnvioGestor();
   toast(`✅ Envío registrado: ${cantidad} prendas ${banco} → ${gestor}`);
   if (document.getElementById('v-envios-gestor')?.style.display !== 'none') loadEnviosGestor();
-  if (document.getElementById('v-stock-prendas')?.style.display !== 'none') loadStockPrendas();
 }
 
 async function loadBackupList() {
