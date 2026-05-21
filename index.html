@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.21.4</title>
+<title>Grupo Olyar — Solicitudes v2.21.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -891,6 +891,86 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     </div>
 
     <!-- BACKUP -->
+    <!-- STOCK DE PRENDAS -->
+    <div id="v-stock-prendas" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">📦 Stock de prendas</div><div class="ph-s">Control de prendas en blanco por banco</div></div>
+        <button class="btn btn-p" onclick="abrirModalCargaStock()">＋ Cargar stock</button>
+      </div>
+
+      <!-- CARDS DE STOCK POR BANCO -->
+      <div id="stock-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px"></div>
+
+      <!-- MOVIMIENTOS -->
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="card-t">📋 Historial de movimientos</div>
+            <div class="card-s">Entradas y salidas de prendas</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="stock-mov-banco" class="fsel" onchange="renderMovimientos()" style="font-size:12px">
+              <option value="">Todos los bancos</option>
+            </select>
+            <select id="stock-mov-tipo" class="fsel" onchange="renderMovimientos()" style="font-size:12px">
+              <option value="">Todos los tipos</option>
+              <option value="entrada">Entrada</option>
+              <option value="salida_avanza">Salida AVANZA</option>
+              <option value="salida_gestor">Salida gestor</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;min-width:600px;font-size:13px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Fecha</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Banco</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Tipo</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Cantidad</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Nota / Referencia</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Usuario</th>
+              </tr>
+            </thead>
+            <tbody id="stock-mov-tbody"></tbody>
+          </table>
+        </div>
+        <div id="stock-mov-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin movimientos registrados</div>
+      </div>
+    </div>
+
+    <!-- MODAL CARGA STOCK -->
+    <div class="overlay" id="stock-modal-overlay" onclick="if(event.target===this)cerrarModalStock()" style="display:none;z-index:500">
+      <div class="modal" style="max-width:400px">
+        <div class="mh">
+          <div class="mt">📦 Cargar stock de prendas</div>
+          <button class="mc" onclick="cerrarModalStock()">✕</button>
+        </div>
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+          <div class="fc">
+            <label>Banco</label>
+            <select id="stock-modal-banco" class="fsel">
+              <option value="">Seleccioná un banco</option>
+              <option value="Columbia">Columbia</option>
+              <option value="Galicia">Galicia</option>
+              <option value="Santander">Santander</option>
+              <option value="Supervielle">Supervielle</option>
+              <option value="Bancor">Bancor</option>
+            </select>
+          </div>
+          <div class="fc">
+            <label>Cantidad a agregar</label>
+            <input type="number" id="stock-modal-cantidad" min="1" placeholder="Ej: 10" style="font-size:16px">
+          </div>
+          <div class="fc">
+            <label>Nota (opcional)</label>
+            <input type="text" id="stock-modal-nota" placeholder="Ej: Compra talonario mayo">
+          </div>
+          <button class="btn btn-p" onclick="guardarCargaStock()">💾 Guardar</button>
+        </div>
+      </div>
+    </div>
+
     <div id="v-backup" style="display:none">
       <div class="ph"><div><div class="ph-t">Backup</div><div class="ph-s">Copia de seguridad de la planilla</div></div></div>
       <div class="card" style="max-width:500px">
@@ -2823,6 +2903,7 @@ function openSidebar() {
   document.getElementById('sb-nueva').style.display = ME?.rol === 'admin' ? 'none' : '';
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
+  document.getElementById('sb-stock-prendas').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos') ? '' : 'none';
@@ -7028,6 +7109,11 @@ async function savePrenda() {
     const { error } = await SB.from('solicitudes').update({ en_proceso: enProceso, presentada, finalizada: finalizada || null, entregada }).eq('id', id);
     if (error) throw error;
     if (r) { r.enProceso = enProceso; r.presentada = presentada; r.finalizada = finalizada; r.entregada = entregada; }
+
+    // Descontar stock si la prenda acaba de marcarse como presentada al gestor
+    if (presentada && !viejaPrenda.presentada && r?.banco) {
+      await descontarStockPrenda(r.banco, 'salida_gestor', id, `Gestor: ${r.gestor_asignado || r.nombrecliente || id}`);
+    }
     const cambiosPrenda = diffObjetos(viejaPrenda, { enProceso, presentada, finalizada, entregada }, ['enProceso','presentada','finalizada','entregada']);
     registrarHistorial('prenda', id, cambiosPrenda);
     toast('Prenda actualizada ✓', 'ok');
@@ -7235,7 +7321,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','stock-prendas'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -7272,6 +7358,7 @@ function showV(v) {
     const sp = document.getElementById('cred-side-panel');
     if (sp) sp.style.transform = 'translateX(100%)';
   }
+  if (v==='stock-prendas') { loadStockPrendas(); }
   if (v !== 'datero') closeDateroPanel();
 
   if (v === 'contabilidad') {
@@ -7668,6 +7755,14 @@ async function saveRecord() {
     }
     syncUI('ok');
     toast(editId?'Solicitud actualizada ✓':'Solicitud guardada ✓','ok');
+
+    // Descontar stock de prendas si pasó a AVANZA y antes no lo era
+    const estadoNuevo = (rec.estado||'').toUpperCase();
+    const estadoViejo = (viejo?.estado||'').toUpperCase();
+    if (estadoNuevo === 'AVANZA' && estadoViejo !== 'AVANZA' && rec.banco) {
+      await descontarStockPrenda(rec.banco, 'salida_avanza', rec.id, `Solicitud ${rec.nombrecliente||rec.id}`);
+    }
+
     if ((rec.estado||'').toUpperCase() === 'AVANZA') {
       const c = CONT_DATA[rec.id] || {};
       if (c.aLiquidar || c.comLukaya || c.impCredito) {
@@ -8759,6 +8854,122 @@ function exportCSV() {
 // GESTOR DE BACKUPS
 // ══════════════════════════════════════════════
 let BACKUP_LIST_CACHE = [];
+
+// ═══════════════════════════════════════════
+// STOCK DE PRENDAS
+// ═══════════════════════════════════════════
+let STOCK_DATA = {};
+let MOV_DATA   = [];
+
+async function loadStockPrendas() {
+  const { data: stock } = await SB.from('stock_prendas').select('*').order('banco');
+  const { data: movs  } = await SB.from('stock_prendas_movimientos').select('*').order('fecha', { ascending: false }).limit(200);
+  STOCK_DATA = {};
+  (stock || []).forEach(s => { STOCK_DATA[s.banco] = s; });
+  MOV_DATA = movs || [];
+  renderStockCards();
+  renderMovimientos();
+  // Poblar filtro banco en movimientos
+  const sel = document.getElementById('stock-mov-banco');
+  if (sel && sel.options.length === 1) {
+    const bancos = [...new Set(MOV_DATA.map(m => m.banco).filter(Boolean))].sort();
+    bancos.forEach(b => { const o = document.createElement('option'); o.value = b; o.textContent = b; sel.appendChild(o); });
+  }
+}
+
+function renderStockCards() {
+  const cont = document.getElementById('stock-cards');
+  if (!cont) return;
+  const bancos = ['Columbia','Galicia','Santander','Supervielle','Bancor'];
+  const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
+  cont.innerHTML = bancos.map(banco => {
+    const s = STOCK_DATA[banco];
+    const cant = s ? s.cantidad : 0;
+    const color = COLORES[banco] || 'var(--blue)';
+    const alerta = cant <= 5 ? 'border:2px solid #dc2626' : '';
+    return `<div class="card" style="padding:20px;${alerta};cursor:default">
+      <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px">${banco}</div>
+      <div style="font-size:36px;font-weight:800;color:${cant <= 5 ? '#dc2626' : 'var(--ink)'};line-height:1">${cant}</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant <= 5 ? '⚠️ Stock bajo' : 'prendas disponibles'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMovimientos() {
+  const tbody = document.getElementById('stock-mov-tbody');
+  const empty = document.getElementById('stock-mov-empty');
+  if (!tbody) return;
+  const fBanco = document.getElementById('stock-mov-banco')?.value || '';
+  const fTipo  = document.getElementById('stock-mov-tipo')?.value  || '';
+  const COLORES = { Columbia:'#1d6fce', Galicia:'#e8821a', Santander:'#ec0000', Supervielle:'#682489', Bancor:'#005f5b' };
+  const TIPO_LABELS = { entrada:'✅ Entrada', salida_avanza:'🔽 Salida AVANZA', salida_gestor:'🔽 Salida gestor' };
+
+  let data = [...MOV_DATA];
+  if (fBanco) data = data.filter(m => m.banco === fBanco);
+  if (fTipo)  data = data.filter(m => m.tipo === fTipo);
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(m => {
+    const fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    const esEntrada = m.tipo === 'entrada';
+    const color = COLORES[m.banco] || 'var(--ink)';
+    return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${fecha}</td>
+      <td style="padding:8px 12px;font-weight:700;color:${color}">${m.banco||'—'}</td>
+      <td style="padding:8px 12px;font-size:12px">${TIPO_LABELS[m.tipo]||m.tipo}</td>
+      <td style="padding:8px 12px;text-align:right;font-weight:700;color:${esEntrada?'#059669':'#dc2626'}">${esEntrada?'+':'−'}${Math.abs(m.cantidad)}</td>
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${m.nota||m.solicitud_id||'—'}</td>
+      <td style="padding:8px 12px;font-size:12px;color:var(--muted)">${m.usuario||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function abrirModalCargaStock() {
+  document.getElementById('stock-modal-banco').value = '';
+  document.getElementById('stock-modal-cantidad').value = '';
+  document.getElementById('stock-modal-nota').value = '';
+  document.getElementById('stock-modal-overlay').style.display = 'flex';
+}
+
+function cerrarModalStock() {
+  document.getElementById('stock-modal-overlay').style.display = 'none';
+}
+
+async function guardarCargaStock() {
+  const banco = document.getElementById('stock-modal-banco').value;
+  const cantidad = parseInt(document.getElementById('stock-modal-cantidad').value) || 0;
+  const nota = document.getElementById('stock-modal-nota').value.trim();
+  if (!banco) { toast('Seleccioná un banco', 'warn'); return; }
+  if (cantidad < 1) { toast('La cantidad debe ser mayor a 0', 'warn'); return; }
+
+  // Upsert stock
+  const actual = STOCK_DATA[banco]?.cantidad || 0;
+  await SB.from('stock_prendas').upsert({ banco, cantidad: actual + cantidad, updated_at: new Date().toISOString() }, { onConflict: 'banco' });
+
+  // Registrar movimiento
+  await SB.from('stock_prendas_movimientos').insert({
+    banco, tipo: 'entrada', cantidad, nota: nota || null, usuario: ME?.usr || null
+  });
+
+  cerrarModalStock();
+  await loadStockPrendas();
+  toast(`✅ Se agregaron ${cantidad} prendas de ${banco}`);
+}
+
+async function descontarStockPrenda(banco, tipo, solicitudId, nota) {
+  if (!banco) return;
+  const s = STOCK_DATA[banco];
+  if (!s) return;
+  const nueva = Math.max(0, (s.cantidad || 0) - 1);
+  await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+  await SB.from('stock_prendas_movimientos').insert({
+    banco, tipo, cantidad: 1, solicitud_id: solicitudId || null, nota: nota || null, usuario: ME?.usr || null
+  });
+  // Actualizar cache local
+  if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+}
 
 async function loadBackupList() {
   const loading = document.getElementById('backup-list-loading');
@@ -10792,6 +11003,10 @@ function renderReportes() {
     </button>
     <button class="sb-item" id="sb-contabilidad" onclick="closeSidebar();showV('contabilidad')" style="display:none">
       <span class="sb-icon">🧾</span> Contabilidad
+    </button>
+
+    <button class="sb-item" id="sb-stock-prendas" onclick="closeSidebar();showV('stock-prendas')" style="display:none">
+      <span class="sb-icon">📦</span> Stock de prendas
     </button>
 
     <button class="sb-item" id="sb-presupuestos" onclick="closeSidebar();showV('presupuestos')" style="display:none">
