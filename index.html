@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.6</title>
+<title>Grupo Olyar — Solicitudes v2.22.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7741,6 +7741,7 @@ async function saveRecord() {
     const estadoNuevo = (rec.estado||'').toUpperCase();
     const estadoViejo = (viejo?.estado||'').toUpperCase();
     if (estadoNuevo === 'AVANZA' && estadoViejo !== 'AVANZA' && rec.banco) {
+      console.log('🔵 AVANZA detectado — gestor:', rec.gestorAsignado, '| banco:', rec.banco);
       await descontarStockPrenda(rec.banco, 'salida_avanza', rec.id, `Solicitud ${rec.nombrecliente||rec.id}`, rec.gestorAsignado || null);
     }
 
