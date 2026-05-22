@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.9</title>
+<title>Grupo Olyar — Solicitudes v2.23.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3354,6 +3354,11 @@ async function confirmarAsignacion(gestorId, gestorNombre) {
     toast('Asignado a ' + gestorNombre + ' ✓', 'ok');
     closeSelGestor();
     renderGestoria();
+
+    // Descontar 1 prenda del stock del gestor asignado
+    if (r?.banco) {
+      await descontarStockPrenda(r.banco, 'salida_avanza', ASIGNAR_ID, `Asignado: ${gestorNombre} | ${r.nombrecliente||''}`, gestorNombre);
+    }
   } catch(e) {
     toast('Error al asignar: ' + e.message, 'er');
   }
@@ -7745,13 +7750,7 @@ async function saveRecord() {
     syncUI('ok');
     toast(editId?'Solicitud actualizada ✓':'Solicitud guardada ✓','ok');
 
-    // Descontar stock de prendas si pasó a AVANZA y antes no lo era
-    const estadoNuevo = (rec.estado||'').toUpperCase();
-    const estadoViejo = (viejo?.estado||'').toUpperCase();
-    if (estadoNuevo === 'AVANZA' && estadoViejo !== 'AVANZA' && rec.banco) {
-      console.log('🔵 AVANZA detectado — gestor:', rec.gestorAsignado, '| banco:', rec.banco);
-      await descontarStockPrenda(rec.banco, 'salida_avanza', rec.id, `Solicitud ${rec.nombrecliente||rec.id}`, rec.gestorAsignado || null);
-    }
+    // El descuento de stock ocurre al asignar gestor en Gestoría (confirmarAsignacion)
 
     if ((rec.estado||'').toUpperCase() === 'AVANZA') {
       const c = CONT_DATA[rec.id] || {};
