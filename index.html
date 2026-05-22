@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.1</title>
+<title>Grupo Olyar — Solicitudes v2.23.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -3278,13 +3278,13 @@ async function desasignarGestoria(id) {
   if (!requireEdit()) return;
   const r = RECORDS.find(x => x.id === id);
   const nombre = r?.nombrecliente || 'esta operación';
-  if (!confirm(`¿Desasignar gestor de "${nombre}"? La operación volverá al estado "Aprobado".`)) return;
-  const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null, estado: 'Aprobado' }).eq('id', id);
+  if (!confirm(`¿Desasignar gestor de "${nombre}"? La operación volverá al estado "APROBADO".`)) return;
+  const { error } = await SB.from('solicitudes').update({ gestor_asignado: null, gestor_id: null, estado: 'APROBADO' }).eq('id', id);
   if (error) { toast('Error al desasignar gestor', 'er'); return; }
   const rec = RECORDS.find(x => x.id === id);
-  if (rec) { rec.gestorAsignado = null; rec.gestorId = null; rec.estado = 'Aprobado'; }
+  if (rec) { rec.gestorAsignado = null; rec.gestorId = null; rec.estado = 'APROBADO'; }
   renderGestoria();
-  toast('Gestor desasignado — estado vuelto a Aprobado ✓', 'ok');
+  toast('Gestor desasignado — estado vuelto a APROBADO ✓', 'ok');
 }
 
 async function asignarGestoria(id) {
@@ -3496,7 +3496,7 @@ function renderPresupuestos() {
   }
   const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
   const mon = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
-  const estadoColor = { 'Borrador': 'var(--muted)', 'Enviado': 'var(--blue)', 'Aprobado': 'var(--green)', 'Rechazado': 'var(--red)' };
+  const estadoColor = { 'BORRADOR': 'var(--muted)', 'ENVIADO': 'var(--blue)', 'APROBADO': 'var(--green)', 'RECHAZADO': 'var(--red)' };
   tbody.innerHTML = PRESUP_CACHE.map(p => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
       <td style="padding:4px 6px;width:85px" onclick="event.stopPropagation()">
@@ -3612,7 +3612,7 @@ function renderHistoricoPresup() {
 
   const fmtD = v => v ? v.split('-').reverse().join('/') : '—';
   const mon  = v => v ? '$' + Math.round(v).toLocaleString('es-AR') : '—';
-  const estadoColor = { 'Borrador':'var(--muted)', 'Enviado':'var(--blue)', 'Aprobado':'var(--green)', 'Rechazado':'var(--red)' };
+  const estadoColor = { 'BORRADOR':'var(--muted)', 'ENVIADO':'var(--blue)', 'APROBADO':'var(--green)', 'RECHAZADO':'var(--red)' };
 
   tbody.innerHTML = data.map(p => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''" onclick="verDetallePresupuesto('${p.id}')">
@@ -8952,35 +8952,35 @@ async function guardarCargaStock() {
 async function descontarStockPrenda(banco, tipo, solicitudId, nota, gestor) {
   if (!banco) { console.warn('descontarStock: banco vacío'); return; }
 
+  // Normalizar banco: primera letra mayúscula, resto minúscula
+  const bancoNorm = banco.charAt(0).toUpperCase() + banco.slice(1).toLowerCase();
+
   try {
     if (tipo === 'salida_avanza' && gestor) {
-      // Descontar del stock del gestor — usar maybeSingle para no fallar si no existe
       const { data: sg, error: sgErr } = await SB.from('stock_prendas_gestor')
-        .select('*').eq('gestor', gestor).eq('banco', banco).maybeSingle();
-      console.log('🔵 descontarStock gestor:', gestor, '| banco:', banco, '| registro:', sg, '| error:', sgErr);
+        .select('*').eq('gestor', gestor).eq('banco', bancoNorm).maybeSingle();
+      console.log('🔵 descontarStock gestor:', gestor, '| banco:', bancoNorm, '| registro:', sg, '| error:', sgErr);
       if (sg) {
         const nueva = Math.max(0, (sg.cantidad || 0) - 1);
         const { error: upErr } = await SB.from('stock_prendas_gestor')
           .update({ cantidad: nueva, updated_at: new Date().toISOString() })
-          .eq('gestor', gestor).eq('banco', banco);
+          .eq('gestor', gestor).eq('banco', bancoNorm);
         if (upErr) console.error('Error update stock gestor:', upErr);
-        else console.log('✅ Stock gestor actualizado:', gestor, banco, '→', nueva);
+        else console.log('✅ Stock gestor actualizado:', gestor, bancoNorm, '→', nueva);
       } else {
-        console.warn('⚠️ No se encontró stock para gestor:', gestor, 'banco:', banco);
+        console.warn('⚠️ No se encontró stock para gestor:', gestor, 'banco:', bancoNorm);
       }
     } else {
-      // Descontar del stock general
-      const { data: sg } = await SB.from('stock_prendas').select('*').eq('banco', banco).maybeSingle();
+      const { data: sg } = await SB.from('stock_prendas').select('*').eq('banco', bancoNorm).maybeSingle();
       if (sg) {
         const nueva = Math.max(0, (sg.cantidad || 0) - 1);
-        await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
-        if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+        await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', bancoNorm);
+        if (STOCK_DATA[bancoNorm]) STOCK_DATA[bancoNorm].cantidad = nueva;
       }
     }
 
-    // Registrar movimiento siempre
     await SB.from('stock_prendas_movimientos').insert({
-      banco, tipo, cantidad: 1, solicitud_id: solicitudId || null,
+      banco: bancoNorm, tipo, cantidad: 1, solicitud_id: solicitudId || null,
       nota: nota || null, usuario: ME?.usr || null
     });
   } catch(e) {
