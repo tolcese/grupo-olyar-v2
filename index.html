@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.0</title>
+<title>Grupo Olyar — Solicitudes v2.23.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -8950,29 +8950,42 @@ async function guardarCargaStock() {
 }
 
 async function descontarStockPrenda(banco, tipo, solicitudId, nota, gestor) {
-  if (!banco) return;
+  if (!banco) { console.warn('descontarStock: banco vacío'); return; }
 
-  if (tipo === 'salida_avanza' && gestor) {
-    // Descontar del stock del gestor
-    const { data: sg } = await SB.from('stock_prendas_gestor').select('*').eq('gestor', gestor).eq('banco', banco).single();
-    if (sg) {
-      const nueva = Math.max(0, (sg.cantidad || 0) - 1);
-      await SB.from('stock_prendas_gestor').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('gestor', gestor).eq('banco', banco);
+  try {
+    if (tipo === 'salida_avanza' && gestor) {
+      // Descontar del stock del gestor — usar maybeSingle para no fallar si no existe
+      const { data: sg, error: sgErr } = await SB.from('stock_prendas_gestor')
+        .select('*').eq('gestor', gestor).eq('banco', banco).maybeSingle();
+      console.log('🔵 descontarStock gestor:', gestor, '| banco:', banco, '| registro:', sg, '| error:', sgErr);
+      if (sg) {
+        const nueva = Math.max(0, (sg.cantidad || 0) - 1);
+        const { error: upErr } = await SB.from('stock_prendas_gestor')
+          .update({ cantidad: nueva, updated_at: new Date().toISOString() })
+          .eq('gestor', gestor).eq('banco', banco);
+        if (upErr) console.error('Error update stock gestor:', upErr);
+        else console.log('✅ Stock gestor actualizado:', gestor, banco, '→', nueva);
+      } else {
+        console.warn('⚠️ No se encontró stock para gestor:', gestor, 'banco:', banco);
+      }
+    } else {
+      // Descontar del stock general
+      const { data: sg } = await SB.from('stock_prendas').select('*').eq('banco', banco).maybeSingle();
+      if (sg) {
+        const nueva = Math.max(0, (sg.cantidad || 0) - 1);
+        await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
+        if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
+      }
     }
-  } else {
-    // Descontar del stock general
-    const s = STOCK_DATA[banco];
-    if (!s) return;
-    const nueva = Math.max(0, (s.cantidad || 0) - 1);
-    await SB.from('stock_prendas').update({ cantidad: nueva, updated_at: new Date().toISOString() }).eq('banco', banco);
-    if (STOCK_DATA[banco]) STOCK_DATA[banco].cantidad = nueva;
-  }
 
-  // Registrar movimiento
-  await SB.from('stock_prendas_movimientos').insert({
-    banco, tipo, cantidad: 1, solicitud_id: solicitudId || null,
-    nota: nota || null, usuario: ME?.usr || null
-  });
+    // Registrar movimiento siempre
+    await SB.from('stock_prendas_movimientos').insert({
+      banco, tipo, cantidad: 1, solicitud_id: solicitudId || null,
+      nota: nota || null, usuario: ME?.usr || null
+    });
+  } catch(e) {
+    console.error('Error en descontarStockPrenda:', e);
+  }
 }
 
 let ENVIOS_DATA = [];
