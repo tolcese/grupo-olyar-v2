@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.22.7</title>
+<title>Grupo Olyar — Solicitudes v2.22.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -7318,7 +7318,15 @@ function showV(v) {
   }
   closeAllDD();
   if (v==='sol')      renderTable();
-  if (v==='nueva' && !editId && !window._isDuplicating) { resetForm(); document.getElementById('form-title').textContent='Nueva solicitud'; document.getElementById('save-btn').textContent='💾 Guardar solicitud'; }
+  if (v==='nueva') {
+    if (!window._isDuplicating && !window._isEditing) {
+      editId = null;
+      resetForm();
+      document.getElementById('form-title').textContent='Nueva solicitud';
+      document.getElementById('save-btn').textContent='💾 Guardar solicitud';
+    }
+    window._isEditing = false;
+  }
   if (v==='usuarios') loadUsers();
   if (v==='config')   { loadMantenimientoStatus(); loadPorcentajes(); }
   if (v==='backup')   { loadBackupList(); _mostrarStatusBackup(); }
@@ -8014,6 +8022,7 @@ function renderStats(data) {
 function editRec(id) {
   const r=RECORDS.find(x=>x.id===id); if(!r) return;
   editId=id;
+  window._isEditing = true;
   document.getElementById('form-title').textContent='Editar solicitud';
   document.getElementById('save-btn').textContent='💾 Guardar cambios';
   fillForm(r); showV('nueva');
