@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grupo-olyar-v2.22.7';
+const CACHE_NAME = 'grupo-olyar-v2.23.11';
 
 // Solo cacheamos el shell estático — los datos de Supabase siempre van a la red
 const STATIC_ASSETS = [
