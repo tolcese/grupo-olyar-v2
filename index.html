@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.4</title>
+<title>Grupo Olyar — Solicitudes v2.23.5</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2719,7 +2719,7 @@ async function enterApp() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('tb-av').textContent = ME.nom[0].toUpperCase();
   document.getElementById('tb-uname').textContent = ME.nom;
-  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : ME.rol === 'presupuestos' ? '📄 Presupuestos' : ME.rol === 'usuario_presupuestos' ? '👤+ Presupuestos' : '👤 Usuario';
+  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : ME.rol === 'presupuestos' ? '📄 Presupuestos' : ME.rol === 'usuario_presupuestos' ? '👤+ Presupuestos' : ME.rol === 'administracion' ? '🏢 Administración' : ME.rol === 'usuario_administracion' ? '👤+ Administración' : '👤 Usuario';
   if (ME.rol === 'admin') {
     document.getElementById('sb-usuarios').style.display = '';
     document.getElementById('th-acc').style.display = '';
@@ -2763,6 +2763,10 @@ async function enterApp() {
     Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
     await loadPresupuestos();
     initPresupRealtime();
+  } else if (ME.rol === 'administracion' || ME.rol === 'usuario_administracion') {
+    await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
+    Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
+    initPresupRealtime();
   } else {
     await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
     Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
@@ -2782,6 +2786,9 @@ async function enterApp() {
     // usuario_presupuestos: igual que user pero con acceso a presupuestos
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
+    showV('sol');
+  } else if (ME.rol === 'administracion' || ME.rol === 'usuario_administracion') {
+    // Por ahora igual que user — cuando exista la sección Administración se configurará
     showV('sol');
   } else if (ME.rol === 'presupuestos') {
     // Ocultar toda la navegacion del sistema
@@ -8103,6 +8110,8 @@ async function loadUsers() {
               <option value="admin" ${u.rol==='admin'?'selected':''}>⚡ Admin</option>
               <option value="presupuestos" ${u.rol==='presupuestos'?'selected':''}>📄 Presupuestos</option>
               <option value="usuario_presupuestos" ${u.rol==='usuario_presupuestos'?'selected':''}>👤+ Usuario + Presupuestos</option>
+              <option value="administracion" ${u.rol==='administracion'?'selected':''}>🏢 Administración</option>
+              <option value="usuario_administracion" ${u.rol==='usuario_administracion'?'selected':''}>👤+ Usuario + Administración</option>
             </select>
             <button class="btn btn-d" style="font-size:12px;padding:5px 10px" onclick="delUser('${u.usr}')">Eliminar</button>
           </div>
