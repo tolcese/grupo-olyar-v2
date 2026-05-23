@@ -17,7 +17,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.3</title>
+<title>Grupo Olyar — Solicitudes v2.23.4</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -2719,7 +2719,7 @@ async function enterApp() {
   document.getElementById('login-wrap').style.display = 'none';
   document.getElementById('tb-av').textContent = ME.nom[0].toUpperCase();
   document.getElementById('tb-uname').textContent = ME.nom;
-  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : ME.rol === 'presupuestos' ? '📄 Presupuestos' : '👤 Usuario';
+  document.getElementById('tb-role').textContent = ME.rol === 'admin' ? '⚡ Admin' : ME.rol === 'invitado' ? '👁️ Invitado' : ME.rol === 'presupuestos' ? '📄 Presupuestos' : ME.rol === 'usuario_presupuestos' ? '👤+ Presupuestos' : '👤 Usuario';
   if (ME.rol === 'admin') {
     document.getElementById('sb-usuarios').style.display = '';
     document.getElementById('th-acc').style.display = '';
@@ -2758,6 +2758,11 @@ async function enterApp() {
     // Solo cargar lo necesario para presupuestos
     await loadPresupuestos();
     initPresupRealtime();
+  } else if (ME.rol === 'usuario_presupuestos') {
+    await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
+    Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
+    await loadPresupuestos();
+    initPresupRealtime();
   } else {
     await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
     Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
@@ -2773,7 +2778,12 @@ async function enterApp() {
   setTimeout(() => { const badge = document.getElementById('prend-rech-badge'); if (badge) badge.style.display = RECORDS.filter(r => r.prendaRechazada && !r.fechaReingresoPrend).length ? '' : 'none'; }, 1500);
   if (ME.rol === 'admin') setTimeout(() => checkAutoBackup(), 2000);
   loading(false);
-  if (ME.rol === 'presupuestos') {
+  if (ME.rol === 'usuario_presupuestos') {
+    // usuario_presupuestos: igual que user pero con acceso a presupuestos
+    document.getElementById('sb-presupuestos').style.display = '';
+    document.getElementById('sb-historico-presup').style.display = '';
+    showV('sol');
+  } else if (ME.rol === 'presupuestos') {
     // Ocultar toda la navegacion del sistema
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
     document.getElementById('btn-datero').style.display = 'none';
@@ -2892,7 +2902,7 @@ function openSidebar() {
   document.getElementById('sb-envios-gestor').style.display = (ME?.rol === 'admin' || ME?.rol === 'user') ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos') ? '' : 'none';
+  document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
   document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
 
   if (ME?.rol === 'admin') renderSidebarPV();
@@ -8067,7 +8077,7 @@ async function loadUsers() {
         const isOnline = lastSeen && (ahora - lastSeen) < 5 * 60 * 1000;
         const cantSolicitudes = RECORDS.filter(r => (r.usuario||'').toLowerCase() === u.nom.toLowerCase()).length;
         const cantPresupuestos = (PRESUP_CACHE||[]).filter(p => (p.creado_por||'').toLowerCase() === u.usr.toLowerCase()).length;
-        const esPresup = u.rol === 'presupuestos';
+        const esPresup = u.rol === 'presupuestos' || u.rol === 'usuario_presupuestos';
         const cantLabel = esPresup
           ? `📄 <b style="color:var(--ink2)">${cantPresupuestos}</b> presupuesto${cantPresupuestos !== 1 ? 's' : ''} cargado${cantPresupuestos !== 1 ? 's' : ''}`
           : `📋 <b style="color:var(--ink2)">${cantSolicitudes}</b> solicitud${cantSolicitudes !== 1 ? 'es' : ''} cargada${cantSolicitudes !== 1 ? 's' : ''}`;
@@ -8092,6 +8102,7 @@ async function loadUsers() {
               <option value="user" ${u.rol==='user'?'selected':''}>👤 Usuario</option>
               <option value="admin" ${u.rol==='admin'?'selected':''}>⚡ Admin</option>
               <option value="presupuestos" ${u.rol==='presupuestos'?'selected':''}>📄 Presupuestos</option>
+              <option value="usuario_presupuestos" ${u.rol==='usuario_presupuestos'?'selected':''}>👤+ Usuario + Presupuestos</option>
             </select>
             <button class="btn btn-d" style="font-size:12px;padding:5px 10px" onclick="delUser('${u.usr}')">Eliminar</button>
           </div>
