@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.14</title>
+<title>Grupo Olyar — Solicitudes v2.23.15</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -10142,7 +10142,7 @@ async function exportBrechaExcel() {
   XLSX.writeFile(wb, `Brecha_Financiamiento_${fecha}.xlsx`);
 }
 
-let _brechaSort = { col: 'pct', dir: 1 };
+let _brechaSort = { col: 'fecha', dir: -1 };
 
 function sortBrecha(col) {
   if (_brechaSort.col === col) _brechaSort.dir *= -1;
@@ -10195,6 +10195,7 @@ function renderBrecha() {
     const gb = (fAgrup === 'banco' ? b.banco : b.concesionaria) || '';
     const gCmp = ga.localeCompare(gb, 'es');
     if (gCmp !== 0) return gCmp;
+    if (col === 'fecha')         return String(a.fecha||a.fechaReg||'').localeCompare(String(b.fecha||b.fechaReg||'')) * dir;
     if (col === 'cliente')       return String(a.nombrecliente||'').localeCompare(String(b.nombrecliente||''), 'es') * dir;
     if (col === 'banco')         return String(a.banco||'').localeCompare(String(b.banco||''), 'es') * dir;
     if (col === 'concesionaria') return String(a.concesionaria||'').localeCompare(String(b.concesionaria||''), 'es') * dir;
@@ -10205,7 +10206,7 @@ function renderBrecha() {
     return 0;
   });
 
-  ['cliente','banco','concesionaria','vehiculo','importe','brecha','pct'].forEach(c => {
+  ['fecha','cliente','banco','concesionaria','vehiculo','importe','brecha','pct'].forEach(c => {
     const el = document.getElementById('bsort-'+c);
     if (el) el.textContent = col === c ? (dir === 1 ? ' ↑' : ' ↓') : '';
   });
