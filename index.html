@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.19</title>
+<title>Grupo Olyar — Solicitudes v2.23.20</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2819,6 +2819,10 @@ async function enterApp() {
     // Solo cargar lo necesario para presupuestos
     await loadPresupuestos();
     initPresupRealtime();
+  } else if (ME.rol === 'administracion') {
+    // Solo cargar lo necesario para administración
+    // (sin datos del sistema por ahora)
+    initPresupRealtime();
   } else if (ME.rol === 'usuario_presupuestos') {
     await Promise.all([loadLists(), loadRecords(), loadClientes(), loadContabilidad(), loadConcesionarias(), loadCreditos()]);
     Promise.all([loadGestores(), loadDatero(), loadGastos(), loadPorcentajesBanco()]).catch(()=>{});
@@ -2848,9 +2852,22 @@ async function enterApp() {
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
     showV('sol');
-  } else if (ME.rol === 'administracion' || ME.rol === 'usuario_administracion') {
-    // Por ahora igual que user — cuando exista la sección Administración se configurará
+  } else if (ME.rol === 'usuario_administracion') {
+    // usuario_administracion: igual que user pero con acceso a administración
     showV('sol');
+  } else if (ME.rol === 'administracion') {
+    // Ocultar toda la navegación del sistema — solo ve Administración
+    document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+    document.getElementById('btn-datero').style.display = 'none';
+    document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
+    document.getElementById('sb-administracion').style.display = '';
+    document.getElementById('sb-div-calc').style.display = 'none';
+    document.getElementById('sb-lbl-calc').style.display = 'none';
+    document.getElementById('sb-div-cuenta').style.display = 'none';
+    document.getElementById('sb-lbl-cuenta').style.display = 'none';
+    const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
+    if (miCuentaBtn) miCuentaBtn.style.display = '';
+    showV('administracion');
   } else if (ME.rol === 'presupuestos') {
     // Ocultar toda la navegacion del sistema
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
