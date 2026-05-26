@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.15</title>
+<title>Grupo Olyar — Solicitudes v2.23.16</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2764,7 +2764,7 @@ async function enterApp() {
   // Sidebar items por rol
   const isAdmin = ME.rol === 'admin';
   const isUser  = ME.rol === 'user';
-  document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser) ? '' : 'none';
+  document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser || ME?.rol === 'usuario_presupuestos' || ME?.rol === 'usuario_administracion' || ME?.rol === 'administracion') ? '' : 'none';
   document.getElementById('script-pre').textContent = SCRIPT_CODE;
   document.getElementById('sc-imp').style.display = ME.rol === 'admin' ? '' : 'none';
   document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
@@ -2949,7 +2949,7 @@ function openSidebar() {
   document.getElementById('sb-nueva').style.display = ME?.rol === 'admin' ? 'none' : '';
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-envios-gestor').style.display = (ME?.rol === 'admin' || ME?.rol === 'user') ? '' : 'none';
+  document.getElementById('sb-envios-gestor').style.display = ['admin','user','usuario_presupuestos','usuario_administracion','administracion'].includes(ME?.rol) ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
