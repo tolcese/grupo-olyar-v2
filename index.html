@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.18</title>
+<title>Grupo Olyar — Solicitudes v2.23.19</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -979,6 +979,21 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           </table>
         </div>
         <div id="envios-list-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin envíos registrados</div>
+      </div>
+    </div>
+
+    <!-- ADMINISTRACIÓN -->
+    <div id="v-administracion" style="display:none">
+      <div class="ph">
+        <div>
+          <div class="ph-t">🏢 Administración</div>
+          <div class="ph-s">Sección en desarrollo</div>
+        </div>
+      </div>
+      <div class="card" style="text-align:center;padding:60px 24px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:16px">🏗️</div>
+        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px">Próximamente</div>
+        <div style="font-size:13px">Esta sección está en desarrollo.<br>Pronto vas a poder gestionar la administración desde acá.</div>
       </div>
     </div>
 
@@ -2953,6 +2968,7 @@ function openSidebar() {
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-envios-gestor').style.display = ['admin','user','usuario_presupuestos'].includes(ME?.rol) ? '' : 'none';
+  document.getElementById('sb-administracion').style.display = ['admin','administracion','usuario_administracion'].includes(ME?.rol) ? '' : 'none';
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
@@ -7370,7 +7386,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -11299,6 +11315,10 @@ function renderReportes() {
 
     <button class="sb-item" id="sb-envios-gestor" onclick="closeSidebar();showV('envios-gestor')" style="display:none">
       <span class="sb-icon">🚚</span> Stock de prendas
+    </button>
+
+    <button class="sb-item" id="sb-administracion" onclick="closeSidebar();showV('administracion')" style="display:none">
+      <span class="sb-icon">🏢</span> Administración
     </button>
 
     <button class="sb-item" id="sb-presupuestos" onclick="closeSidebar();showV('presupuestos')" style="display:none">
