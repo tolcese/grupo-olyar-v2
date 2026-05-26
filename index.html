@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.17</title>
+<title>Grupo Olyar — Solicitudes v2.23.18</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2367,9 +2367,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div class="fc" style="margin-bottom:13px"><label>Contraseña</label><input id="u-pwd" type="password"></div>
     <div class="fc" style="margin-bottom:18px"><label>Rol</label>
       <select id="u-rol">
-        <option value="user">Usuario — ve todo, no puede editar/eliminar</option>
-        <option value="admin">Admin — control total</option>
-        <option value="presupuestos">Presupuestos — solo presupuestos</option>
+        <option value="user">👤 Usuario — ve todo, no puede editar/eliminar</option>
+        <option value="admin">⚡ Admin — control total</option>
+        <option value="presupuestos">📄 Presupuestos — solo presupuestos</option>
+        <option value="usuario_presupuestos">👤+ Usuario + Presupuestos</option>
+        <option value="administracion">🏢 Administración</option>
+        <option value="usuario_administracion">👤+ Usuario + Administración</option>
       </select></div>
     <div class="mfoot" style="border:none;padding:0;margin:0">
       <button class="btn btn-s" onclick="document.getElementById('user-modal').classList.remove('open')">Cancelar</button>
