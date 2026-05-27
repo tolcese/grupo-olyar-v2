@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.28</title>
+<title>Grupo Olyar — Solicitudes v2.23.29</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2867,6 +2867,9 @@ async function doLogin() {
     if (error || !data) { showErr('Usuario o contraseña incorrectos'); }
     else if (data.pwd_hash !== p) { showErr('Usuario o contraseña incorrectos'); }
     else {
+      // Limpiar cualquier dato del usuario anterior antes de entrar
+      localStorage.removeItem('last_auto_backup_date');
+      localStorage.removeItem('datero_last_seen');
       ME = { usr: data.usr, nom: data.nom, rol: data.rol };
       enterApp();
     }
@@ -3075,10 +3078,17 @@ async function loadWeather() {
 setInterval(() => { if (ME?.usr === 'claudionieva') loadWeather(); }, 30 * 60 * 1000);
 
 function doLogout() {
+  // Limpiar datos del usuario anterior
+  const keysToRemove = ['last_auto_backup_date', 'datero_last_seen'];
+  keysToRemove.forEach(k => localStorage.removeItem(k));
+  // Limpiar notas del usuario
+  if (ME?.usr) localStorage.removeItem('notas_' + ME.usr);
+
   ME = null; RECORDS = []; editId = null;
   document.getElementById('login-wrap').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
   document.getElementById('l-p').value = '';
+  document.getElementById('l-u').value = '';
   document.getElementById('login-err').style.display = 'none';
   document.getElementById('login-btn').style.display = 'block';
   document.getElementById('login-loading').style.display = 'none';
