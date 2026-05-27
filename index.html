@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.31</title>
+<title>Grupo Olyar — Solicitudes v2.23.32</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1073,7 +1073,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
               </div>
             </div>
 
-            <!-- Sin Cobrado -->
+            <!-- Sin Cobrado: fila 1: Aranceles | Multas | (vacío) — fila 2: Sellados | Gasto envío | Honorario Moni -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Aranceles</label><input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
@@ -1081,6 +1081,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Multas</label><input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
+              <div></div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Sellados</label><input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
