@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.32</title>
+<title>Grupo Olyar — Solicitudes v2.23.33</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1066,22 +1066,21 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-mov-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
                 <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-mov-cob" min="0" placeholder=""></div>
               </div>
+            </div>
+
+            <!-- Fila 2: Forms | Aranceles | Multas — Fila 3: Sellados | Gasto envío | Honorario Moni -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Forms</div>
                 <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
                 <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-forms-cob" min="0" placeholder=""></div>
               </div>
-            </div>
-
-            <!-- Sin Cobrado: fila 1: Aranceles | Multas | (vacío) — fila 2: Sellados | Gasto envío | Honorario Moni -->
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Aranceles</label><input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Multas</label><input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
-              <div></div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Sellados</label><input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
@@ -2977,16 +2976,17 @@ async function enterApp() {
   } else if (ME.rol === 'administracion') {
     // Ocultar toda la navegación del sistema — solo ve Administración
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+    document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
     document.getElementById('btn-datero').style.display = 'none';
     document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
-    document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-administracion').style.display = '';
-    document.getElementById('sb-div-calc').style.display = 'none';
-    document.getElementById('sb-lbl-calc').style.display = 'none';
-    document.getElementById('sb-div-cuenta').style.display = 'none';
-    document.getElementById('sb-lbl-cuenta').style.display = 'none';
-    const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
-    if (miCuentaBtn) miCuentaBtn.style.display = '';
+    document.getElementById('sb-nueva').style.display = 'none';
+    // Ocultar secciones del sidebar que no corresponden
+    ['sb-div-calc','sb-lbl-calc','sb-div-cuenta','sb-lbl-cuenta'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    window._rolAdminPuro = true;
     showV('administracion');
   } else if (ME.rol === 'presupuestos') {
     // Ocultar toda la navegacion del sistema
@@ -3113,6 +3113,11 @@ function openSidebar() {
   document.getElementById('sb-backup').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-envios-gestor').style.display = ['admin','user','usuario_presupuestos'].includes(ME?.rol) ? '' : 'none';
   document.getElementById('sb-administracion').style.display = ['admin','administracion','usuario_administracion'].includes(ME?.rol) ? '' : 'none';
+  // Para rol administracion puro: asegurarse que sb-nueva no aparezca
+  if (window._rolAdminPuro) {
+    document.getElementById('sb-nueva').style.display = 'none';
+    document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
+  }
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
