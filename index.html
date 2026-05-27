@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.34</title>
+<title>Grupo Olyar — Solicitudes v2.23.35</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1053,18 +1053,18 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Escribanía</div>
-                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-esc-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
-                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-esc-cob" min="0" placeholder=""></div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="text" inputmode="decimal" id="adm-t-esc-real" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="text" inputmode="decimal" id="adm-t-esc-cob" placeholder=""></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Inf + Anotación</div>
-                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-inf-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
-                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-inf-cob" min="0" placeholder=""></div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="text" inputmode="decimal" id="adm-t-inf-real" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="text" inputmode="decimal" id="adm-t-inf-cob" placeholder=""></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Movilidad</div>
-                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-mov-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
-                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-mov-cob" min="0" placeholder=""></div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="text" inputmode="decimal" id="adm-t-mov-real" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="text" inputmode="decimal" id="adm-t-mov-cob" placeholder=""></div>
               </div>
             </div>
 
@@ -1072,23 +1072,23 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Forms</div>
-                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
-                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-forms-cob" min="0" placeholder=""></div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="text" inputmode="decimal" id="adm-t-forms" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="text" inputmode="decimal" id="adm-t-forms-cob" placeholder=""></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
-                <div class="fc"><label>Aranceles</label><input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Aranceles</label><input type="text" inputmode="decimal" id="adm-t-aranceles" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
-                <div class="fc"><label>Multas</label><input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Multas</label><input type="text" inputmode="decimal" id="adm-t-multas" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
-                <div class="fc"><label>Sellados</label><input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Sellados</label><input type="text" inputmode="decimal" id="adm-t-sellados" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
-                <div class="fc"><label>Gasto envío</label><input type="number" id="adm-t-envio" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Gasto envío</label><input type="text" inputmode="decimal" id="adm-t-envio" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
               <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
-                <div class="fc"><label>Honorario Moni</label><input type="number" id="adm-t-honorario" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Honorario Moni</label><input type="text" inputmode="decimal" id="adm-t-honorario" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
             </div>
           </div>
@@ -1097,11 +1097,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <div class="fc">
               <label>Total gastos <span style="color:var(--muted);font-weight:400">(calculado)</span></label>
-              <input type="number" id="adm-t-total" min="0" placeholder="" style="background:var(--surface);color:var(--blue);font-weight:700" readonly>
+              <input type="text" id="adm-t-total" placeholder="" style="background:var(--surface);color:var(--blue);font-weight:700" readonly>
             </div>
             <div class="fc">
               <label>Abonaron/nos</label>
-              <input type="number" id="adm-t-abono" min="0" placeholder="">
+              <input type="text" inputmode="decimal" id="adm-t-abono" placeholder="">
             </div>
           </div>
 
