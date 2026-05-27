@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.22</title>
+<title>Grupo Olyar — Solicitudes v2.23.23</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -985,15 +985,134 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <!-- ADMINISTRACIÓN -->
     <div id="v-administracion" style="display:none">
       <div class="ph">
-        <div>
-          <div class="ph-t">🏢 Administración</div>
-          <div class="ph-s">Sección en desarrollo</div>
-        </div>
+        <div><div class="ph-t">🏢 Administración</div><div class="ph-s">Gestión interna</div></div>
+        <button class="btn btn-p" id="adm-btn-nuevo" onclick="abrirModalTramite()" style="display:none">＋ Nuevo trámite</button>
       </div>
-      <div class="card" style="text-align:center;padding:60px 24px;color:var(--muted)">
-        <div style="font-size:48px;margin-bottom:16px">🏗️</div>
-        <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:8px">Próximamente</div>
-        <div style="font-size:13px">Esta sección está en desarrollo.<br>Pronto vas a poder gestionar la administración desde acá.</div>
+
+      <!-- TABS -->
+      <div class="tab-bar" style="display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:20px;overflow-x:auto">
+        <button id="adm-tab-tramites" onclick="showAdmTab('tramites')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;white-space:nowrap">📋 Trámites</button>
+      </div>
+
+      <!-- TAB TRAMITES -->
+      <div id="adm-tramites" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input type="text" id="adm-tramites-srch" class="fsel" placeholder="Buscar cliente, dominio..." oninput="renderTramites()" style="max-width:260px">
+          <input type="date" id="adm-tramites-desde" class="fsel" onchange="renderTramites()" style="font-size:12px">
+          <input type="date" id="adm-tramites-hasta" class="fsel" onchange="renderTramites()" style="font-size:12px">
+          <span id="adm-tramites-count" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
+        </div>
+        <div class="table-wrap">
+          <table style="width:100%;min-width:900px;font-size:12.5px;border-collapse:collapse">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Fecha</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Cliente</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Dominio</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Efvo. entregado</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Total gastos</th>
+                <th style="padding:9px 12px;text-align:right;font-weight:700">Abonaron</th>
+                <th style="padding:9px 12px;text-align:left;font-weight:700">Observaciones</th>
+                <th style="padding:9px 12px;text-align:center;font-weight:700">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="adm-tramites-tbody"></tbody>
+          </table>
+        </div>
+        <div id="adm-tramites-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin trámites registrados</div>
+      </div>
+    </div>
+
+    <!-- MODAL TRAMITE -->
+    <div class="overlay" id="adm-tramite-overlay" onclick="if(event.target===this)cerrarModalTramite()">
+      <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto">
+        <div class="mh">
+          <div class="mt" id="adm-tramite-titulo">📋 Nuevo trámite</div>
+          <button class="mc" onclick="cerrarModalTramite()">✕</button>
+        </div>
+        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+          <input type="hidden" id="adm-tramite-id">
+
+          <!-- Datos generales -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            <div class="fc"><label>Fecha</label><input type="date" id="adm-t-fecha"></div>
+            <div class="fc"><label>Cliente</label><input type="text" id="adm-t-cliente" placeholder="Nombre del cliente"></div>
+            <div class="fc"><label>Dominio</label><input type="text" id="adm-t-dominio" placeholder="Ej: ABC123" style="text-transform:uppercase"></div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr;gap:4px">
+            <div class="fc"><label>Efectivo entregado</label><input type="number" id="adm-t-efvo" min="0" placeholder="0"></div>
+          </div>
+
+          <!-- Gastos con real/cobrado -->
+          <div style="background:var(--surface);border-radius:10px;padding:14px">
+            <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Gastos</div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">
+              <div></div><div style="text-align:center">Real</div><div style="text-align:center">Cobrado</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Escribanía</label>
+              <input type="number" id="adm-t-esc-real" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <input type="number" id="adm-t-esc-cob" min="0" placeholder="0">
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Inf + Anotación</label>
+              <input type="number" id="adm-t-inf-real" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <input type="number" id="adm-t-inf-cob" min="0" placeholder="0">
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Movilidad</label>
+              <input type="number" id="adm-t-mov-real" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <input type="number" id="adm-t-mov-cob" min="0" placeholder="0">
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Forms</label>
+              <input type="number" id="adm-t-forms" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Aranceles</label>
+              <input type="number" id="adm-t-aranceles" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Multas</label>
+              <input type="number" id="adm-t-multas" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Sellados</label>
+              <input type="number" id="adm-t-sellados" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
+              <label style="font-size:12.5px">Gasto envío</label>
+              <input type="number" id="adm-t-envio" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center">
+              <label style="font-size:12.5px">Honorario Moni</label>
+              <input type="number" id="adm-t-honorario" min="0" placeholder="0" oninput="calcTramiteTotales()">
+              <div></div>
+            </div>
+          </div>
+
+          <!-- Totales calculados -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="fc">
+              <label>Total gastos <span style="color:var(--muted);font-weight:400">(calculado)</span></label>
+              <input type="number" id="adm-t-total" min="0" placeholder="0" style="background:var(--surface);color:var(--blue);font-weight:700" readonly>
+            </div>
+            <div class="fc">
+              <label>Abonaron/nos</label>
+              <input type="number" id="adm-t-abono" min="0" placeholder="0">
+            </div>
+          </div>
+
+          <div class="fc"><label>Observaciones</label><textarea id="adm-t-obs" rows="2" placeholder="Notas adicionales..."></textarea></div>
+
+          <button class="btn btn-p" onclick="guardarTramite()">💾 Guardar trámite</button>
+        </div>
       </div>
     </div>
 
@@ -7450,6 +7569,7 @@ function showV(v) {
     if (sp) sp.style.transform = 'translateX(100%)';
   }
   if (v==='envios-gestor') { loadEnviosGestor(); }
+  if (v==='administracion') { loadAdministracion(); }
   if (v !== 'datero') closeDateroPanel();
 
   if (v === 'contabilidad') {
@@ -9294,6 +9414,192 @@ async function guardarEnvioGestor() {
   cerrarModalEnvioGestor();
   toast(`✅ Envío registrado: ${cantidad} prendas ${banco} → ${gestor}`);
   if (document.getElementById('v-envios-gestor')?.style.display !== 'none') loadEnviosGestor();
+}
+
+// ═══════════════════════════════════════════
+// ADMINISTRACIÓN — TRÁMITES
+// ═══════════════════════════════════════════
+let TRAMITES_DATA = [];
+
+function showAdmTab(tab) {
+  ['tramites'].forEach(t => {
+    const panel = document.getElementById('adm-' + t);
+    const btn   = document.getElementById('adm-tab-' + t);
+    if (panel) panel.style.display = t === tab ? '' : 'none';
+    if (btn) {
+      btn.style.borderBottomColor = t === tab ? 'var(--blue)' : 'transparent';
+      btn.style.color = t === tab ? 'var(--blue)' : 'var(--muted)';
+    }
+  });
+  const btnNuevo = document.getElementById('adm-btn-nuevo');
+  if (btnNuevo) btnNuevo.style.display = tab === 'tramites' ? '' : 'none';
+  if (tab === 'tramites') loadTramites();
+}
+
+async function loadAdministracion() {
+  showAdmTab('tramites');
+}
+
+async function loadTramites() {
+  const { data, error } = await SB.from('tramites').select('*').order('fecha', { ascending: false });
+  if (error) { console.error('Error cargando trámites:', error); return; }
+  TRAMITES_DATA = data || [];
+  renderTramites();
+}
+
+function renderTramites() {
+  const tbody  = document.getElementById('adm-tramites-tbody');
+  const empty  = document.getElementById('adm-tramites-empty');
+  const countEl = document.getElementById('adm-tramites-count');
+  if (!tbody) return;
+
+  const srch   = (document.getElementById('adm-tramites-srch')?.value || '').toLowerCase();
+  const desde  = document.getElementById('adm-tramites-desde')?.value || '';
+  const hasta  = document.getElementById('adm-tramites-hasta')?.value || '';
+  const mon = v => v ? '$' + Math.round(Number(v)).toLocaleString('es-AR') : '—';
+
+  let data = [...TRAMITES_DATA];
+  if (srch)  data = data.filter(t => (t.cliente||'').toLowerCase().includes(srch) || (t.dominio||'').toLowerCase().includes(srch));
+  if (desde) data = data.filter(t => (t.fecha||'') >= desde);
+  if (hasta) data = data.filter(t => (t.fecha||'') <= hasta);
+
+  if (countEl) countEl.textContent = data.length + ' registro' + (data.length !== 1 ? 's' : '');
+
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = data.map(t => {
+    const fecha = t.fecha ? t.fecha.split('-').reverse().join('/') : '—';
+    return `<tr style="border-bottom:1px solid var(--line)" onmouseenter="this.style.background='var(--surface)'" onmouseleave="this.style.background=''">
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2)">${fecha}</td>
+      <td style="padding:8px 12px;font-weight:600">${t.cliente||'—'}</td>
+      <td style="padding:8px 12px;font-family:monospace;font-weight:600">${t.dominio||'—'}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace">${mon(t.efvo_entregado)}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace;font-weight:600">${mon(t.total_gastos)}</td>
+      <td style="padding:8px 12px;text-align:right;font-family:monospace">${mon(t.abonaron)}</td>
+      <td style="padding:8px 12px;font-size:12px;color:var(--ink2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.observaciones||'—'}</td>
+      <td style="padding:8px 12px;text-align:center">
+        <div style="display:flex;gap:6px;justify-content:center">
+          <button class="ibtn" onclick="editarTramite('${t.id}')" title="Editar">✏️</button>
+          <button class="ibtn del" onclick="eliminarTramite('${t.id}')" title="Eliminar">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function calcTramiteTotales() {
+  const n = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const total = n('adm-t-esc-real') + n('adm-t-inf-real') + n('adm-t-mov-real') +
+                n('adm-t-forms') + n('adm-t-aranceles') + n('adm-t-multas') +
+                n('adm-t-sellados') + n('adm-t-envio') + n('adm-t-honorario');
+  const el = document.getElementById('adm-t-total');
+  if (el) el.value = total || '';
+}
+
+function abrirModalTramite() {
+  document.getElementById('adm-tramite-id').value = '';
+  document.getElementById('adm-tramite-titulo').textContent = '📋 Nuevo trámite';
+  document.getElementById('adm-t-fecha').value = new Date().toISOString().slice(0,10);
+  ['adm-t-cliente','adm-t-dominio','adm-t-efvo','adm-t-esc-real','adm-t-esc-cob',
+   'adm-t-inf-real','adm-t-inf-cob','adm-t-mov-real','adm-t-mov-cob','adm-t-forms',
+   'adm-t-aranceles','adm-t-multas','adm-t-sellados','adm-t-envio','adm-t-honorario',
+   'adm-t-total','adm-t-abono','adm-t-obs'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('adm-tramite-overlay').classList.add('open');
+}
+
+function cerrarModalTramite() {
+  document.getElementById('adm-tramite-overlay').classList.remove('open');
+}
+
+function editarTramite(id) {
+  const t = TRAMITES_DATA.find(x => String(x.id) === String(id));
+  if (!t) return;
+  document.getElementById('adm-tramite-id').value = t.id;
+  document.getElementById('adm-tramite-titulo').textContent = '✏️ Editar trámite';
+  document.getElementById('adm-t-fecha').value = t.fecha || '';
+  document.getElementById('adm-t-cliente').value = t.cliente || '';
+  document.getElementById('adm-t-dominio').value = t.dominio || '';
+  document.getElementById('adm-t-efvo').value = t.efvo_entregado || '';
+  document.getElementById('adm-t-esc-real').value = t.escribania_real || '';
+  document.getElementById('adm-t-esc-cob').value = t.escribania_cobrado || '';
+  document.getElementById('adm-t-inf-real').value = t.inf_anotacion_real || '';
+  document.getElementById('adm-t-inf-cob').value = t.inf_anotacion_cobrado || '';
+  document.getElementById('adm-t-mov-real').value = t.movilidad_real || '';
+  document.getElementById('adm-t-mov-cob').value = t.movilidad_cobrado || '';
+  document.getElementById('adm-t-forms').value = t.forms || '';
+  document.getElementById('adm-t-aranceles').value = t.aranceles || '';
+  document.getElementById('adm-t-multas').value = t.multas || '';
+  document.getElementById('adm-t-sellados').value = t.sellados || '';
+  document.getElementById('adm-t-envio').value = t.gasto_envio || '';
+  document.getElementById('adm-t-honorario').value = t.honorario_moni || '';
+  document.getElementById('adm-t-total').value = t.total_gastos || '';
+  document.getElementById('adm-t-abono').value = t.abonaron || '';
+  document.getElementById('adm-t-obs').value = t.observaciones || '';
+  document.getElementById('adm-tramite-overlay').classList.add('open');
+}
+
+async function guardarTramite() {
+  const id     = document.getElementById('adm-tramite-id').value;
+  const n = key => parseFloat(document.getElementById(key)?.value) || 0;
+  const s = key => document.getElementById(key)?.value.trim() || null;
+
+  const total = n('adm-t-esc-real') + n('adm-t-inf-real') + n('adm-t-mov-real') +
+                n('adm-t-forms') + n('adm-t-aranceles') + n('adm-t-multas') +
+                n('adm-t-sellados') + n('adm-t-envio') + n('adm-t-honorario');
+
+  const rec = {
+    fecha:                  s('adm-t-fecha'),
+    cliente:                s('adm-t-cliente'),
+    dominio:                (s('adm-t-dominio')||'').toUpperCase() || null,
+    efvo_entregado:         n('adm-t-efvo'),
+    escribania_real:        n('adm-t-esc-real'),
+    escribania_cobrado:     n('adm-t-esc-cob'),
+    inf_anotacion_real:     n('adm-t-inf-real'),
+    inf_anotacion_cobrado:  n('adm-t-inf-cob'),
+    movilidad_real:         n('adm-t-mov-real'),
+    movilidad_cobrado:      n('adm-t-mov-cob'),
+    forms:                  n('adm-t-forms'),
+    aranceles:              n('adm-t-aranceles'),
+    multas:                 n('adm-t-multas'),
+    sellados:               n('adm-t-sellados'),
+    gasto_envio:            n('adm-t-envio'),
+    honorario_moni:         n('adm-t-honorario'),
+    total_gastos:           total,
+    abonaron:               n('adm-t-abono'),
+    observaciones:          s('adm-t-obs'),
+    usuario:                ME?.usr || null,
+  };
+
+  try {
+    if (id) {
+      const { error } = await SB.from('tramites').update(rec).eq('id', id);
+      if (error) throw error;
+    } else {
+      const { error } = await SB.from('tramites').insert(rec);
+      if (error) throw error;
+    }
+    cerrarModalTramite();
+    await loadTramites();
+    toast(id ? 'Trámite actualizado ✓' : 'Trámite guardado ✓', 'ok');
+  } catch(e) {
+    toast('Error: ' + e.message, 'er');
+  }
+}
+
+async function eliminarTramite(id) {
+  if (!confirm('¿Eliminar este trámite?')) return;
+  try {
+    const { error } = await SB.from('tramites').delete().eq('id', id);
+    if (error) throw error;
+    await loadTramites();
+    toast('Trámite eliminado', 'ok');
+  } catch(e) {
+    toast('Error: ' + e.message, 'er');
+  }
 }
 
 async function loadBackupList() {
