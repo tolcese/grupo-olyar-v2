@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.30</title>
+<title>Grupo Olyar — Solicitudes v2.23.31</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1051,41 +1051,43 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
             <!-- Con Real y Cobrado -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Escribanía</div>
                 <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-esc-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
                 <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-esc-cob" min="0" placeholder=""></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Inf + Anotación</div>
                 <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-inf-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
                 <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-inf-cob" min="0" placeholder=""></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Movilidad</div>
                 <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-mov-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
                 <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-mov-cob" min="0" placeholder=""></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
+                <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Forms</div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-forms-cob" min="0" placeholder=""></div>
               </div>
             </div>
 
             <!-- Sin Cobrado -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
-                <div class="fc"><label>Forms</label><input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
-              </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Aranceles</label><input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Multas</label><input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Sellados</label><input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Gasto envío</label><input type="number" id="adm-t-envio" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
-              <div style="background:var(--surface);border-radius:10px;padding:14px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px;border:1.5px solid var(--line)">
                 <div class="fc"><label>Honorario Moni</label><input type="number" id="adm-t-honorario" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
               </div>
             </div>
@@ -9507,8 +9509,8 @@ function abrirModalTramite() {
   document.getElementById('adm-t-fecha').value = new Date().toISOString().slice(0,10);
   ['adm-t-cliente','adm-t-dominio','adm-t-efvo','adm-t-esc-real','adm-t-esc-cob',
    'adm-t-inf-real','adm-t-inf-cob','adm-t-mov-real','adm-t-mov-cob','adm-t-forms',
-   'adm-t-aranceles','adm-t-multas','adm-t-sellados','adm-t-envio','adm-t-honorario',
-   'adm-t-total','adm-t-abono','adm-t-obs'].forEach(id => {
+   'adm-t-forms-cob','adm-t-aranceles','adm-t-multas','adm-t-sellados','adm-t-envio',
+   'adm-t-honorario','adm-t-total','adm-t-abono','adm-t-obs'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -9535,6 +9537,7 @@ function editarTramite(id) {
   document.getElementById('adm-t-mov-real').value = t.movilidad_real || '';
   document.getElementById('adm-t-mov-cob').value = t.movilidad_cobrado || '';
   document.getElementById('adm-t-forms').value = t.forms || '';
+  document.getElementById('adm-t-forms-cob').value = t.forms_cobrado || '';
   document.getElementById('adm-t-aranceles').value = t.aranceles || '';
   document.getElementById('adm-t-multas').value = t.multas || '';
   document.getElementById('adm-t-sellados').value = t.sellados || '';
@@ -9567,6 +9570,7 @@ async function guardarTramite() {
     movilidad_real:         n('adm-t-mov-real'),
     movilidad_cobrado:      n('adm-t-mov-cob'),
     forms:                  n('adm-t-forms'),
+    forms_cobrado:          n('adm-t-forms-cob'),
     aranceles:              n('adm-t-aranceles'),
     multas:                 n('adm-t-multas'),
     sellados:               n('adm-t-sellados'),
