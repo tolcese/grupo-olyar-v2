@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.29</title>
+<title>Grupo Olyar — Solicitudes v2.23.30</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1025,80 +1025,74 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
 
     <!-- MODAL TRAMITE -->
     <div class="overlay" id="adm-tramite-overlay" onclick="if(event.target===this)cerrarModalTramite()">
-      <div class="modal" style="max-width:720px;max-height:90vh;overflow-y:auto">
+      <div class="modal" style="max-width:900px;max-height:92vh;overflow-y:auto;width:95vw">
         <div class="mh">
           <div class="mt" id="adm-tramite-titulo">📋 Nuevo trámite</div>
           <button class="mc" onclick="cerrarModalTramite()">✕</button>
         </div>
-        <div style="padding:20px 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="padding:20px 28px;display:flex;flex-direction:column;gap:18px">
           <input type="hidden" id="adm-tramite-id">
 
           <!-- Datos generales -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="display:grid;grid-template-columns:1fr 2fr 1fr;gap:14px">
             <div class="fc"><label>Fecha</label><input type="date" id="adm-t-fecha"></div>
             <div class="fc"><label>Cliente</label><input type="text" id="adm-t-cliente" placeholder="Nombre del cliente"></div>
             <div class="fc"><label>Dominio</label><input type="text" id="adm-t-dominio" placeholder="Ej: ABC123" style="text-transform:uppercase"></div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr;gap:4px">
-            <div class="fc"><label>Efectivo entregado</label><input type="text" inputmode="numeric" id="adm-t-efvo" placeholder=""></div>
+          <div class="fc" style="max-width:240px">
+            <label>Efectivo entregado</label>
+            <input type="text" inputmode="numeric" id="adm-t-efvo" placeholder="">
           </div>
 
-          <!-- Gastos con real/cobrado -->
-          <div style="background:var(--surface);border-radius:10px;padding:14px">
-            <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em">Gastos</div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;font-size:11px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">
-              <div></div><div style="text-align:center">Real</div><div style="text-align:center">Cobrado</div>
+          <!-- Gastos en cards -->
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px">Gastos</div>
+
+            <!-- Con Real y Cobrado -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Escribanía</div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-esc-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-esc-cob" min="0" placeholder=""></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Inf + Anotación</div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-inf-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-inf-cob" min="0" placeholder=""></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:10px">Movilidad</div>
+                <div class="fc" style="margin-bottom:8px"><label>Real</label><input type="number" id="adm-t-mov-real" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+                <div class="fc"><label>Cobrado</label><input type="number" id="adm-t-mov-cob" min="0" placeholder=""></div>
+              </div>
             </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Escribanía</label>
-              <input type="number" id="adm-t-esc-real" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <input type="number" id="adm-t-esc-cob" min="0" placeholder="">
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Inf + Anotación</label>
-              <input type="number" id="adm-t-inf-real" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <input type="number" id="adm-t-inf-cob" min="0" placeholder="">
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Movilidad</label>
-              <input type="number" id="adm-t-mov-real" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <input type="number" id="adm-t-mov-cob" min="0" placeholder="">
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Forms</label>
-              <input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Aranceles</label>
-              <input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Multas</label>
-              <input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Sellados</label>
-              <input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center;margin-bottom:8px">
-              <label style="font-size:12.5px">Gasto envío</label>
-              <input type="number" id="adm-t-envio" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
-            </div>
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;align-items:center">
-              <label style="font-size:12.5px">Honorario Moni</label>
-              <input type="number" id="adm-t-honorario" min="0" placeholder="" oninput="calcTramiteTotales()">
-              <div></div>
+
+            <!-- Sin Cobrado -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Forms</label><input type="number" id="adm-t-forms" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Aranceles</label><input type="number" id="adm-t-aranceles" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Multas</label><input type="number" id="adm-t-multas" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Sellados</label><input type="number" id="adm-t-sellados" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Gasto envío</label><input type="number" id="adm-t-envio" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
+              <div style="background:var(--surface);border-radius:10px;padding:14px">
+                <div class="fc"><label>Honorario Moni</label><input type="number" id="adm-t-honorario" min="0" placeholder="" oninput="calcTramiteTotales()"></div>
+              </div>
             </div>
           </div>
 
-          <!-- Totales calculados -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <!-- Totales -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
             <div class="fc">
               <label>Total gastos <span style="color:var(--muted);font-weight:400">(calculado)</span></label>
               <input type="number" id="adm-t-total" min="0" placeholder="" style="background:var(--surface);color:var(--blue);font-weight:700" readonly>
