@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.33</title>
+<title>Grupo Olyar — Solicitudes v2.23.34</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -9501,12 +9501,47 @@ function renderTramites() {
 }
 
 function calcTramiteTotales() {
-  const n = id => parseFloat(document.getElementById(id)?.value) || 0;
+  const n = id => {
+    const val = (document.getElementById(id)?.value || '').replace(/\./g,'').replace(',','.');
+    return parseFloat(val) || 0;
+  };
   const total = n('adm-t-esc-real') + n('adm-t-inf-real') + n('adm-t-mov-real') +
                 n('adm-t-forms') + n('adm-t-aranceles') + n('adm-t-multas') +
                 n('adm-t-sellados') + n('adm-t-envio') + n('adm-t-honorario');
   const el = document.getElementById('adm-t-total');
-  if (el) el.value = total || '';
+  if (el) el.value = total > 0 ? fmtARS(total) : '';
+}
+
+function fmtARS(v) {
+  if (!v && v !== 0) return '';
+  return Number(v).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function parseTramiteNum(id) {
+  const val = (document.getElementById(id)?.value || '').replace(/\./g,'').replace(',','.');
+  return parseFloat(val) || 0;
+}
+
+function bindTramiteNumInput(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('blur', () => {
+    const v = parseTramiteNum(id);
+    el.value = v > 0 ? fmtARS(v) : '';
+    calcTramiteTotales();
+  });
+  el.addEventListener('focus', () => {
+    const v = parseTramiteNum(id);
+    el.value = v > 0 ? v : '';
+  });
+}
+
+const _tramiteNumIds = ['adm-t-efvo','adm-t-esc-real','adm-t-esc-cob','adm-t-inf-real','adm-t-inf-cob',
+  'adm-t-mov-real','adm-t-mov-cob','adm-t-forms','adm-t-forms-cob','adm-t-aranceles',
+  'adm-t-multas','adm-t-sellados','adm-t-envio','adm-t-honorario','adm-t-abono'];
+
+function initTramiteInputs() {
+  _tramiteNumIds.forEach(id => bindTramiteNumInput(id));
 }
 
 function abrirModalTramite() {
@@ -9521,6 +9556,7 @@ function abrirModalTramite() {
     if (el) el.value = '';
   });
   document.getElementById('adm-tramite-overlay').classList.add('open');
+  setTimeout(initTramiteInputs, 50);
 }
 
 function cerrarModalTramite() {
@@ -9535,29 +9571,30 @@ function editarTramite(id) {
   document.getElementById('adm-t-fecha').value = t.fecha || '';
   document.getElementById('adm-t-cliente').value = t.cliente || '';
   document.getElementById('adm-t-dominio').value = t.dominio || '';
-  document.getElementById('adm-t-efvo').value = t.efvo_entregado || '';
-  document.getElementById('adm-t-esc-real').value = t.escribania_real || '';
-  document.getElementById('adm-t-esc-cob').value = t.escribania_cobrado || '';
-  document.getElementById('adm-t-inf-real').value = t.inf_anotacion_real || '';
-  document.getElementById('adm-t-inf-cob').value = t.inf_anotacion_cobrado || '';
-  document.getElementById('adm-t-mov-real').value = t.movilidad_real || '';
-  document.getElementById('adm-t-mov-cob').value = t.movilidad_cobrado || '';
-  document.getElementById('adm-t-forms').value = t.forms || '';
-  document.getElementById('adm-t-forms-cob').value = t.forms_cobrado || '';
-  document.getElementById('adm-t-aranceles').value = t.aranceles || '';
-  document.getElementById('adm-t-multas').value = t.multas || '';
-  document.getElementById('adm-t-sellados').value = t.sellados || '';
-  document.getElementById('adm-t-envio').value = t.gasto_envio || '';
-  document.getElementById('adm-t-honorario').value = t.honorario_moni || '';
-  document.getElementById('adm-t-total').value = t.total_gastos || '';
-  document.getElementById('adm-t-abono').value = t.abonaron || '';
+  document.getElementById('adm-t-efvo').value = t.efvo_entregado ? fmtARS(t.efvo_entregado) : '';
+  document.getElementById('adm-t-esc-real').value = t.escribania_real ? fmtARS(t.escribania_real) : '';
+  document.getElementById('adm-t-esc-cob').value = t.escribania_cobrado ? fmtARS(t.escribania_cobrado) : '';
+  document.getElementById('adm-t-inf-real').value = t.inf_anotacion_real ? fmtARS(t.inf_anotacion_real) : '';
+  document.getElementById('adm-t-inf-cob').value = t.inf_anotacion_cobrado ? fmtARS(t.inf_anotacion_cobrado) : '';
+  document.getElementById('adm-t-mov-real').value = t.movilidad_real ? fmtARS(t.movilidad_real) : '';
+  document.getElementById('adm-t-mov-cob').value = t.movilidad_cobrado ? fmtARS(t.movilidad_cobrado) : '';
+  document.getElementById('adm-t-forms').value = t.forms ? fmtARS(t.forms) : '';
+  document.getElementById('adm-t-forms-cob').value = t.forms_cobrado ? fmtARS(t.forms_cobrado) : '';
+  document.getElementById('adm-t-aranceles').value = t.aranceles ? fmtARS(t.aranceles) : '';
+  document.getElementById('adm-t-multas').value = t.multas ? fmtARS(t.multas) : '';
+  document.getElementById('adm-t-sellados').value = t.sellados ? fmtARS(t.sellados) : '';
+  document.getElementById('adm-t-envio').value = t.gasto_envio ? fmtARS(t.gasto_envio) : '';
+  document.getElementById('adm-t-honorario').value = t.honorario_moni ? fmtARS(t.honorario_moni) : '';
+  document.getElementById('adm-t-total').value = t.total_gastos ? fmtARS(t.total_gastos) : '';
+  document.getElementById('adm-t-abono').value = t.abonaron ? fmtARS(t.abonaron) : '';
   document.getElementById('adm-t-obs').value = t.observaciones || '';
   document.getElementById('adm-tramite-overlay').classList.add('open');
+  setTimeout(initTramiteInputs, 50);
 }
 
 async function guardarTramite() {
   const id     = document.getElementById('adm-tramite-id').value;
-  const n = key => parseFloat(document.getElementById(key)?.value) || 0;
+  const n = key => parseTramiteNum(key);
   const s = key => document.getElementById(key)?.value.trim() || null;
 
   const total = n('adm-t-esc-real') + n('adm-t-inf-real') + n('adm-t-mov-real') +
