@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.35</title>
+<title>Grupo Olyar — Solicitudes v2.23.37</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -9211,23 +9211,22 @@ async function guardarCargaStock() {
 async function descontarStockPrenda(banco, tipo, solicitudId, nota, gestor) {
   if (!banco) { console.warn('descontarStock: banco vacío'); return; }
 
-  // Normalizar banco: primera letra mayúscula, resto minúscula
   const bancoNorm = banco.charAt(0).toUpperCase() + banco.slice(1).toLowerCase();
 
   try {
     if (tipo === 'salida_avanza' && gestor) {
-      const { data: sg, error: sgErr } = await SB.from('stock_prendas_gestor')
+      const { data: sg } = await SB.from('stock_prendas_gestor')
         .select('*').eq('gestor', gestor).eq('banco', bancoNorm).maybeSingle();
-      console.log('🔵 descontarStock gestor:', gestor, '| banco:', bancoNorm, '| registro:', sg, '| error:', sgErr);
-      if (sg) {
+      console.log('🔵 descontarStock gestor:', gestor, '| banco:', bancoNorm, '| stock gestor:', sg?.cantidad);
+      if (sg && sg.cantidad > 0) {
         const nueva = Math.max(0, (sg.cantidad || 0) - 1);
-        const { error: upErr } = await SB.from('stock_prendas_gestor')
+        await SB.from('stock_prendas_gestor')
           .update({ cantidad: nueva, updated_at: new Date().toISOString() })
           .eq('gestor', gestor).eq('banco', bancoNorm);
-        if (upErr) console.error('Error update stock gestor:', upErr);
-        else console.log('✅ Stock gestor actualizado:', gestor, bancoNorm, '→', nueva);
+        console.log('✅ Descontado del stock gestor:', gestor, bancoNorm, '→', nueva);
       } else {
-        console.warn('⚠️ No se encontró stock para gestor:', gestor, 'banco:', bancoNorm);
+        console.warn('⚠️ Gestor sin stock propio — primero registrá el envío al gestor');
+        return; // No descontar si no tiene stock propio
       }
     } else {
       const { data: sg } = await SB.from('stock_prendas').select('*').eq('banco', bancoNorm).maybeSingle();
