@@ -1,15 +1,12 @@
-const CACHE_NAME = 'grupo-olyar-v2.23.11';
+const CACHE_NAME = 'grupo-olyar-v2.23.37';
 
-// Solo cacheamos el shell estático — los datos de Supabase siempre van a la red
+// Solo cacheamos iconos y manifest — el index.html siempre va a la red
 const STATIC_ASSETS = [
-  '/grupo-olyar-v2/',
-  '/grupo-olyar-v2/index.html',
   '/grupo-olyar-v2/manifest.json',
   '/grupo-olyar-v2/icons/icon-192.png',
   '/grupo-olyar-v2/icons/icon-512.png'
 ];
 
-// Instalación: cachear assets estáticos
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS))
@@ -17,7 +14,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
 });
 
-// Activación: limpiar caches viejos
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -27,7 +23,6 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: network-first para Supabase, cache-first para assets estáticos
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
@@ -41,7 +36,15 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Assets propios: cache-first con fallback a red
+  // index.html: siempre network-first para garantizar versión actualizada
+  if (url.pathname.endsWith('/') || url.pathname.endsWith('index.html')) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Iconos y manifest: cache-first
   event.respondWith(
     caches.match(event.request).then(cached => {
       if (cached) return cached;
