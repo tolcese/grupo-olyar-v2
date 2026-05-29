@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.37</title>
+<title>Grupo Olyar — Solicitudes v2.23.38</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -6453,7 +6453,7 @@ function renderHistoricoLiquidaciones() {
   const chkV = v => v ? '<span style="color:var(--green);font-weight:700">✓</span>' : '<span style="color:var(--line)">—</span>';
 
   tbody.innerHTML = data.map((r, i) => {
-    const c = CONT_DATA[r.id] || {};
+    const c = { ...(LT_DATA[r.id] || {}), ...(CONT_DATA[r.id] || {}) };
     return `
     <tr style="cursor:pointer" onclick="openContPanel('${r.id}')">
       <td style="position:sticky;left:0;background:#fff;z-index:1;box-shadow:2px 0 6px rgba(0,0,0,.04)" onclick="event.stopPropagation()">
@@ -11464,8 +11464,11 @@ function renderPrendasPendientes() {
   const nok = v => `<span style="color:var(--red);font-weight:700">✗</span>`;
 
   // Prendas = registros con gestor asignado donde al menos uno de los 3 campos no está completo, + rechazadas
+  // Excluir las que ya tienen fecha_pago_banco (ya fueron cobradas)
   let data = RECORDS.filter(r => {
     if (!r.gestorAsignado || !r.gestorAsignado.trim()) return false;
+    const contData = CONT_DATA[r.id] || {};
+    if (contData.fechaPagoBanco) return false; // Ya cobrada — excluir
     if (r.prendaRechazada) return true; // Rechazadas siempre incluidas
     const tieneEnProceso = !!r.enProceso;
     const tienePresentada = !!r.presentada;
