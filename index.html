@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.38</title>
+<title>Grupo Olyar — Solicitudes v2.23.39</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -5292,6 +5292,30 @@ function openCredPanel(id) {
       </button>
       <div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">Se calcula la fecha 7 días antes del próximo vencimiento</div>
     </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Cuotas</div>
+      ${(() => {
+        const cuotas = CUOTAS_CACHE.filter(q => q.creditoId === id).sort((a,b) => a.nro - b.nro);
+        if (!cuotas.length) return '<div style="font-size:12px;color:var(--muted);text-align:center;padding:8px">Sin cuotas registradas</div>';
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        return cuotas.map(q => {
+          const venc = q.vencimiento ? new Date(q.vencimiento + 'T12:00:00') : null;
+          const vencida = venc && venc < hoy && q.estado !== 'Pagada';
+          const color = q.estado === 'Pagada' ? 'var(--green)' : vencida ? 'var(--red)' : 'var(--ink2)';
+          const fmtV = v => v ? v.split('-').reverse().join('/') : '—';
+          return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)">
+            <div style="font-size:12px">
+              <span style="font-weight:700;color:var(--ink)">Cuota ${q.nro}</span>
+              <span style="color:${color};margin-left:8px;font-size:11px">${q.estado||'Pendiente'}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--muted)">${fmtV(q.vencimiento)}</span>
+              <button class="ibtn" style="width:28px;height:28px;font-size:13px" onclick="event.stopPropagation();abrirEditCuota('${q.id}','${q.nro}','${q.vencimiento||''}','${q.monto||''}','${q.estado||'Pendiente'}')" title="Editar cuota">✏️</button>
+            </div>
+          </div>`;
+        }).join('');
+      })()}
+    </div>
     ${isAdmin ? `<div class="panel-section">
       <button class="btn btn-d" style="font-size:12px;width:100%" onclick="delCredito('${id}')">🗑️ Eliminar crédito</button>
     </div>` : ''}
@@ -5575,6 +5599,58 @@ function enviarRecordatorioWA(id) {
 
   const url = `https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
+}
+
+let _editCuotaCreditoId = null;
+
+function abrirEditCuota(id, nro, vencimiento, monto, estado) {
+  document.getElementById('edit-cuota-id').value = id;
+  document.getElementById('edit-cuota-titulo').textContent = `✏️ Editar cuota ${nro}`;
+  document.getElementById('edit-cuota-fecha').value = vencimiento || '';
+  document.getElementById('edit-cuota-monto').value = monto || '';
+  document.getElementById('edit-cuota-estado').value = estado || 'Pendiente';
+  // Guardar el crédito al que pertenece para refrescar el panel
+  const cuota = CUOTAS_CACHE.find(q => String(q.id) === String(id));
+  _editCuotaCreditoId = cuota?.creditoId || null;
+  document.getElementById('edit-cuota-overlay').classList.add('open');
+}
+
+function cerrarEditCuota() {
+  document.getElementById('edit-cuota-overlay').classList.remove('open');
+}
+
+async function guardarEditCuota() {
+  const id     = document.getElementById('edit-cuota-id').value;
+  const fecha  = document.getElementById('edit-cuota-fecha').value;
+  const monto  = parseFloat(document.getElementById('edit-cuota-monto').value) || 0;
+  const estado = document.getElementById('edit-cuota-estado').value;
+
+  if (!fecha) { toast('Ingresá la fecha de vencimiento', 'warn'); return; }
+
+  try {
+    const { error } = await SB.from('cuotas').update({
+      vencimiento: fecha,
+      monto: monto || null,
+      estado
+    }).eq('id', id);
+    if (error) throw error;
+
+    // Actualizar caché local
+    const idx = CUOTAS_CACHE.findIndex(q => String(q.id) === String(id));
+    if (idx >= 0) {
+      CUOTAS_CACHE[idx].vencimiento = fecha;
+      CUOTAS_CACHE[idx].monto = monto;
+      CUOTAS_CACHE[idx].estado = estado;
+    }
+
+    cerrarEditCuota();
+    toast('Cuota actualizada ✓', 'ok');
+
+    // Refrescar el panel del crédito
+    if (_editCuotaCreditoId) openCredPanel(_editCuotaCreditoId);
+  } catch(e) {
+    toast('Error: ' + e.message, 'er');
+  }
 }
 
 function closeCredPanel() {
@@ -11866,6 +11942,30 @@ function renderReportes() {
     <!-- Barra scroll espejo fija al fondo del modal -->
     <div class="gestoria-scroll-mirror" id="gestoria-mirror">
       <div class="gestoria-scroll-mirror-inner" id="gestoria-mirror-inner"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR CUOTA -->
+<div class="overlay" id="edit-cuota-overlay" onclick="if(event.target===this)cerrarEditCuota()">
+  <div class="modal" style="max-width:380px">
+    <div class="mh">
+      <div class="mt" id="edit-cuota-titulo">✏️ Editar cuota</div>
+      <button class="mc" onclick="cerrarEditCuota()">✕</button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:14px">
+      <input type="hidden" id="edit-cuota-id">
+      <div class="fc"><label>Vencimiento</label><input type="date" id="edit-cuota-fecha"></div>
+      <div class="fc"><label>Monto</label><input type="number" id="edit-cuota-monto" min="0" step="0.01"></div>
+      <div class="fc">
+        <label>Estado</label>
+        <select id="edit-cuota-estado">
+          <option value="Pendiente">Pendiente</option>
+          <option value="Pagada">Pagada</option>
+          <option value="Vencida">Vencida</option>
+        </select>
+      </div>
+      <button class="btn btn-p" onclick="guardarEditCuota()">💾 Guardar</button>
     </div>
   </div>
 </div>
