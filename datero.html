@@ -43,15 +43,9 @@
     .site-header .logo-mark {
       width: 44px;
       height: 44px;
-      background: var(--accent);
-      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.4rem;
-      color: var(--navy);
-      font-weight: bold;
       flex-shrink: 0;
     }
     .site-header .logo-text h1 {
@@ -344,7 +338,13 @@
 <body>
 
 <header class="site-header">
-  <div class="logo-mark">G</div>
+  <div class="logo-mark">
+    <svg width="44" height="44" viewBox="0 0 680 680" xmlns="http://www.w3.org/2000/svg">
+      <rect x="90" y="90" width="500" height="500" rx="80" fill="#0f172a"/>
+      <path d="M340 180 C234 180 148 266 148 372 C148 478 234 564 340 564 C418 564 486 516 516 448 L516 372 L380 372 L380 420 L458 420 C436 464 392 492 340 492 C274 492 220 438 220 372 C220 306 274 252 340 252 C374 252 404 266 426 290 L478 238 C444 202 394 180 340 180Z" fill="#ffffff"/>
+      <circle cx="516" cy="220" r="36" fill="#1d6fce"/>
+    </svg>
+  </div>
   <div class="logo-text">
     <h1>Grupo Olyar</h1>
     <p>Sistema de gestión crediticia</p>
