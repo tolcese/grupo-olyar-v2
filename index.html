@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.40</title>
+<title>Grupo Olyar — Solicitudes v2.23.41</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -11467,7 +11467,7 @@ function renderSolicitudesAyer() {
       const concData = CONC_CACHE.find(c => c.nombre === conc);
       const tel = concData?.telefono || '';
       const apellidos = [...new Set(regs.map(r => { const partes = (r.nombrecliente||'').trim().split(' '); return partes[0]; }))].join(', ');
-      const msg = 'Hola! ¿Cómo estás? 😊\nTe escribo por la propuestas de los créditos ' + apellidos + '.\nQueríamos saber si le resultó interesante el monto o si le falta mas dinero para llegar?';
+      const msg = 'Hola! Te escribo por la propuestas de los créditos de ' + apellidos + ' Queríamos saber si le resultó interesante el monto o si le falta mas dinero para llegar?';
       window._waData[idx] = { conc, tel, msg };
       return '<button class="btn btn-s" style="background:#25d366;color:#fff;border-color:#25d366;font-size:12px" onclick="abrirModalWAIdx(' + idx + ')">📱 WhatsApp ' + conc + '</button>';
     }).join('');
