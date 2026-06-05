@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.42</title>
+<title>Grupo Olyar — Solicitudes v2.23.43</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3958,10 +3958,13 @@ function calcCertImporte() {
   const precio = parseFloat(document.getElementById('pf-cert-precio')?.value) || 0;
   const cant   = parseFloat(document.getElementById('pf-cert-cant')?.value) || 1;
   const el     = document.getElementById('pf-certificacion');
-  if (el && precio > 0) {
+  if (!el) return;
+  if (precio > 0) {
     el.value = (precio * cant).toFixed(2);
-    calcPresup();
+  } else {
+    el.value = '';
   }
+  calcPresup();
 }
 
 function calcPresup() {
