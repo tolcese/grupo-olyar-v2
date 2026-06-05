@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.44</title>
+<title>Grupo Olyar — Solicitudes v2.23.45</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3970,7 +3970,7 @@ function volverListaPresupuestos() {
 
 let _formulariosItems = [];
 
-const FORMULARIOS_OPCIONES = ['Formulario 02', 'Formulario 03', 'Formulario 59'];
+const FORMULARIOS_OPCIONES = ['Formulario 02', 'Formulario 03', 'Formulario 12', 'Formulario 59'];
 
 function agregarFormulario(item) {
   const entry = item || { nombre: 'Formulario 02', precio: '', cant: 1, importe: 0 };
@@ -3997,6 +3997,25 @@ function calcFormularioImporte(idx) {
   calcPresup();
 }
 
+function onChangeFormularioNombre(idx) {
+  const sel = document.getElementById(`pf-form-nombre-${idx}`);
+  const txt = document.getElementById(`pf-form-otro-${idx}`);
+  if (!sel || !txt) return;
+  if (sel.value === 'otro') {
+    txt.style.display = 'block';
+    txt.focus();
+    _formulariosItems[idx].nombre = txt.value || '';
+  } else {
+    txt.style.display = 'none';
+    _formulariosItems[idx].nombre = sel.value;
+  }
+}
+
+function updateFormularioNombreOtro(idx) {
+  const txt = document.getElementById(`pf-form-otro-${idx}`);
+  if (txt) _formulariosItems[idx].nombre = txt.value;
+}
+
 function updateFormularioNombre(idx) {
   const sel = document.getElementById(`pf-form-nombre-${idx}`);
   if (sel) _formulariosItems[idx].nombre = sel.value;
@@ -4009,10 +4028,11 @@ function renderFormulariosList() {
     <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
       <div class="fc" style="flex:2;min-width:160px">
         <label style="font-size:10px">Formulario</label>
-        <select id="pf-form-nombre-${idx}" onchange="updateFormularioNombre(${idx})" style="font-size:13px;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;width:100%">
+        <select id="pf-form-nombre-${idx}" onchange="onChangeFormularioNombre(${idx})" style="font-size:13px;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;width:100%">
           ${FORMULARIOS_OPCIONES.map(op => `<option value="${op}" ${item.nombre===op?'selected':''}>${op}</option>`).join('')}
-          <option value="otro" ${!FORMULARIOS_OPCIONES.includes(item.nombre)?'selected':''}>Otro</option>
+          <option value="otro" ${!FORMULARIOS_OPCIONES.includes(item.nombre)&&item.nombre?'selected':''}>Otro</option>
         </select>
+        <input type="text" id="pf-form-otro-${idx}" placeholder="Escribí el nombre..." value="${!FORMULARIOS_OPCIONES.includes(item.nombre)&&item.nombre?item.nombre:''}" onchange="updateFormularioNombreOtro(${idx})" style="margin-top:6px;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%;font-size:13px;display:${!FORMULARIOS_OPCIONES.includes(item.nombre)&&item.nombre?'block':'none'}">
       </div>
       <div class="fc" style="flex:1;min-width:100px">
         <label style="font-size:10px">Precio Unitario</label>
