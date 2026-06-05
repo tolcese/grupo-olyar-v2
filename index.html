@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.45</title>
+<title>Grupo Olyar — Solicitudes v2.23.46</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1342,7 +1342,12 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Prenda (doble por localidad)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
-          <div class="fc"><label>Legalizaciones</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc span3" style="display:flex;flex-direction:row;gap:10px;align-items:flex-end">
+            <div class="fc" style="flex:2"><label>Legalizaciones</label><div style="padding:10px 0;font-size:13px;color:var(--muted)">Legalización</div></div>
+            <div class="fc" style="flex:1"><label>Precio Unitario</label><input id="pf-legal-precio" type="number" placeholder="0" oninput="calcLegalizacionImporte()"></div>
+            <div class="fc" style="flex:0 0 80px"><label>Cant.</label><input id="pf-legal-cant" type="number" placeholder="1" min="1" oninput="calcLegalizacionImporte()"></div>
+            <div class="fc" style="flex:1"><label>Importe</label><input id="pf-legalizaciones" type="number" placeholder="0" oninput="calcPresup()" style="background:var(--surface);font-weight:700;color:var(--blue)" readonly></div>
+          </div>
           <div class="fc"><label>Anotaciones Personales</label><input id="pf-anotaciones" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Informe de Dominio</label><input id="pf-informe-dominio" type="number" placeholder="0" oninput="calcPresup()"></div>
         </div>
@@ -3888,7 +3893,7 @@ function nuevoPresupuesto() {
   ['agencia','cliente','dni','dominio','modelo-anio','chasis','registro','marca'].forEach(id => {
     document.getElementById('pf-'+id).value = '';
   });
-  ['valuacion','base-imp','monto-colocar','certificacion','arancel','sellado-base','sellado-prenda','legalizaciones','anotaciones','informe-dominio','mun1-valor','mun2-valor','multas-anio','multas-valor','munjuicios-valor','rentasjuicios-valor','movilidad','altas-bajas','honorarios'].forEach(id => {
+  ['valuacion','base-imp','monto-colocar','certificacion','arancel','sellado-base','sellado-prenda','legalizaciones','legal-precio','legal-cant','anotaciones','informe-dominio','mun1-valor','mun2-valor','multas-anio','multas-valor','munjuicios-valor','rentasjuicios-valor','movilidad','altas-bajas','honorarios'].forEach(id => {
     const el = document.getElementById('pf-'+id);
     if (el) el.value = '';
   });
@@ -3940,6 +3945,8 @@ function editarPresupuesto(id) {
   document.getElementById('pf-sellado-base').value = p.sellado_base || '';
   document.getElementById('pf-sellado-prenda').value = p.sellado_prenda || '';
   document.getElementById('pf-legalizaciones').value = p.legalizaciones || '';
+  document.getElementById('pf-legal-precio').value = p.legal_precio || '';
+  document.getElementById('pf-legal-cant').value = p.legal_cant || '';
   document.getElementById('pf-anotaciones').value = p.anotaciones_personales || '';
   document.getElementById('pf-informe-dominio').value = p.informe_dominio || '';
   document.getElementById('pf-mun1-periodo').value = p.renta_municipalidad_periodo || 'PENDIENTE';
@@ -4055,6 +4062,16 @@ function getTotalFormularios() {
   return _formulariosItems.reduce((s, i) => s + (parseFloat(i.importe) || 0), 0);
 }
 
+function calcLegalizacionImporte() {
+  const precio = parseFloat(document.getElementById('pf-legal-precio')?.value) || 0;
+  const cant   = parseFloat(document.getElementById('pf-legal-cant')?.value) || 1;
+  const el     = document.getElementById('pf-legalizaciones');
+  if (!el) return;
+  if (precio > 0) { el.value = (precio * cant).toFixed(2); }
+  else { el.value = ''; }
+  calcPresup();
+}
+
 function calcCertImporte() {
   const precio = parseFloat(document.getElementById('pf-cert-precio')?.value) || 0;
   const cant   = parseFloat(document.getElementById('pf-cert-cant')?.value) || 1;
@@ -4097,7 +4114,7 @@ async function guardarPresupuesto() {
     monto_colocar: n('pf-monto-colocar'),
     certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), cert_precio: n('pf-cert-precio'), cert_cant: n('pf-cert-cant'), formularios: getTotalFormularios(), formularios_items: JSON.stringify(_formulariosItems),
     arancel_registro: n('pf-arancel'), sellado_base: n('pf-sellado-base'),
-    sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'),
+    sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'), legal_precio: n('pf-legal-precio'), legal_cant: n('pf-legal-cant'),
     anotaciones_personales: n('pf-anotaciones'), informe_dominio: n('pf-informe-dominio'),
     renta_municipalidad_periodo: t('pf-mun1-periodo'), renta_municipalidad_valor: n('pf-mun1-valor'),
     renta_municipalidad2_periodo: t('pf-mun2-periodo'), renta_municipalidad2_valor: n('pf-mun2-valor'),
