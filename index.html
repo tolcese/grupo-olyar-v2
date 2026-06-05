@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.50</title>
+<title>Grupo Olyar — Solicitudes v2.23.51</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -4246,11 +4246,11 @@ function generarImpresionPresupuesto(p) {
   </table>
   <table>
     <tr><td style="width:60%;font-weight:bold;padding:4px 6px;font-size:11px;text-transform:uppercase">${(p.certificacion_titulo||'Certificación (08 Compra, 02 Y Nota)').toUpperCase()}:</td><td style="text-align:right;font-weight:bold">${p.certificacion?mon(p.certificacion):''}</td></tr>
-    ${p.formularios?`<tr class="row-item"><td>FORMULARIOS 02, 03 Y 59</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`:''}
+    ${(() => { let items = []; try { items = typeof p.formularios_items === 'string' ? JSON.parse(p.formularios_items) : (p.formularios_items || []); } catch(e) {} if (!items.length && p.formularios) return `<tr class="row-item"><td>FORMULARIOS</td><td style="text-align:right">${mon(p.formularios)}</td></tr>`; return items.map(f => `<tr class="row-item"><td>${(f.nombre||'Formulario').toUpperCase()}${f.cant>1?' x'+f.cant:''}</td><td style="text-align:right">${mon(f.importe)}</td></tr>`).join(''); })()}
     ${p.arancel_registro?`<tr class="row-item"><td>ARANCEL DE REGISTRO</td><td style="text-align:right">${mon(p.arancel_registro)}</td></tr>`:''}
     ${p.sellado_base?`<tr class="row-item"><td>SELLADO DE BASE IMPONIBLE</td><td style="text-align:right">${mon(p.sellado_base)}</td></tr>`:''}
     ${p.sellado_prenda?`<tr class="row-item"><td>SELLADO DE PRENDA (DOBLE POR LOCALIDAD)</td><td style="text-align:right">${mon(p.sellado_prenda)}</td></tr>`:''}
-    ${p.legalizaciones?`<tr class="row-item"><td>LEGALIZACIONES:</td><td style="text-align:right">${mon(p.legalizaciones)}</td></tr>`:''}
+    ${p.legalizaciones?`<tr class="row-item"><td>LEGALIZACIONES${p.legal_cant>1?' x'+p.legal_cant:''}</td><td style="text-align:right">${mon(p.legalizaciones)}</td></tr>`:''}
     ${p.anotaciones_personales?`<tr class="row-item"><td>ANOTACIONES PERSONALES</td><td style="text-align:right">${mon(p.anotaciones_personales)}</td></tr>`:''}
     ${p.informe_dominio?`<tr class="row-item"><td>INFORME DE DOMINIO</td><td style="text-align:right">${mon(p.informe_dominio)}</td></tr>`:''}
   </table>
