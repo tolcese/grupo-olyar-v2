@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.41</title>
+<title>Grupo Olyar — Solicitudes v2.23.42</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1330,7 +1330,9 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <div class="fg">
           <div class="fc span3" style="display:flex;flex-direction:row;gap:10px;align-items:flex-end">
             <div class="fc" style="flex:2"><label>Título Certificación</label><input id="pf-certificacion-titulo" type="text" value="Certificación (08 Compra, 02 Y Nota)"></div>
-            <div class="fc" style="flex:1"><label>Importe</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()"></div>
+            <div class="fc" style="flex:1"><label>Precio Unitario</label><input id="pf-cert-precio" type="number" placeholder="0" oninput="calcCertImporte()"></div>
+            <div class="fc" style="flex:0 0 80px"><label>Cant.</label><input id="pf-cert-cant" type="number" placeholder="1" min="1" oninput="calcCertImporte()"></div>
+            <div class="fc" style="flex:1"><label>Importe</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()" style="background:var(--surface);font-weight:700;color:var(--blue)"></div>
           </div>
           <div class="fc"><label>Formularios 02, 03 y 59</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3917,6 +3919,8 @@ function editarPresupuesto(id) {
   document.getElementById('pf-monto-colocar').value = p.monto_colocar || '';
   document.getElementById('pf-certificacion').value = p.certificacion || '';
   document.getElementById('pf-certificacion-titulo').value = p.certificacion_titulo || 'Certificación (08 Compra, 02 Y Nota)';
+  document.getElementById('pf-cert-precio').value = p.cert_precio || '';
+  document.getElementById('pf-cert-cant').value = p.cert_cant || '';
   document.getElementById('pf-formularios').value = p.formularios || '';
   document.getElementById('pf-arancel').value = p.arancel_registro || '';
   document.getElementById('pf-sellado-base').value = p.sellado_base || '';
@@ -3950,6 +3954,16 @@ function volverListaPresupuestos() {
   renderPresupuestos();
 }
 
+function calcCertImporte() {
+  const precio = parseFloat(document.getElementById('pf-cert-precio')?.value) || 0;
+  const cant   = parseFloat(document.getElementById('pf-cert-cant')?.value) || 1;
+  const el     = document.getElementById('pf-certificacion');
+  if (el && precio > 0) {
+    el.value = (precio * cant).toFixed(2);
+    calcPresup();
+  }
+}
+
 function calcPresup() {
   const n = id => parseFloat(document.getElementById(id)?.value||0) || 0;
   const val = n('pf-valuacion');
@@ -3977,7 +3991,7 @@ async function guardarPresupuesto() {
     registro: t('pf-registro'), marca: t('pf-marca'),
     valuacion_dnrpa: n('pf-valuacion'), base_imponible_70: n('pf-base-imp'),
     monto_colocar: n('pf-monto-colocar'),
-    certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), formularios: n('pf-formularios'),
+    certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), cert_precio: n('pf-cert-precio'), cert_cant: n('pf-cert-cant'), formularios: n('pf-formularios'),
     arancel_registro: n('pf-arancel'), sellado_base: n('pf-sellado-base'),
     sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'),
     anotaciones_personales: n('pf-anotaciones'), informe_dominio: n('pf-informe-dominio'),
