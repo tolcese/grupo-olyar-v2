@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.43</title>
+<title>Grupo Olyar — Solicitudes v2.23.44</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1334,7 +1334,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div class="fc" style="flex:0 0 80px"><label>Cant.</label><input id="pf-cert-cant" type="number" placeholder="1" min="1" oninput="calcCertImporte()"></div>
             <div class="fc" style="flex:1"><label>Importe</label><input id="pf-certificacion" type="number" placeholder="0" oninput="calcPresup()" style="background:var(--surface);font-weight:700;color:var(--blue)"></div>
           </div>
-          <div class="fc"><label>Formularios 02, 03 y 59</label><input id="pf-formularios" type="number" placeholder="0" oninput="calcPresup()"></div>
+          <div class="fc span3">
+            <label style="font-size:11px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em">Formularios</label>
+            <div id="pf-formularios-list" style="display:flex;flex-direction:column;gap:8px;margin-top:6px"></div>
+            <button type="button" class="btn btn-s" style="margin-top:8px;align-self:flex-start;font-size:12px" onclick="agregarFormulario()">＋ Agregar formulario</button>
+          </div>
           <div class="fc"><label>Arancel de Registro</label><input id="pf-arancel" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Base Imponible</label><input id="pf-sellado-base" type="number" placeholder="0" oninput="calcPresup()"></div>
           <div class="fc"><label>Sellado de Prenda (doble por localidad)</label><input id="pf-sellado-prenda" type="number" placeholder="0" oninput="calcPresup()"></div>
@@ -3884,10 +3888,13 @@ function nuevoPresupuesto() {
   ['agencia','cliente','dni','dominio','modelo-anio','chasis','registro','marca'].forEach(id => {
     document.getElementById('pf-'+id).value = '';
   });
-  ['valuacion','base-imp','monto-colocar','certificacion','formularios','arancel','sellado-base','sellado-prenda','legalizaciones','anotaciones','informe-dominio','mun1-valor','mun2-valor','multas-anio','multas-valor','munjuicios-valor','rentasjuicios-valor','movilidad','altas-bajas','honorarios'].forEach(id => {
+  ['valuacion','base-imp','monto-colocar','certificacion','arancel','sellado-base','sellado-prenda','legalizaciones','anotaciones','informe-dominio','mun1-valor','mun2-valor','multas-anio','multas-valor','munjuicios-valor','rentasjuicios-valor','movilidad','altas-bajas','honorarios'].forEach(id => {
     const el = document.getElementById('pf-'+id);
     if (el) el.value = '';
   });
+  // Reset formularios dinámicos
+  _formulariosItems = [];
+  renderFormulariosList();
   ['mun1-periodo','mun2-periodo','multas-periodo','munjuicios-periodo','rentasjuicios-periodo'].forEach(id => {
     document.getElementById('pf-'+id).value = 'PENDIENTE';
   });
@@ -3921,7 +3928,14 @@ function editarPresupuesto(id) {
   document.getElementById('pf-certificacion-titulo').value = p.certificacion_titulo || 'Certificación (08 Compra, 02 Y Nota)';
   document.getElementById('pf-cert-precio').value = p.cert_precio || '';
   document.getElementById('pf-cert-cant').value = p.cert_cant || '';
-  document.getElementById('pf-formularios').value = p.formularios || '';
+  _formulariosItems = [];
+  if (p.formularios_items) {
+    try {
+      const items = typeof p.formularios_items === 'string' ? JSON.parse(p.formularios_items) : p.formularios_items;
+      items.forEach(item => agregarFormulario(item));
+    } catch(e) { _formulariosItems = []; }
+  }
+  renderFormulariosList();
   document.getElementById('pf-arancel').value = p.arancel_registro || '';
   document.getElementById('pf-sellado-base').value = p.sellado_base || '';
   document.getElementById('pf-sellado-prenda').value = p.sellado_prenda || '';
@@ -3954,6 +3968,73 @@ function volverListaPresupuestos() {
   renderPresupuestos();
 }
 
+let _formulariosItems = [];
+
+const FORMULARIOS_OPCIONES = ['Formulario 02', 'Formulario 03', 'Formulario 59'];
+
+function agregarFormulario(item) {
+  const entry = item || { nombre: 'Formulario 02', precio: '', cant: 1, importe: 0 };
+  _formulariosItems.push(entry);
+  renderFormulariosList();
+}
+
+function eliminarFormulario(idx) {
+  _formulariosItems.splice(idx, 1);
+  renderFormulariosList();
+  calcPresup();
+}
+
+function calcFormularioImporte(idx) {
+  const precio = parseFloat(document.getElementById(`pf-form-precio-${idx}`)?.value) || 0;
+  const cant   = parseFloat(document.getElementById(`pf-form-cant-${idx}`)?.value) || 1;
+  const el     = document.getElementById(`pf-form-importe-${idx}`);
+  if (!el) return;
+  const importe = precio > 0 ? precio * cant : 0;
+  el.value = importe > 0 ? importe.toFixed(2) : '';
+  _formulariosItems[idx].precio  = precio;
+  _formulariosItems[idx].cant    = cant;
+  _formulariosItems[idx].importe = importe;
+  calcPresup();
+}
+
+function updateFormularioNombre(idx) {
+  const sel = document.getElementById(`pf-form-nombre-${idx}`);
+  if (sel) _formulariosItems[idx].nombre = sel.value;
+}
+
+function renderFormulariosList() {
+  const cont = document.getElementById('pf-formularios-list');
+  if (!cont) return;
+  cont.innerHTML = _formulariosItems.map((item, idx) => `
+    <div style="display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap">
+      <div class="fc" style="flex:2;min-width:160px">
+        <label style="font-size:10px">Formulario</label>
+        <select id="pf-form-nombre-${idx}" onchange="updateFormularioNombre(${idx})" style="font-size:13px;padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;width:100%">
+          ${FORMULARIOS_OPCIONES.map(op => `<option value="${op}" ${item.nombre===op?'selected':''}>${op}</option>`).join('')}
+          <option value="otro" ${!FORMULARIOS_OPCIONES.includes(item.nombre)?'selected':''}>Otro</option>
+        </select>
+      </div>
+      <div class="fc" style="flex:1;min-width:100px">
+        <label style="font-size:10px">Precio Unitario</label>
+        <input type="number" id="pf-form-precio-${idx}" value="${item.precio||''}" placeholder="0" oninput="calcFormularioImporte(${idx})" style="padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%;font-size:13px">
+      </div>
+      <div class="fc" style="flex:0 0 70px">
+        <label style="font-size:10px">Cant.</label>
+        <input type="number" id="pf-form-cant-${idx}" value="${item.cant||1}" min="1" placeholder="1" oninput="calcFormularioImporte(${idx})" style="padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%;font-size:13px">
+      </div>
+      <div class="fc" style="flex:1;min-width:100px">
+        <label style="font-size:10px">Importe</label>
+        <input type="text" id="pf-form-importe-${idx}" value="${item.importe>0?item.importe.toFixed(2):''}" placeholder="0" readonly style="padding:9px 10px;border:1.5px solid var(--surface);border-radius:8px;background:var(--surface);color:var(--blue);font-weight:700;width:100%;font-size:13px">
+      </div>
+      <button type="button" class="ibtn del" style="height:38px;width:38px;flex-shrink:0" onclick="eliminarFormulario(${idx})" title="Eliminar">✕</button>
+    </div>
+  `).join('');
+}
+
+function getTotalFormularios() {
+  return _formulariosItems.reduce((s, i) => s + (parseFloat(i.importe) || 0), 0);
+}
+
 function calcCertImporte() {
   const precio = parseFloat(document.getElementById('pf-cert-precio')?.value) || 0;
   const cant   = parseFloat(document.getElementById('pf-cert-cant')?.value) || 1;
@@ -3973,7 +4054,7 @@ function calcPresup() {
   const base70 = Math.round(val * 0.70);
   document.getElementById('pf-base-imp').value = base70 || '';
   const total = 
-    n('pf-certificacion') + n('pf-formularios') + n('pf-arancel') +
+    n('pf-certificacion') + getTotalFormularios() + n('pf-arancel') +
     n('pf-sellado-base') + n('pf-sellado-prenda') + n('pf-legalizaciones') +
     n('pf-anotaciones') + n('pf-informe-dominio') +
     n('pf-mun1-valor') + n('pf-mun2-valor') + n('pf-multas-valor') +
@@ -3994,7 +4075,7 @@ async function guardarPresupuesto() {
     registro: t('pf-registro'), marca: t('pf-marca'),
     valuacion_dnrpa: n('pf-valuacion'), base_imponible_70: n('pf-base-imp'),
     monto_colocar: n('pf-monto-colocar'),
-    certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), cert_precio: n('pf-cert-precio'), cert_cant: n('pf-cert-cant'), formularios: n('pf-formularios'),
+    certificacion: n('pf-certificacion'), certificacion_titulo: t('pf-certificacion-titulo'), cert_precio: n('pf-cert-precio'), cert_cant: n('pf-cert-cant'), formularios: getTotalFormularios(), formularios_items: JSON.stringify(_formulariosItems),
     arancel_registro: n('pf-arancel'), sellado_base: n('pf-sellado-base'),
     sellado_prenda: n('pf-sellado-prenda'), legalizaciones: n('pf-legalizaciones'),
     anotaciones_personales: n('pf-anotaciones'), informe_dominio: n('pf-informe-dominio'),
@@ -4048,7 +4129,7 @@ function imprimirPresupuesto() {
     monto_colocar: parseFloat(document.getElementById('pf-monto-colocar').value)||0,
     certificacion: parseFloat(document.getElementById('pf-certificacion').value)||0,
     certificacion_titulo: document.getElementById('pf-certificacion-titulo').value,
-    formularios: parseFloat(document.getElementById('pf-formularios').value)||0,
+    formularios: getTotalFormularios(), formularios_items: JSON.stringify(_formulariosItems),
     arancel_registro: parseFloat(document.getElementById('pf-arancel').value)||0,
     sellado_base: parseFloat(document.getElementById('pf-sellado-base').value)||0,
     sellado_prenda: parseFloat(document.getElementById('pf-sellado-prenda').value)||0,
