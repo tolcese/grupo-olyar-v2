@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.52</title>
+<title>Grupo Olyar — Solicitudes v2.23.53</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -7093,7 +7093,7 @@ async function loadCupos() {
     // Descuenta si tiene gestor asignado (prenda pendiente o rechazada) y NO está entregada
     if (s.gestor_asignado && !s.entregada) {
       const banco = (s.banco || '').toUpperCase();
-      const imp = parseFloat(String(s.importe||0).replace(/[$,]/g,'')) || 0;
+      const imp = parseFloat(String(s.importe||0).replace(/[$,.]/g,'').replace(/[^\d]/g,'')) || 0;
       usoMap[banco] = (usoMap[banco] || 0) + imp;
     }
   });
