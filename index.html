@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.55</title>
+<title>Grupo Olyar — Solicitudes v2.23.56</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -6396,7 +6396,7 @@ function imprimirHojaGuia(idx) {
   .checkbox { width: 14px; height: 14px; border: 1.5px solid #111; display: inline-block; flex-shrink: 0; }
   .obs-box { border: 1px solid #111; border-top: none; min-height: 70px; padding: 10px; }
   .obs-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #555; margin-bottom: 6px; }
-  .footer { text-align: right; margin-top: 18px; font-size: 11px; font-weight: 800; letter-spacing: 2px; color: #555; }
+  .footer { text-align: center; margin-top: 24px; font-size: 20px; font-weight: 900; letter-spacing: 3px; color: #111; }
   @media print { body { padding: 16px 20px; } }
 </style>
 </head>
@@ -6441,6 +6441,17 @@ function imprimirHojaGuia(idx) {
     <div class="field" style="border-bottom:none">
       <label>Agencia</label>
       <div class="val">${val(r.concesionaria)}</div>
+    </div>
+  </div>
+
+  <div class="grid" style="border-top:1px solid #111;border-bottom:none">
+    <div class="field" style="border-right:1px solid #111;border-bottom:none">
+      <label>Fecha</label>
+      <div class="val">&nbsp;</div>
+    </div>
+    <div class="field" style="border-bottom:none">
+      <label>Trámite Nº</label>
+      <div class="val">&nbsp;</div>
     </div>
   </div>
 
