@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.67</title>
+<title>Grupo Olyar — Solicitudes v2.23.68</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2015,7 +2015,44 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
     </div>
 
-    <div id="v-bancos"" style="display:none">
+    <div id="v-calc-galicia-mail" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">✉️ Calculador p/mail Galicia</div><div class="ph-s">Cálculo de comisiones AUTONET y LUKAYA sobre el monto del crédito</div></div>
+      </div>
+
+      <div style="max-width:480px">
+        <div class="card" style="padding:24px">
+          <div style="margin-bottom:18px">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">Monto del crédito</label>
+            <input type="text" id="cgm-monto" placeholder="$ 0,00" oninput="calcGaliciaMail()" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:16px;font-weight:700;font-family:monospace">
+          </div>
+          <div style="margin-bottom:18px">
+            <label style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:6px">% Comision LUKAYA</label>
+            <input type="number" id="cgm-pct-lukaya" value="3" step="0.01" oninput="calcGaliciaMail()" style="width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;font-size:16px;font-weight:700">
+          </div>
+          <div style="border-top:1.5px solid var(--line);padding-top:16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Comision AUTONET (1% x 3)</span>
+              <span id="cgm-out-autonet" style="font-weight:700;font-family:monospace">$ 0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Subtotal (credito menos AUTONET)</span>
+              <span id="cgm-out-subtotal" style="font-weight:700;font-family:monospace">$ 0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px">
+              <span style="color:var(--muted)">Comision LUKAYA</span>
+              <span id="cgm-out-lukaya" style="font-weight:700;font-family:monospace">$ 0,00</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;background:var(--blue-soft);padding:12px 14px;border-radius:8px;margin-top:6px">
+              <span style="font-size:13px;font-weight:700;color:#1d6fce">MONTO PARA EL CLIENTE</span>
+              <span id="cgm-out-final" style="font-weight:800;font-family:monospace;font-size:17px;color:#1d6fce">$ 0,00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="v-bancos" style="display:none">
       <div class="ph">
         <div><div class="ph-t">🏦 Bancos</div><div class="ph-s">Acceso rápido a portales bancarios</div></div>
       </div>
@@ -3143,6 +3180,7 @@ function openSidebar() {
   document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
   document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
+  document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
 
   if (ME?.rol === 'admin') renderSidebarPV();
 }
@@ -7877,7 +7915,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -9857,6 +9895,40 @@ function fmtARS(v) {
   if (!v && v !== 0) return '';
   return Number(v).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+function parseCgmMonto() {
+  const val = (document.getElementById('cgm-monto')?.value || '').replace(/\./g,'').replace(',','.');
+  return parseFloat(val) || 0;
+}
+
+function calcGaliciaMail() {
+  const monto = parseCgmMonto();
+  const pctLukaya = parseFloat(document.getElementById('cgm-pct-lukaya')?.value) || 0;
+
+  const comisionAutonet = monto * 0.01 * 3;
+  const subtotal = monto - comisionAutonet;
+  const comisionLukaya = monto * (pctLukaya / 100);
+  const montoFinal = subtotal - comisionLukaya;
+
+  const setOut = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = '$ ' + fmtARS(v); };
+  setOut('cgm-out-autonet', comisionAutonet);
+  setOut('cgm-out-subtotal', subtotal);
+  setOut('cgm-out-lukaya', comisionLukaya);
+  setOut('cgm-out-final', montoFinal);
+}
+
+(function bindCgmMontoBlur() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('cgm-monto');
+    if (el) {
+      el.addEventListener('blur', () => {
+        const v = parseCgmMonto();
+        el.value = v > 0 ? fmtARS(v) : '';
+        calcGaliciaMail();
+      });
+    }
+  });
+})();
 
 function parseTramiteNum(id) {
   const val = (document.getElementById(id)?.value || '').replace(/\./g,'').replace(',','.');
@@ -12074,6 +12146,9 @@ function renderReportes() {
     </button>
     <button class="sb-item" id="sb-genpdf" onclick="closeSidebar();showV('genpdf')" style="display:none">
       <span class="sb-icon">📄</span> Generador PDF
+    </button>
+    <button class="sb-item" id="sb-calc-galicia-mail" onclick="closeSidebar();showV('calc-galicia-mail')" style="display:none">
+      <span class="sb-icon">✉️</span> Calculador p/mail Galicia
     </button>
     <div class="sb-divider" id="sb-div-cuenta"></div>
     <div class="sb-section-label" id="sb-lbl-cuenta">Cuenta</div>
