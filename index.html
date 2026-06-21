@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.69</title>
+<title>Grupo Olyar — Solicitudes v2.23.70</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1934,7 +1934,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div class="panel-sub" id="soc-panel-sub">Sociedad</div>
         </div>
         <div style="display:flex;gap:6px">
-          <button class="xbtn" onclick="abrirModalSociedad(window._socPanelId)" title="Editar">✏️</button>
+          <button class="xbtn" onclick="closeSociedadPanel();abrirNuevaSociedad(window._socPanelId)" title="Editar">✏️</button>
           <button class="xbtn" onclick="closeSociedadPanel()">×</button>
         </div>
       </div>
@@ -1943,125 +1943,74 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
   </div>
 </div>
 
-<div id="soc-modal-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(15,23,42,.45);align-items:center;justify-content:center" onclick="if(event.target===this)closeModalSociedad()">
-  <div style="background:#fff;border-radius:14px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
-    <div style="padding:20px 24px;border-bottom:1.5px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:2">
-      <div style="font-size:17px;font-weight:800" id="soc-modal-title">Nueva operación de Sociedad</div>
-      <button class="xbtn" onclick="closeModalSociedad()">×</button>
+<div id="v-soc-nueva" style="display:none">
+  <div class="ph">
+    <div><div class="ph-t" id="soc-form-title">Nueva operación de Sociedad</div><div class="ph-s">Completá y guardá</div></div>
+    <button class="btn btn-s" onclick="showV('sociedades')">← Volver</button>
+  </div>
+  <div class="card" style="padding:26px">
+    <input type="hidden" id="soc-id">
+    <div class="fg">
+      <div class="fc"><label>Fecha</label><input type="date" id="soc-fecha"></div>
+      <div class="fc"><label>Localidad</label><input type="text" id="soc-localidad" placeholder="Localidad"></div>
+      <div class="fc"><label>Comercial</label><input type="text" id="soc-comercial" placeholder="Nombre comercial"></div>
+      <div class="fc"><label>Gestor</label><input type="text" id="soc-gestor" placeholder="Nombre del gestor"></div>
+      <div class="fc"><label>Nombre Sociedad</label><input type="text" id="soc-nombre" placeholder="Razón social"></div>
+      <div class="fc"><label>CUIT</label><input type="text" id="soc-cuit" inputmode="numeric" placeholder="20-12345678-9"></div>
+      <div class="fc"><label>Pre Prenda / Inscripta</label>
+        <select id="soc-pre-prenda">
+          <option value="">— Seleccioná —</option>
+          <option value="Pre prenda">Pre prenda</option>
+          <option value="Inscripta">Inscripta</option>
+        </select>
+      </div>
+      <div class="fc"><label>Digital</label>
+        <select id="soc-digital">
+          <option value="false">No</option>
+          <option value="true">Sí</option>
+        </select>
+      </div>
+      <div class="fc"><label>Envío Prenda</label>
+        <select id="soc-envio-prenda">
+          <option value="false">No</option>
+          <option value="true">Sí</option>
+        </select>
+      </div>
+      <div class="fc"><label>Fecha Liquidación / Mutuo</label><input type="date" id="soc-fecha-liq"></div>
+      <div class="fc"><label>Concesionario</label><input type="text" id="soc-concesionario" placeholder="Concesionario"></div>
+      <div class="fc"><label>Descripción del bien</label><input type="text" id="soc-descripcion-bien" placeholder="Marca, modelo, año..."></div>
+
+      <div class="fc span3" style="border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-top:6px">
+        <label style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block">Prendas</label>
+        <div class="fg" style="margin:0">
+          <div class="fc"><label>Fecha envío</label><input type="date" id="soc-prenda-envio"></div>
+          <div class="fc"><label>Fecha entrega</label><input type="date" id="soc-prenda-entrega"></div>
+        </div>
+      </div>
+
+      <div class="fc"><label>Pago honorarios</label>
+        <select id="soc-pago-honorarios">
+          <option value="false">No</option>
+          <option value="true">Sí</option>
+        </select>
+      </div>
+
+      <div class="fc span3" style="border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-top:6px">
+        <label style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block">Gastos</label>
+        <div class="fg" style="margin:0">
+          <div class="fc"><label>Detalle</label><input type="text" id="soc-gastos-detalle" placeholder="Detalle del gasto"></div>
+          <div class="fc"><label>Importe ($)</label>
+            <div class="cur"><span class="cur-s">$</span><input id="soc-gastos-importe" type="number" min="0" placeholder="0"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fc span3"><label>Comentarios</label>
+        <textarea id="soc-comentarios" placeholder="Notas adicionales..." style="min-height:140px"></textarea></div>
     </div>
-    <div style="padding:22px 24px">
-      <input type="hidden" id="soc-id">
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha</label>
-          <input type="date" id="soc-fecha" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Localidad</label>
-          <input type="text" id="soc-localidad" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Comercial</label>
-          <input type="text" id="soc-comercial" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Gestor</label>
-          <input type="text" id="soc-gestor" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Nombre Sociedad</label>
-        <input type="text" id="soc-nombre" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">CUIT</label>
-          <input type="text" id="soc-cuit" inputmode="numeric" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Pre Prenda / Inscripta</label>
-          <select id="soc-pre-prenda" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-            <option value="">Seleccionar...</option>
-            <option value="Pre prenda">Pre prenda</option>
-            <option value="Inscripta">Inscripta</option>
-          </select>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:8px;padding-top:18px">
-          <input type="checkbox" id="soc-digital" style="width:17px;height:17px">
-          <label for="soc-digital" style="font-size:13px;font-weight:600">Digital</label>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;padding-top:18px">
-          <input type="checkbox" id="soc-envio-prenda" style="width:17px;height:17px">
-          <label for="soc-envio-prenda" style="font-size:13px;font-weight:600">Envío Prenda</label>
-        </div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha Liquidación / Mutuo</label>
-          <input type="date" id="soc-fecha-liq" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Concesionario</label>
-          <input type="text" id="soc-concesionario" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Descripción del bien</label>
-        <input type="text" id="soc-descripcion-bien" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-      </div>
-
-      <div style="border:1.5px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px">
-        <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Prendas</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha envío</label>
-            <input type="date" id="soc-prenda-envio" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha entrega</label>
-            <input type="date" id="soc-prenda-entrega" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
-        <input type="checkbox" id="soc-pago-honorarios" style="width:17px;height:17px">
-        <label for="soc-pago-honorarios" style="font-size:13px;font-weight:600">Pago honorarios</label>
-      </div>
-
-      <div style="border:1.5px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px">
-        <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Gastos</div>
-        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Detalle</label>
-            <input type="text" id="soc-gastos-detalle" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
-          </div>
-          <div>
-            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Importe</label>
-            <input type="text" id="soc-gastos-importe" placeholder="$ 0,00" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px;font-family:monospace">
-          </div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:6px">
-        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Comentarios</label>
-        <textarea id="soc-comentarios" rows="6" style="width:100%;padding:11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px;resize:vertical;font-family:inherit"></textarea>
-      </div>
-    </div>
-    <div style="padding:16px 24px;border-top:1.5px solid var(--line);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff">
-      <button onclick="closeModalSociedad()" style="padding:10px 18px;border:1.5px solid var(--line);background:#fff;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer">Cancelar</button>
-      <button onclick="guardarSociedad()" style="padding:10px 22px;border:none;background:var(--blue);color:#fff;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer">Guardar</button>
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="showV('sociedades')">Cancelar</button>
+      <button class="btn btn-p" onclick="guardarSociedad()">💾 Guardar operación</button>
     </div>
   </div>
 </div>
@@ -2196,7 +2145,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div id="v-sociedades" style="display:none">
       <div class="ph">
         <div><div class="ph-t">🏛️ Sociedades</div><div class="ph-s">Gestión de operaciones de sociedades</div></div>
-        <button class="btn btn-p" onclick="abrirModalSociedad()">＋ Nueva operación</button>
+        <button class="btn btn-p" onclick="abrirNuevaSociedad()">＋ Nueva operación</button>
       </div>
 
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
@@ -6862,13 +6811,13 @@ function closeSociedadPanel() {
   panel.style.transform = 'translateX(100%)';
 }
 
-function abrirModalSociedad(id) {
+function abrirNuevaSociedad(id) {
   const isEdit = !!id;
-  document.getElementById('soc-modal-title').textContent = isEdit ? 'Editar operación de Sociedad' : 'Nueva operación de Sociedad';
+  document.getElementById('soc-form-title').textContent = isEdit ? 'Editar operación de Sociedad' : 'Nueva operación de Sociedad';
   document.getElementById('soc-id').value = id || '';
 
   const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v || ''; };
-  const setChk = (elId, v) => { const el = document.getElementById(elId); if (el) el.checked = !!v; };
+  const setSel = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v ? 'true' : 'false'; };
 
   if (isEdit) {
     const r = SOCIEDADES.find(x => x.id === id);
@@ -6880,38 +6829,32 @@ function abrirModalSociedad(id) {
     setVal('soc-nombre', r.nombreSociedad);
     setVal('soc-cuit', r.cuit);
     setVal('soc-pre-prenda', r.prePrendaInscripta);
-    setChk('soc-digital', r.digital);
-    setChk('soc-envio-prenda', r.envioPrenda);
+    setSel('soc-digital', r.digital);
+    setSel('soc-envio-prenda', r.envioPrenda);
     setVal('soc-fecha-liq', r.fechaLiquidacionMutuo);
     setVal('soc-concesionario', r.concesionario);
     setVal('soc-descripcion-bien', r.descripcionBien);
     setVal('soc-prenda-envio', r.prendaFechaEnvio);
     setVal('soc-prenda-entrega', r.prendaFechaEntrega);
-    setChk('soc-pago-honorarios', r.pagoHonorarios);
+    setSel('soc-pago-honorarios', r.pagoHonorarios);
     setVal('soc-gastos-detalle', r.gastosDetalle);
-    setVal('soc-gastos-importe', r.gastosImporte ? Number(r.gastosImporte).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '');
+    setVal('soc-gastos-importe', r.gastosImporte || '');
     setVal('soc-comentarios', r.comentarios);
   } else {
     ['soc-fecha','soc-localidad','soc-comercial','soc-gestor','soc-nombre','soc-cuit','soc-pre-prenda',
      'soc-fecha-liq','soc-concesionario','soc-descripcion-bien','soc-prenda-envio','soc-prenda-entrega',
      'soc-gastos-detalle','soc-gastos-importe','soc-comentarios'].forEach(elId => setVal(elId, ''));
-    setChk('soc-digital', false);
-    setChk('soc-envio-prenda', false);
-    setChk('soc-pago-honorarios', false);
+    setSel('soc-digital', false);
+    setSel('soc-envio-prenda', false);
+    setSel('soc-pago-honorarios', false);
   }
 
-  document.getElementById('soc-modal-overlay').style.display = 'flex';
-}
-
-function closeModalSociedad() {
-  document.getElementById('soc-modal-overlay').style.display = 'none';
+  showV('soc-nueva');
 }
 
 async function guardarSociedad() {
   const id = document.getElementById('soc-id').value;
   const isEdit = !!id;
-
-  const gastosImporteRaw = (document.getElementById('soc-gastos-importe').value || '').replace(/\./g,'').replace(',','.');
 
   const payload = {
     fecha: document.getElementById('soc-fecha').value || null,
@@ -6921,16 +6864,16 @@ async function guardarSociedad() {
     nombre_sociedad: document.getElementById('soc-nombre').value || null,
     cuit: document.getElementById('soc-cuit').value || null,
     pre_prenda_inscripta: document.getElementById('soc-pre-prenda').value || null,
-    digital: document.getElementById('soc-digital').checked,
-    envio_prenda: document.getElementById('soc-envio-prenda').checked,
+    digital: document.getElementById('soc-digital').value === 'true',
+    envio_prenda: document.getElementById('soc-envio-prenda').value === 'true',
     fecha_liquidacion_mutuo: document.getElementById('soc-fecha-liq').value || null,
     concesionario: document.getElementById('soc-concesionario').value || null,
     descripcion_bien: document.getElementById('soc-descripcion-bien').value || null,
     prenda_fecha_envio: document.getElementById('soc-prenda-envio').value || null,
     prenda_fecha_entrega: document.getElementById('soc-prenda-entrega').value || null,
-    pago_honorarios: document.getElementById('soc-pago-honorarios').checked,
+    pago_honorarios: document.getElementById('soc-pago-honorarios').value === 'true',
     gastos_detalle: document.getElementById('soc-gastos-detalle').value || null,
-    gastos_importe: parseFloat(gastosImporteRaw) || null,
+    gastos_importe: parseFloat(document.getElementById('soc-gastos-importe').value) || null,
     comentarios: document.getElementById('soc-comentarios').value || null,
     updated_at: new Date().toISOString()
   };
@@ -6944,8 +6887,8 @@ async function guardarSociedad() {
       const { error } = await SB.from('sociedades').insert(payload);
       if (error) throw error;
     }
-    closeModalSociedad();
     await loadSociedades();
+    showV('sociedades');
     if (typeof toast === 'function') toast(isEdit ? 'Operación actualizada' : 'Operación creada');
   } catch (e) {
     console.error('Error guardando sociedad:', e);
@@ -8328,7 +8271,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
