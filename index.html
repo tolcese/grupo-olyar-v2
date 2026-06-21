@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.68</title>
+<title>Grupo Olyar — Solicitudes v2.23.69</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1925,6 +1925,147 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
   </div>
 </div>
 
+<div style="position:fixed;inset:0;z-index:550;display:flex;justify-content:flex-end;pointer-events:none" id="soc-panel-overlay" onclick="if(event.target===this)closeSociedadPanel()">
+  <div style="width:420px;max-width:95vw;background:#fff;height:100%;box-shadow:-4px 0 24px rgba(15,23,42,.12);transform:translateX(100%);transition:transform .28s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;overflow-y:auto;pointer-events:all" id="soc-side-panel">
+    <div class="panel-head" style="padding:20px 20px 14px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div>
+          <div class="panel-name" id="soc-panel-nombre">—</div>
+          <div class="panel-sub" id="soc-panel-sub">Sociedad</div>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="xbtn" onclick="abrirModalSociedad(window._socPanelId)" title="Editar">✏️</button>
+          <button class="xbtn" onclick="closeSociedadPanel()">×</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel-body" id="soc-panel-body"></div>
+  </div>
+</div>
+
+<div id="soc-modal-overlay" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(15,23,42,.45);align-items:center;justify-content:center" onclick="if(event.target===this)closeModalSociedad()">
+  <div style="background:#fff;border-radius:14px;width:640px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+    <div style="padding:20px 24px;border-bottom:1.5px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:2">
+      <div style="font-size:17px;font-weight:800" id="soc-modal-title">Nueva operación de Sociedad</div>
+      <button class="xbtn" onclick="closeModalSociedad()">×</button>
+    </div>
+    <div style="padding:22px 24px">
+      <input type="hidden" id="soc-id">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha</label>
+          <input type="date" id="soc-fecha" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Localidad</label>
+          <input type="text" id="soc-localidad" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Comercial</label>
+          <input type="text" id="soc-comercial" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Gestor</label>
+          <input type="text" id="soc-gestor" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Nombre Sociedad</label>
+        <input type="text" id="soc-nombre" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">CUIT</label>
+          <input type="text" id="soc-cuit" inputmode="numeric" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Pre Prenda / Inscripta</label>
+          <select id="soc-pre-prenda" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+            <option value="">Seleccionar...</option>
+            <option value="Pre prenda">Pre prenda</option>
+            <option value="Inscripta">Inscripta</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:8px;padding-top:18px">
+          <input type="checkbox" id="soc-digital" style="width:17px;height:17px">
+          <label for="soc-digital" style="font-size:13px;font-weight:600">Digital</label>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding-top:18px">
+          <input type="checkbox" id="soc-envio-prenda" style="width:17px;height:17px">
+          <label for="soc-envio-prenda" style="font-size:13px;font-weight:600">Envío Prenda</label>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha Liquidación / Mutuo</label>
+          <input type="date" id="soc-fecha-liq" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Concesionario</label>
+          <input type="text" id="soc-concesionario" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Descripción del bien</label>
+        <input type="text" id="soc-descripcion-bien" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+      </div>
+
+      <div style="border:1.5px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Prendas</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha envío</label>
+            <input type="date" id="soc-prenda-envio" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha entrega</label>
+            <input type="date" id="soc-prenda-entrega" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <input type="checkbox" id="soc-pago-honorarios" style="width:17px;height:17px">
+        <label for="soc-pago-honorarios" style="font-size:13px;font-weight:600">Pago honorarios</label>
+      </div>
+
+      <div style="border:1.5px solid var(--line);border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:12px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Gastos</div>
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:14px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Detalle</label>
+            <input type="text" id="soc-gastos-detalle" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Importe</label>
+            <input type="text" id="soc-gastos-importe" placeholder="$ 0,00" style="width:100%;padding:9px 11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px;font-family:monospace">
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:6px">
+        <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Comentarios</label>
+        <textarea id="soc-comentarios" rows="6" style="width:100%;padding:11px;border:1.5px solid var(--line);border-radius:8px;font-size:13.5px;resize:vertical;font-family:inherit"></textarea>
+      </div>
+    </div>
+    <div style="padding:16px 24px;border-top:1.5px solid var(--line);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff">
+      <button onclick="closeModalSociedad()" style="padding:10px 18px;border:1.5px solid var(--line);background:#fff;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onclick="guardarSociedad()" style="padding:10px 22px;border:none;background:var(--blue);color:#fff;border-radius:8px;font-size:13.5px;font-weight:700;cursor:pointer">Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- BANCOS -->
     <div id="v-genpdf" style="display:none">
       <div class="ph">
@@ -2049,6 +2190,38 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div id="v-sociedades" style="display:none">
+      <div class="ph">
+        <div><div class="ph-t">🏛️ Sociedades</div><div class="ph-s">Gestión de operaciones de sociedades</div></div>
+        <button class="btn btn-p" onclick="abrirModalSociedad()">＋ Nueva operación</button>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+        <input id="soc-srch" class="fsel" placeholder="Buscar sociedad, cuit, gestor, comercial..." oninput="renderSociedades()" style="font-size:12px;padding:8px 12px;min-width:260px">
+        <span id="soc-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
+      </div>
+
+      <div class="card" style="padding:0;overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+          <thead>
+            <tr style="background:var(--surface)">
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">#</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Sociedad</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">CUIT</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Localidad</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Comercial</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gestor</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Estado</th>
+              <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Digital</th>
+            </tr>
+          </thead>
+          <tbody id="soc-tbody"></tbody>
+        </table>
+        <div id="soc-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin operaciones registradas</div>
       </div>
     </div>
 
@@ -6540,6 +6713,246 @@ function closeDateroPanel() {
   panel.style.transform = 'translateX(100%)';
 }
 
+// ══════════════════════════════════════════════
+// SOCIEDADES
+// ══════════════════════════════════════════════
+let SOCIEDADES = [];
+
+async function loadSociedades() {
+  try {
+    const { data, error } = await SB.from('sociedades').select('*').order('fecha', { ascending: false });
+    if (error) throw error;
+    SOCIEDADES = (data || []).map(r => ({
+      id: r.id,
+      fecha: r.fecha,
+      localidad: r.localidad,
+      comercial: r.comercial,
+      gestor: r.gestor,
+      nombreSociedad: r.nombre_sociedad,
+      cuit: r.cuit,
+      prePrendaInscripta: r.pre_prenda_inscripta,
+      digital: r.digital,
+      envioPrenda: r.envio_prenda,
+      fechaLiquidacionMutuo: r.fecha_liquidacion_mutuo,
+      concesionario: r.concesionario,
+      descripcionBien: r.descripcion_bien,
+      prendaFechaEnvio: r.prenda_fecha_envio,
+      prendaFechaEntrega: r.prenda_fecha_entrega,
+      pagoHonorarios: r.pago_honorarios,
+      gastosDetalle: r.gastos_detalle,
+      gastosImporte: r.gastos_importe,
+      comentarios: r.comentarios
+    }));
+    renderSociedades();
+  } catch (e) {
+    console.error('Error cargando sociedades:', e);
+  }
+}
+
+function fmtFechaSoc(v) {
+  if (!v) return '—';
+  const p = v.split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : v;
+}
+
+function renderSociedades() {
+  const tbody = document.getElementById('soc-tbody');
+  const empty = document.getElementById('soc-empty');
+  const count = document.getElementById('soc-count');
+  if (!tbody) return;
+
+  const q = (document.getElementById('soc-srch')?.value || '').toLowerCase().trim();
+  let data = SOCIEDADES;
+  if (q) {
+    data = data.filter(r =>
+      (r.nombreSociedad||'').toLowerCase().includes(q) ||
+      (r.cuit||'').toString().toLowerCase().includes(q) ||
+      (r.gestor||'').toLowerCase().includes(q) ||
+      (r.comercial||'').toLowerCase().includes(q)
+    );
+  }
+
+  if (count) count.textContent = data.length + (data.length === 1 ? ' registro' : ' registros');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const estadoCalc = r => {
+    if (r.pagoHonorarios) return '<span class="badge b-aprobado"><span class="bd"></span>FINALIZADA</span>';
+    if (r.envioPrenda) return '<span class="badge b-avanza"><span class="bd"></span>EN TRÁMITE</span>';
+    return '<span class="badge b-rechazado"><span class="bd"></span>INICIADA</span>';
+  };
+
+  tbody.innerHTML = data.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openSociedadPanel('${r.id}')">
+      <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:8px 10px;white-space:nowrap">${fmtFechaSoc(r.fecha)}</td>
+      <td style="padding:8px 10px;font-weight:700">${r.nombreSociedad||'—'}</td>
+      <td style="padding:8px 10px">${r.cuit||'—'}</td>
+      <td style="padding:8px 10px">${r.localidad||'—'}</td>
+      <td style="padding:8px 10px">${r.comercial||'—'}</td>
+      <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
+      <td style="padding:8px 10px">${estadoCalc(r)}</td>
+      <td style="padding:8px 10px;text-align:center">${r.digital ? '✅' : '—'}</td>
+    </tr>`).join('');
+}
+
+function openSociedadPanel(id) {
+  const r = SOCIEDADES.find(x => x.id === id);
+  if (!r) return;
+  window._socPanelId = id;
+
+  document.getElementById('soc-panel-nombre').textContent = r.nombreSociedad || '—';
+  document.getElementById('soc-panel-sub').textContent = 'CUIT ' + (r.cuit || '—');
+
+  const val = v => (v === null || v === undefined || v === '') ? '—' : v;
+  const valBool = v => v ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>';
+  const fmtMonto = v => v ? '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+
+  document.getElementById('soc-panel-body').innerHTML = `
+    <div class="panel-section">
+      <div class="panel-section-t">Datos generales</div>
+      <div class="prow"><span class="pl">Fecha</span><span class="pv">${fmtFechaSoc(r.fecha)}</span></div>
+      <div class="prow"><span class="pl">Localidad</span><span class="pv">${val(r.localidad)}</span></div>
+      <div class="prow"><span class="pl">Comercial</span><span class="pv">${val(r.comercial)}</span></div>
+      <div class="prow"><span class="pl">Gestor</span><span class="pv bold">${val(r.gestor)}</span></div>
+      <div class="prow"><span class="pl">Nombre Sociedad</span><span class="pv bold">${val(r.nombreSociedad)}</span></div>
+      <div class="prow"><span class="pl">CUIT</span><span class="pv">${val(r.cuit)}</span></div>
+      <div class="prow"><span class="pl">Pre Prenda / Inscripta</span><span class="pv">${val(r.prePrendaInscripta)}</span></div>
+      <div class="prow"><span class="pl">Digital</span><span class="pv">${valBool(r.digital)}</span></div>
+      <div class="prow"><span class="pl">Envío Prenda</span><span class="pv">${valBool(r.envioPrenda)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Operación</div>
+      <div class="prow"><span class="pl">Fecha Liquidación / Mutuo</span><span class="pv">${fmtFechaSoc(r.fechaLiquidacionMutuo)}</span></div>
+      <div class="prow"><span class="pl">Concesionario</span><span class="pv">${val(r.concesionario)}</span></div>
+      <div class="prow"><span class="pl">Descripción del bien</span><span class="pv">${val(r.descripcionBien)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Prendas</div>
+      <div class="prow"><span class="pl">Fecha envío</span><span class="pv">${fmtFechaSoc(r.prendaFechaEnvio)}</span></div>
+      <div class="prow"><span class="pl">Fecha entrega</span><span class="pv">${fmtFechaSoc(r.prendaFechaEntrega)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Honorarios y gastos</div>
+      <div class="prow"><span class="pl">Pago honorarios</span><span class="pv">${valBool(r.pagoHonorarios)}</span></div>
+      <div class="prow"><span class="pl">Detalle gastos</span><span class="pv">${val(r.gastosDetalle)}</span></div>
+      <div class="prow"><span class="pl">Importe gastos</span><span class="pv mono bold">${fmtMonto(r.gastosImporte)}</span></div>
+    </div>
+    <div class="panel-section">
+      <div class="panel-section-t">Comentarios</div>
+      <div style="font-size:13px;color:var(--text);white-space:pre-wrap;padding:4px 0">${val(r.comentarios)}</div>
+    </div>
+  `;
+
+  const overlay = document.getElementById('soc-panel-overlay');
+  const panel   = document.getElementById('soc-side-panel');
+  overlay.style.pointerEvents = 'all';
+  panel.style.transform = 'translateX(0)';
+}
+
+function closeSociedadPanel() {
+  const overlay = document.getElementById('soc-panel-overlay');
+  const panel   = document.getElementById('soc-side-panel');
+  overlay.style.pointerEvents = 'none';
+  panel.style.transform = 'translateX(100%)';
+}
+
+function abrirModalSociedad(id) {
+  const isEdit = !!id;
+  document.getElementById('soc-modal-title').textContent = isEdit ? 'Editar operación de Sociedad' : 'Nueva operación de Sociedad';
+  document.getElementById('soc-id').value = id || '';
+
+  const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v || ''; };
+  const setChk = (elId, v) => { const el = document.getElementById(elId); if (el) el.checked = !!v; };
+
+  if (isEdit) {
+    const r = SOCIEDADES.find(x => x.id === id);
+    if (!r) return;
+    setVal('soc-fecha', r.fecha);
+    setVal('soc-localidad', r.localidad);
+    setVal('soc-comercial', r.comercial);
+    setVal('soc-gestor', r.gestor);
+    setVal('soc-nombre', r.nombreSociedad);
+    setVal('soc-cuit', r.cuit);
+    setVal('soc-pre-prenda', r.prePrendaInscripta);
+    setChk('soc-digital', r.digital);
+    setChk('soc-envio-prenda', r.envioPrenda);
+    setVal('soc-fecha-liq', r.fechaLiquidacionMutuo);
+    setVal('soc-concesionario', r.concesionario);
+    setVal('soc-descripcion-bien', r.descripcionBien);
+    setVal('soc-prenda-envio', r.prendaFechaEnvio);
+    setVal('soc-prenda-entrega', r.prendaFechaEntrega);
+    setChk('soc-pago-honorarios', r.pagoHonorarios);
+    setVal('soc-gastos-detalle', r.gastosDetalle);
+    setVal('soc-gastos-importe', r.gastosImporte ? Number(r.gastosImporte).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '');
+    setVal('soc-comentarios', r.comentarios);
+  } else {
+    ['soc-fecha','soc-localidad','soc-comercial','soc-gestor','soc-nombre','soc-cuit','soc-pre-prenda',
+     'soc-fecha-liq','soc-concesionario','soc-descripcion-bien','soc-prenda-envio','soc-prenda-entrega',
+     'soc-gastos-detalle','soc-gastos-importe','soc-comentarios'].forEach(elId => setVal(elId, ''));
+    setChk('soc-digital', false);
+    setChk('soc-envio-prenda', false);
+    setChk('soc-pago-honorarios', false);
+  }
+
+  document.getElementById('soc-modal-overlay').style.display = 'flex';
+}
+
+function closeModalSociedad() {
+  document.getElementById('soc-modal-overlay').style.display = 'none';
+}
+
+async function guardarSociedad() {
+  const id = document.getElementById('soc-id').value;
+  const isEdit = !!id;
+
+  const gastosImporteRaw = (document.getElementById('soc-gastos-importe').value || '').replace(/\./g,'').replace(',','.');
+
+  const payload = {
+    fecha: document.getElementById('soc-fecha').value || null,
+    localidad: document.getElementById('soc-localidad').value || null,
+    comercial: document.getElementById('soc-comercial').value || null,
+    gestor: document.getElementById('soc-gestor').value || null,
+    nombre_sociedad: document.getElementById('soc-nombre').value || null,
+    cuit: document.getElementById('soc-cuit').value || null,
+    pre_prenda_inscripta: document.getElementById('soc-pre-prenda').value || null,
+    digital: document.getElementById('soc-digital').checked,
+    envio_prenda: document.getElementById('soc-envio-prenda').checked,
+    fecha_liquidacion_mutuo: document.getElementById('soc-fecha-liq').value || null,
+    concesionario: document.getElementById('soc-concesionario').value || null,
+    descripcion_bien: document.getElementById('soc-descripcion-bien').value || null,
+    prenda_fecha_envio: document.getElementById('soc-prenda-envio').value || null,
+    prenda_fecha_entrega: document.getElementById('soc-prenda-entrega').value || null,
+    pago_honorarios: document.getElementById('soc-pago-honorarios').checked,
+    gastos_detalle: document.getElementById('soc-gastos-detalle').value || null,
+    gastos_importe: parseFloat(gastosImporteRaw) || null,
+    comentarios: document.getElementById('soc-comentarios').value || null,
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    if (isEdit) {
+      const { error } = await SB.from('sociedades').update(payload).eq('id', id);
+      if (error) throw error;
+    } else {
+      payload.id = 'SOC' + Date.now();
+      const { error } = await SB.from('sociedades').insert(payload);
+      if (error) throw error;
+    }
+    closeModalSociedad();
+    await loadSociedades();
+    if (typeof toast === 'function') toast(isEdit ? 'Operación actualizada' : 'Operación creada');
+  } catch (e) {
+    console.error('Error guardando sociedad:', e);
+    alert('Error al guardar: ' + (e.message || e));
+  }
+}
+
 function initDateroMirror() {
   const scroll = document.getElementById('datero-scroll');
   const mirror = document.getElementById('datero-mirror');
@@ -7915,7 +8328,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -12137,6 +12550,9 @@ function renderReportes() {
     </button>
     <button class="sb-item" onclick="closeSidebar();showV('calendario')">
       <span class="sb-icon">📅</span> Calendario
+    </button>
+    <button class="sb-item" onclick="closeSidebar();showV('sociedades');loadSociedades()">
+      <span class="sb-icon">🏛️</span> Sociedades
     </button>
 
     <div class="sb-divider" id="sb-div-calc"></div>
