@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.73</title>
+<title>Grupo Olyar — Solicitudes v2.23.74</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -6704,6 +6704,23 @@ function fmtFechaSoc(v) {
   return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : v;
 }
 
+function estadoSociedad(r) {
+  if (r.prendaFechaEnvio && r.prendaFechaEntrega) return 'FINALIZADA';
+  if (r.fecha) {
+    const fechaCarga = new Date(r.fecha);
+    const hoy = new Date();
+    fechaCarga.setHours(0,0,0,0); hoy.setHours(0,0,0,0);
+    if (hoy > fechaCarga) return 'EN TRÁMITE';
+  }
+  return 'INICIADA';
+}
+
+function estadoSociedadBadge(r) {
+  const e = estadoSociedad(r);
+  const cls = e === 'FINALIZADA' ? 'b-aprobado' : e === 'EN TRÁMITE' ? 'b-avanza' : 'b-rechazado';
+  return `<span class="badge ${cls}"><span class="bd"></span>${e}</span>`;
+}
+
 function renderSociedades() {
   const tbody = document.getElementById('soc-tbody');
   const empty = document.getElementById('soc-empty');
@@ -6729,23 +6746,6 @@ function renderSociedades() {
     return;
   }
   if (empty) empty.style.display = 'none';
-
-function estadoSociedad(r) {
-  if (r.prendaFechaEnvio && r.prendaFechaEntrega) return 'FINALIZADA';
-  if (r.fecha) {
-    const fechaCarga = new Date(r.fecha);
-    const hoy = new Date();
-    fechaCarga.setHours(0,0,0,0); hoy.setHours(0,0,0,0);
-    if (hoy > fechaCarga) return 'EN TRÁMITE';
-  }
-  return 'INICIADA';
-}
-
-function estadoSociedadBadge(r) {
-  const e = estadoSociedad(r);
-  const cls = e === 'FINALIZADA' ? 'b-aprobado' : e === 'EN TRÁMITE' ? 'b-avanza' : 'b-rechazado';
-  return `<span class="badge ${cls}"><span class="bd"></span>${e}</span>`;
-}
 
   tbody.innerHTML = data.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openSociedadPanel('${r.id}')">
