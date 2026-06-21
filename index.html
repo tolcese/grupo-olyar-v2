@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.72</title>
+<title>Grupo Olyar — Solicitudes v2.23.73</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -6730,11 +6730,22 @@ function renderSociedades() {
   }
   if (empty) empty.style.display = 'none';
 
-  const estadoCalc = r => {
-    if (r.pagoHonorarios) return '<span class="badge b-aprobado"><span class="bd"></span>FINALIZADA</span>';
-    if (r.envioPrenda) return '<span class="badge b-avanza"><span class="bd"></span>EN TRÁMITE</span>';
-    return '<span class="badge b-rechazado"><span class="bd"></span>INICIADA</span>';
-  };
+function estadoSociedad(r) {
+  if (r.prendaFechaEnvio && r.prendaFechaEntrega) return 'FINALIZADA';
+  if (r.fecha) {
+    const fechaCarga = new Date(r.fecha);
+    const hoy = new Date();
+    fechaCarga.setHours(0,0,0,0); hoy.setHours(0,0,0,0);
+    if (hoy > fechaCarga) return 'EN TRÁMITE';
+  }
+  return 'INICIADA';
+}
+
+function estadoSociedadBadge(r) {
+  const e = estadoSociedad(r);
+  const cls = e === 'FINALIZADA' ? 'b-aprobado' : e === 'EN TRÁMITE' ? 'b-avanza' : 'b-rechazado';
+  return `<span class="badge ${cls}"><span class="bd"></span>${e}</span>`;
+}
 
   tbody.innerHTML = data.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openSociedadPanel('${r.id}')">
@@ -6745,7 +6756,7 @@ function renderSociedades() {
       <td style="padding:8px 10px">${r.localidad||'—'}</td>
       <td style="padding:8px 10px">${r.comercial||'—'}</td>
       <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
-      <td style="padding:8px 10px">${estadoCalc(r)}</td>
+      <td style="padding:8px 10px">${estadoSociedadBadge(r)}</td>
       <td style="padding:8px 10px;text-align:center">${r.digital ? '✅' : '—'}</td>
     </tr>`).join('');
 }
@@ -6765,6 +6776,7 @@ function openSociedadPanel(id) {
   document.getElementById('soc-panel-body').innerHTML = `
     <div class="panel-section">
       <div class="panel-section-t">Datos generales</div>
+      <div class="prow"><span class="pl">Estado</span><span class="pv">${estadoSociedadBadge(r)}</span></div>
       <div class="prow"><span class="pl">Fecha</span><span class="pv">${fmtFechaSoc(r.fecha)}</span></div>
       <div class="prow"><span class="pl">Localidad</span><span class="pv">${val(r.localidad)}</span></div>
       <div class="prow"><span class="pl">Comercial</span><span class="pv">${val(r.comercial)}</span></div>
