@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.70</title>
+<title>Grupo Olyar — Solicitudes v2.23.71</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1970,7 +1970,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <option value="true">Sí</option>
         </select>
       </div>
-      <div class="fc"><label>Envío Prenda</label>
+      <div class="fc"><label>Envío Prenda Digital</label>
         <select id="soc-envio-prenda">
           <option value="false">No</option>
           <option value="true">Sí</option>
@@ -1981,7 +1981,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="fc"><label>Descripción del bien</label><input type="text" id="soc-descripcion-bien" placeholder="Marca, modelo, año..."></div>
 
       <div class="fc span3" style="border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-top:6px">
-        <label style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block">Prendas</label>
+        <label style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block">Prendas Finalizadas</label>
         <div class="fg" style="margin:0">
           <div class="fc"><label>Fecha envío</label><input type="date" id="soc-prenda-envio"></div>
           <div class="fc"><label>Fecha entrega</label><input type="date" id="soc-prenda-entrega"></div>
@@ -6773,7 +6773,7 @@ function openSociedadPanel(id) {
       <div class="prow"><span class="pl">CUIT</span><span class="pv">${val(r.cuit)}</span></div>
       <div class="prow"><span class="pl">Pre Prenda / Inscripta</span><span class="pv">${val(r.prePrendaInscripta)}</span></div>
       <div class="prow"><span class="pl">Digital</span><span class="pv">${valBool(r.digital)}</span></div>
-      <div class="prow"><span class="pl">Envío Prenda</span><span class="pv">${valBool(r.envioPrenda)}</span></div>
+      <div class="prow"><span class="pl">Envío Prenda Digital</span><span class="pv">${valBool(r.envioPrenda)}</span></div>
     </div>
     <div class="panel-section">
       <div class="panel-section-t">Operación</div>
@@ -6782,7 +6782,7 @@ function openSociedadPanel(id) {
       <div class="prow"><span class="pl">Descripción del bien</span><span class="pv">${val(r.descripcionBien)}</span></div>
     </div>
     <div class="panel-section">
-      <div class="panel-section-t">Prendas</div>
+      <div class="panel-section-t">Prendas Finalizadas</div>
       <div class="prow"><span class="pl">Fecha envío</span><span class="pv">${fmtFechaSoc(r.prendaFechaEnvio)}</span></div>
       <div class="prow"><span class="pl">Fecha entrega</span><span class="pv">${fmtFechaSoc(r.prendaFechaEntrega)}</span></div>
     </div>
