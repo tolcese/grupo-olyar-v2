@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.7</title>
+<title>Grupo Olyar — Solicitudes v2.24.8</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -8444,6 +8444,7 @@ function aplicarModoSidebar(modo) {
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
     document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
+    document.getElementById('sb-contabilidad').style.display = (ME?.rol === 'admin' || ['claudionieva','golcese','tolcese','Invitado'].includes(ME?.usr)) ? '' : 'none';
   }
 }
 
