@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.6</title>
+<title>Grupo Olyar — Solicitudes v2.24.7</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3367,7 +3367,7 @@ function openSidebar() {
     document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
   }
   document.getElementById('sb-usuarios').style.display = ME?.rol === 'admin' ? '' : 'none';
-  document.getElementById('sb-contabilidad').style.display = ME?.rol === 'admin' ? '' : 'none';
+  document.getElementById('sb-contabilidad').style.display = (ME?.rol === 'admin' || ['claudionieva','golcese','tolcese','Invitado'].includes(ME?.usr)) ? '' : 'none';
   document.getElementById('sb-presupuestos').style.display = (ME?.rol === 'admin' || ME?.rol === 'presupuestos' || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
   document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
   document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
@@ -8478,7 +8478,7 @@ function showV(v) {
 
   if (v === 'nueva' && !canEdit()) { toast('No tenés permisos para crear solicitudes', 'warn'); return; }
   if ((v === 'contabilidad' || v === 'bancos') && !canEdit()) { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
-  if (v === 'contabilidad' && ME?.rol !== 'admin') { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
+  if (v === 'contabilidad' && !(ME?.rol === 'admin' || ['claudionieva','golcese','tolcese','Invitado'].includes(ME?.usr))) { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
   if (v === 'reportes') {
     const isAdmin = ME?.rol === 'admin';
     // Tabs solo para admin
