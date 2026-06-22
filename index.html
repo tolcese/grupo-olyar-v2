@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.77</title>
+<title>Grupo Olyar — Solicitudes v2.23.78</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1980,6 +1980,20 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <div class="fc"><label>Fecha Liquidación / Mutuo</label><input type="date" id="soc-fecha-liq"></div>
       <div class="fc"><label>Concesionario</label><input type="text" id="soc-concesionario" placeholder="Concesionario"></div>
       <div class="fc"><label>Descripción del bien</label><input type="text" id="soc-descripcion-bien" placeholder="Marca, modelo, año..."></div>
+      <div class="fc"><label>Moneda</label>
+        <select id="soc-moneda">
+          <option value="">— Seleccioná —</option>
+          <option value="Pesos">Pesos</option>
+          <option value="Dolares">Dólares</option>
+        </select>
+      </div>
+      <div class="fc"><label>Origen</label>
+        <select id="soc-origen">
+          <option value="">— Seleccioná —</option>
+          <option value="Whatsapp">Whatsapp</option>
+          <option value="Mail">Mail</option>
+        </select>
+      </div>
 
       <div class="fc span3" style="border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-top:6px">
         <label style="font-size:13px;font-weight:800;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:block">Prendas Finalizadas</label>
@@ -6686,6 +6700,8 @@ async function loadSociedades() {
       fechaLiquidacionMutuo: r.fecha_liquidacion_mutuo,
       concesionario: r.concesionario,
       descripcionBien: r.descripcion_bien,
+      moneda: r.moneda,
+      origen: r.origen,
       prendaFechaEnvio: r.prenda_fecha_envio,
       prendaFechaEntrega: r.prenda_fecha_entrega,
       pagoHonorarios: r.pago_honorarios,
@@ -6795,6 +6811,8 @@ function openSociedadPanel(id) {
       <div class="prow"><span class="pl">Fecha Liquidación / Mutuo</span><span class="pv">${fmtFechaSoc(r.fechaLiquidacionMutuo)}</span></div>
       <div class="prow"><span class="pl">Concesionario</span><span class="pv">${val(r.concesionario)}</span></div>
       <div class="prow"><span class="pl">Descripción del bien</span><span class="pv">${val(r.descripcionBien)}</span></div>
+      <div class="prow"><span class="pl">Moneda</span><span class="pv">${val(r.moneda)}</span></div>
+      <div class="prow"><span class="pl">Origen</span><span class="pv">${val(r.origen)}</span></div>
     </div>
     <div class="panel-section">
       <div class="panel-section-t">Prendas Finalizadas</div>
@@ -6880,6 +6898,8 @@ async function abrirNuevaSociedad(id) {
     setVal('soc-fecha-liq', r.fechaLiquidacionMutuo);
     setVal('soc-concesionario', r.concesionario);
     setVal('soc-descripcion-bien', r.descripcionBien);
+    setVal('soc-moneda', r.moneda);
+    setVal('soc-origen', r.origen);
     setVal('soc-prenda-envio', r.prendaFechaEnvio);
     setVal('soc-prenda-entrega', r.prendaFechaEntrega);
     setSel('soc-pago-honorarios', r.pagoHonorarios);
@@ -6888,7 +6908,7 @@ async function abrirNuevaSociedad(id) {
     setVal('soc-comentarios', r.comentarios);
   } else {
     ['soc-fecha','soc-localidad','soc-comercial','soc-nombre','soc-cuit','soc-pre-prenda',
-     'soc-fecha-liq','soc-concesionario','soc-descripcion-bien','soc-prenda-envio','soc-prenda-entrega',
+     'soc-fecha-liq','soc-concesionario','soc-descripcion-bien','soc-moneda','soc-origen','soc-prenda-envio','soc-prenda-entrega',
      'soc-gastos-detalle','soc-gastos-importe','soc-comentarios'].forEach(elId => setVal(elId, ''));
     await poblarSelectGestorSociedad('');
     setSel('soc-digital', false);
@@ -6916,6 +6936,8 @@ async function guardarSociedad() {
     fecha_liquidacion_mutuo: document.getElementById('soc-fecha-liq').value || null,
     concesionario: document.getElementById('soc-concesionario').value || null,
     descripcion_bien: document.getElementById('soc-descripcion-bien').value || null,
+    moneda: document.getElementById('soc-moneda').value || null,
+    origen: document.getElementById('soc-origen').value || null,
     prenda_fecha_envio: document.getElementById('soc-prenda-envio').value || null,
     prenda_fecha_entrega: document.getElementById('soc-prenda-entrega').value || null,
     pago_honorarios: document.getElementById('soc-pago-honorarios').value === 'true',
