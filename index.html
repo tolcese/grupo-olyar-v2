@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.75</title>
+<title>Grupo Olyar — Solicitudes v2.23.76</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1935,6 +1935,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         </div>
         <div style="display:flex;gap:6px">
           <button class="xbtn" onclick="closeSociedadPanel();abrirNuevaSociedad(window._socPanelId)" title="Editar">✏️</button>
+          <button class="xbtn" id="soc-panel-del-btn" onclick="eliminarSociedad(window._socPanelId)" title="Eliminar" style="display:none">🗑️</button>
           <button class="xbtn" onclick="closeSociedadPanel()">×</button>
         </div>
       </div>
@@ -6768,6 +6769,8 @@ function openSociedadPanel(id) {
 
   document.getElementById('soc-panel-nombre').textContent = r.nombreSociedad || '—';
   document.getElementById('soc-panel-sub').textContent = 'CUIT ' + (r.cuit || '—');
+  const delBtn = document.getElementById('soc-panel-del-btn');
+  if (delBtn) delBtn.style.display = ME?.rol === 'admin' ? '' : 'none';
 
   const val = v => (v === null || v === undefined || v === '') ? '—' : v;
   const valBool = v => v ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>';
@@ -6821,6 +6824,24 @@ function closeSociedadPanel() {
   const panel   = document.getElementById('soc-side-panel');
   overlay.style.pointerEvents = 'none';
   panel.style.transform = 'translateX(100%)';
+}
+
+async function eliminarSociedad(id) {
+  if (ME?.rol !== 'admin') return;
+  const r = SOCIEDADES.find(x => x.id === id);
+  if (!r) return;
+  if (!confirm(`¿Eliminar la operación de "${r.nombreSociedad || 'esta sociedad'}"? Esta acción no se puede deshacer.`)) return;
+
+  try {
+    const { error } = await SB.from('sociedades').delete().eq('id', id);
+    if (error) throw error;
+    closeSociedadPanel();
+    await loadSociedades();
+    if (typeof toast === 'function') toast('Operación eliminada');
+  } catch (e) {
+    console.error('Error eliminando sociedad:', e);
+    alert('Error al eliminar: ' + (e.message || e));
+  }
 }
 
 async function poblarSelectGestorSociedad(selected) {
