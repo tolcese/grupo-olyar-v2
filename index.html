@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.5</title>
+<title>Grupo Olyar — Solicitudes v2.24.6</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -8411,10 +8411,8 @@ function aplicarModoSidebar(modo) {
     const lblCuenta = document.getElementById('sb-lbl-cuenta');
     if (lblCuenta) lblCuenta.style.display = '';
   } else if (modo === 'sociedades') {
-    // Mostrar solo: Sociedades, Presupuestos, Histórico Presupuestos
+    // Mostrar solo: Sociedades, Prendas Sociedades Finalizadas
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = '');
-    document.getElementById('sb-presupuestos').style.display = '';
-    document.getElementById('sb-historico-presup').style.display = '';
     const miCuentaBtn2 = document.querySelector('.sb-item[onclick*="micuenta"]');
     if (miCuentaBtn2) miCuentaBtn2.style.display = '';
     const cerrarSesionBtn2 = document.querySelector('.sb-item[onclick*="doLogout"]');
