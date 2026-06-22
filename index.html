@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.0</title>
+<title>Grupo Olyar — Solicitudes v2.24.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3341,6 +3341,14 @@ function openSidebar() {
   document.getElementById('sidebar-overlay').classList.add('open');
   // Sincronizar nombre de usuario
   if (ME) document.getElementById('sb-username').textContent = '@' + (ME.usr || ME.nom || '');
+
+  // Si hay un modo del Panel Principal activo, re-aplicar ESE modo en vez de la visibilidad por rol puro
+  if (window._modoPrincipal) {
+    aplicarModoSidebar(window._modoPrincipal);
+    if (ME?.rol === 'admin') renderSidebarPV();
+    return;
+  }
+
   // Mostrar config solo si admin
   document.getElementById('sb-nueva').style.display = ME?.rol === 'admin' ? 'none' : '';
   document.getElementById('sb-config').style.display = ME?.rol === 'admin' ? '' : 'none';
@@ -8361,11 +8369,27 @@ function aplicarModoSidebar(modo) {
   if (modo === 'presupuestos') {
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
+    const miCuentaBtn = document.querySelector('.sb-item[onclick*="micuenta"]');
+    if (miCuentaBtn) miCuentaBtn.style.display = '';
+    const cerrarSesionBtn = document.querySelector('.sb-item[onclick*="doLogout"]');
+    if (cerrarSesionBtn) cerrarSesionBtn.style.display = '';
+    const divCuenta = document.getElementById('sb-div-cuenta');
+    if (divCuenta) divCuenta.style.display = '';
+    const lblCuenta = document.getElementById('sb-lbl-cuenta');
+    if (lblCuenta) lblCuenta.style.display = '';
   } else if (modo === 'sociedades') {
     // Mostrar solo: Sociedades, Presupuestos, Histórico Presupuestos
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = '');
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
+    const miCuentaBtn2 = document.querySelector('.sb-item[onclick*="micuenta"]');
+    if (miCuentaBtn2) miCuentaBtn2.style.display = '';
+    const cerrarSesionBtn2 = document.querySelector('.sb-item[onclick*="doLogout"]');
+    if (cerrarSesionBtn2) cerrarSesionBtn2.style.display = '';
+    const divCuenta2 = document.getElementById('sb-div-cuenta');
+    if (divCuenta2) divCuenta2.style.display = '';
+    const lblCuenta2 = document.getElementById('sb-lbl-cuenta');
+    if (lblCuenta2) lblCuenta2.style.display = '';
   } else if (modo === 'comercializadora') {
     // Restaurar todo el sidebar normal según el rol real, MENOS presupuestos/historico/sociedades
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = '');
@@ -8387,6 +8411,8 @@ function aplicarModoSidebar(modo) {
     document.getElementById('sb-presupuestos').style.display = 'none';
     document.getElementById('sb-historico-presup').style.display = 'none';
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = 'none');
+    document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
+    document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
   }
 }
 
