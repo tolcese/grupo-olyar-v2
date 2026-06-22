@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.79</title>
+<title>Grupo Olyar — Solicitudes v2.24.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -647,6 +647,33 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
   </div>
 
   <div class="main">
+
+    <!-- PANEL PRINCIPAL -->
+    <div id="v-panel-principal" style="display:none">
+      <div style="max-width:880px;margin:40px auto;padding:0 20px">
+        <div style="text-align:center;margin-bottom:40px">
+          <div style="font-size:26px;font-weight:800;color:var(--ink);margin-bottom:6px">¿A dónde querés ir?</div>
+          <div style="font-size:14px;color:var(--muted)">Elegí una sección para continuar</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+          <div class="pp-card" onclick="irAModoPrincipal('presupuestos')" style="cursor:pointer;border:1.5px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;transition:all .15s;background:#fff" onmouseenter="this.style.borderColor='var(--blue)';this.style.boxShadow='0 8px 24px rgba(29,111,206,.12)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--line)';this.style.boxShadow='none';this.style.transform='none'">
+            <div style="font-size:46px;margin-bottom:14px">📄</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ink)">Presupuestos</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Cargar y consultar presupuestos</div>
+          </div>
+          <div class="pp-card" onclick="irAModoPrincipal('sociedades')" style="cursor:pointer;border:1.5px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;transition:all .15s;background:#fff" onmouseenter="this.style.borderColor='var(--blue)';this.style.boxShadow='0 8px 24px rgba(29,111,206,.12)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--line)';this.style.boxShadow='none';this.style.transform='none'">
+            <div style="font-size:46px;margin-bottom:14px">🏛️</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ink)">Sociedades</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Operaciones de sociedades</div>
+          </div>
+          <div class="pp-card" onclick="irAModoPrincipal('comercializadora')" style="cursor:pointer;border:1.5px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;transition:all .15s;background:#fff" onmouseenter="this.style.borderColor='var(--blue)';this.style.boxShadow='0 8px 24px rgba(29,111,206,.12)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--line)';this.style.boxShadow='none';this.style.transform='none'">
+            <div style="font-size:46px;margin-bottom:14px">🚗</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ink)">Comercializadora</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Sistema de solicitudes y gestión</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- SOLICITUDES -->
     <div id="v-sol">
@@ -3166,10 +3193,12 @@ async function enterApp() {
     // usuario_presupuestos: igual que user pero con acceso a presupuestos
     document.getElementById('sb-presupuestos').style.display = '';
     document.getElementById('sb-historico-presup').style.display = '';
-    showV('sol');
+    document.getElementById('sb-panel-principal').style.display = '';
+    showV('panel-principal');
   } else if (ME.rol === 'usuario_administracion') {
     // usuario_administracion: igual que user pero con acceso a administración
-    showV('sol');
+    document.getElementById('sb-panel-principal').style.display = '';
+    showV('panel-principal');
   } else if (ME.rol === 'administracion') {
     // Ocultar toda la navegación del sistema — solo ve Administración
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
@@ -3201,8 +3230,12 @@ async function enterApp() {
     const miCuentaBtn = document.querySelector('[onclick*="micuenta"]');
     if (miCuentaBtn) miCuentaBtn.style.display = '';
     showV('presupuestos');
-  } else {
+  } else if (ME.rol === 'admin') {
     showV('sol');
+  } else {
+    // user, invitado, etc: ven el Panel Principal primero
+    document.getElementById('sb-panel-principal').style.display = '';
+    showV('panel-principal');
   }
   // AutoCalc después de que la UI está estable para evitar titileo
   setTimeout(() => autoCalcContabilidad(), 1500);
@@ -3288,6 +3321,10 @@ function doLogout() {
   document.getElementById('login-loading').style.display = 'none';
   // Reset nav
   document.getElementById('sb-usuarios').style.display = 'none';
+  document.getElementById('hamburger-btn').style.display = '';
+  const tbNav = document.querySelector('.tb-nav');
+  if (tbNav) tbNav.style.display = '';
+  window._modoPrincipal = null;
   closeSidebar();
 }
 
@@ -8311,7 +8348,76 @@ document.getElementById('l-u').addEventListener('keydown', e => { if(e.key==='En
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// PANEL PRINCIPAL (pre-panel de acceso)
+// ══════════════════════════════════════════════
+function aplicarModoSidebar(modo) {
+  // Oculta todo y muestra solo lo que corresponde al modo elegido
+  document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+  document.getElementById('btn-datero').style.display = 'none';
+  document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
+  document.getElementById('sb-panel-principal').style.display = '';
+
+  if (modo === 'presupuestos') {
+    document.getElementById('sb-presupuestos').style.display = '';
+    document.getElementById('sb-historico-presup').style.display = '';
+  } else if (modo === 'sociedades') {
+    // Mostrar solo: Sociedades, Presupuestos, Histórico Presupuestos
+    document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = '');
+    document.getElementById('sb-presupuestos').style.display = '';
+    document.getElementById('sb-historico-presup').style.display = '';
+  } else if (modo === 'comercializadora') {
+    // Restaurar todo el sidebar normal según el rol real, MENOS presupuestos/historico/sociedades
+    document.querySelectorAll('.tn').forEach(btn => btn.style.display = '');
+    if (ME.rol !== 'admin') document.getElementById('btn-datero').style.display = '';
+    document.getElementById('tn-reportes').style.display = '';
+    document.getElementById('tn-pe').style.display = ME.rol !== 'invitado' ? '' : 'none';
+    document.getElementById('tn-pf').style.display = ME.rol !== 'invitado' ? '' : 'none';
+
+    document.querySelectorAll('.sb-item').forEach(btn => { if (btn.id !== 'sb-panel-principal') btn.style.display = ''; });
+    // Re-aplicar restricciones normales por rol
+    const isAdmin = ME.rol === 'admin';
+    const isUser  = ME.rol === 'user';
+    document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser) ? '' : 'none';
+    document.getElementById('sc-imp').style.display = ME.rol === 'admin' ? '' : 'none';
+    document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
+    if (document.getElementById('sb-usuarios')) document.getElementById('sb-usuarios').style.display = isAdmin ? '' : 'none';
+    document.getElementById('sb-nueva').style.display = canEdit() ? '' : 'none';
+    // Ocultar lo exclusivo de Presupuestos/Sociedades en este modo
+    document.getElementById('sb-presupuestos').style.display = 'none';
+    document.getElementById('sb-historico-presup').style.display = 'none';
+    document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = 'none');
+  }
+}
+
+async function irAModoPrincipal(modo) {
+  window._modoPrincipal = modo;
+  aplicarModoSidebar(modo);
+
+  if (modo === 'presupuestos') {
+    await loadPresupuestos();
+    showV('presupuestos');
+  } else if (modo === 'sociedades') {
+    await loadSociedades();
+    showV('sociedades');
+  } else if (modo === 'comercializadora') {
+    showV('sol');
+  }
+}
+
+function volverAlPanelPrincipal() {
+  window._modoPrincipal = null;
+  showV('panel-principal');
+}
+
 function showV(v) {
+  // Panel Principal: ocultar acceso al sidebar y nav superior
+  const hb = document.getElementById('hamburger-btn');
+  if (hb) hb.style.display = v === 'panel-principal' ? 'none' : '';
+  const tbNav = document.querySelector('.tb-nav');
+  if (tbNav) tbNav.style.display = v === 'panel-principal' ? 'none' : '';
+  if (v === 'panel-principal') closeSidebar();
+
   if (v === 'nueva' && !canEdit()) { toast('No tenés permisos para crear solicitudes', 'warn'); return; }
   if ((v === 'contabilidad' || v === 'bancos') && !canEdit()) { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
   if (v === 'contabilidad' && ME?.rol !== 'admin') { toast('No tenés permisos para acceder a esta sección', 'warn'); return; }
@@ -8344,7 +8450,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva','panel-principal'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -12502,6 +12608,9 @@ function renderReportes() {
   </div>
 
   <div class="sidebar-body">
+    <button class="sb-item" id="sb-panel-principal" onclick="closeSidebar();volverAlPanelPrincipal()" style="display:none;background:var(--blue-soft);border-radius:10px;margin-bottom:10px">
+      <span class="sb-icon">🏠</span> Panel Principal
+    </button>
     <div class="sb-section-label">Gestión</div>
     <button class="sb-item" id="sb-nueva" onclick="closeSidebar();showV('nueva')" style="display:none">
       <span class="sb-icon">➕</span> Nueva solicitud
