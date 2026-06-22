@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.23.76</title>
+<title>Grupo Olyar — Solicitudes v2.23.77</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2159,13 +2159,13 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <thead>
             <tr style="background:var(--surface)">
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">#</th>
+              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Estado</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Sociedad</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">CUIT</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Localidad</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Comercial</th>
               <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gestor</th>
-              <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Estado</th>
               <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Digital</th>
             </tr>
           </thead>
@@ -6751,13 +6751,13 @@ function renderSociedades() {
   tbody.innerHTML = data.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openSociedadPanel('${r.id}')">
       <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:8px 10px">${estadoSociedadBadge(r)}</td>
       <td style="padding:8px 10px;white-space:nowrap">${fmtFechaSoc(r.fecha)}</td>
       <td style="padding:8px 10px;font-weight:700">${r.nombreSociedad||'—'}</td>
       <td style="padding:8px 10px">${r.cuit||'—'}</td>
       <td style="padding:8px 10px">${r.localidad||'—'}</td>
       <td style="padding:8px 10px">${r.comercial||'—'}</td>
       <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
-      <td style="padding:8px 10px">${estadoSociedadBadge(r)}</td>
       <td style="padding:8px 10px;text-align:center">${r.digital ? '✅' : '—'}</td>
     </tr>`).join('');
 }
