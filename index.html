@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.12</title>
+<title>Grupo Olyar — Solicitudes v2.24.13</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1962,6 +1962,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         </div>
         <div style="display:flex;gap:6px">
           <button class="xbtn" onclick="closeSociedadPanel();abrirNuevaSociedad(window._socPanelId)" title="Editar">✏️</button>
+          <button class="xbtn" onclick="closeSociedadPanel();duplicarSociedad(window._socPanelId)" title="Duplicar">📋</button>
           <button class="xbtn" id="soc-panel-del-btn" onclick="eliminarSociedad(window._socPanelId)" title="Eliminar" style="display:none">🗑️</button>
           <button class="xbtn" onclick="closeSociedadPanel()">×</button>
         </div>
@@ -6981,15 +6982,20 @@ async function poblarSelectGestorSociedad(selected) {
   sel.value = selected || '';
 }
 
-async function abrirNuevaSociedad(id) {
-  const isEdit = !!id;
-  document.getElementById('soc-form-title').textContent = isEdit ? 'Editar operación de Sociedad' : 'Nueva operación de Sociedad';
-  document.getElementById('soc-id').value = id || '';
+function duplicarSociedad(id) {
+  abrirNuevaSociedad(id, true);
+}
+
+async function abrirNuevaSociedad(id, duplicar) {
+  const isEdit = !!id && !duplicar;
+  const isDuplicar = !!id && !!duplicar;
+  document.getElementById('soc-form-title').textContent = isEdit ? 'Editar operación de Sociedad' : (isDuplicar ? 'Duplicar operación de Sociedad' : 'Nueva operación de Sociedad');
+  document.getElementById('soc-id').value = isEdit ? id : '';
 
   const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v || ''; };
   const setSel = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = v ? 'true' : 'false'; };
 
-  if (isEdit) {
+  if (isEdit || isDuplicar) {
     const r = SOCIEDADES.find(x => x.id === id);
     if (!r) return;
     setVal('soc-fecha', r.fecha);
