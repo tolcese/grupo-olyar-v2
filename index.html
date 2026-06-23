@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.10</title>
+<title>Grupo Olyar — Solicitudes v2.24.11</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -4592,11 +4592,12 @@ async function confirmarRechazoPrend() {
       prenda_rechazada: true,
       fecha_rechazo_prenda: fecha,
       motivo_rechazo_prenda: motivo,
-      fecha_reingreso_prenda: null
+      fecha_reingreso_prenda: null,
+      entregada: false
     }).eq('id', id);
     if (error) throw error;
     const r = RECORDS.find(x => x.id === id);
-    if (r) { r.prendaRechazada = true; r.fechaRechazoPrend = fecha; r.motivoRechazoPrend = motivo; r.fechaReingresoPrend = null; }
+    if (r) { r.prendaRechazada = true; r.fechaRechazoPrend = fecha; r.motivoRechazoPrend = motivo; r.fechaReingresoPrend = null; r.entregada = false; }
     toast('Prenda marcada como rechazada ✓', 'ok');
     closePRRechazo();
     closePrendasEntregadas();
