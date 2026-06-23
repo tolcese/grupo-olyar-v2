@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.9</title>
+<title>Grupo Olyar — Solicitudes v2.24.10</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -6311,7 +6311,18 @@ function closeConcHist() {
 
 let DATERO_LAST_COUNT = null;
 
-let DATERO_LAST_SEEN = localStorage.getItem('datero_last_seen') || null;
+let DATERO_LAST_SEEN = null;
+
+async function loadDateroLastSeen() {
+  try {
+    const { data, error } = await SB.from('datero_last_seen').select('last_seen').eq('usuario', ME?.usr).maybeSingle();
+    if (error) throw error;
+    DATERO_LAST_SEEN = data?.last_seen || null;
+  } catch(e) {
+    console.warn('Error cargando datero_last_seen:', e);
+    DATERO_LAST_SEEN = null;
+  }
+}
 
 function _mostrarStatusBackup() {
   const lastDate = localStorage.getItem('last_auto_backup_date');
@@ -6391,6 +6402,7 @@ async function checkAutoBackup(forzado) {
 
 async function checkDateroNuevos() {
   try {
+    if (DATERO_LAST_SEEN === null) await loadDateroLastSeen();
     const { data } = await SB.from('datero').select('created_at').order('created_at', { ascending: false }).limit(1);
     if (!data || !data.length) return;
     const latest = data[0].created_at;
@@ -6403,12 +6415,16 @@ async function checkDateroNuevos() {
   } catch(e) {}
 }
 
-function markDateroSeen() {
+async function markDateroSeen() {
   // Usar el created_at del último datero en vez de la hora del cliente
   const seen = window._datero_latest_created_at || new Date().toISOString();
   DATERO_LAST_SEEN = seen;
-  localStorage.setItem('datero_last_seen', seen);
   document.getElementById('datero-badge').style.display = 'none';
+  try {
+    await SB.from('datero_last_seen').upsert({ usuario: ME?.usr, last_seen: seen, updated_at: new Date().toISOString() });
+  } catch(e) {
+    console.warn('Error guardando datero_last_seen:', e);
+  }
 }
 
 // ══════════════════════════════════════════════
