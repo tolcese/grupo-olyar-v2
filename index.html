@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.17</title>
+<title>Grupo Olyar — Solicitudes v2.25.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2076,6 +2076,145 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
   </div>
 </div>
 
+<div id="v-soc-presupuestos" style="display:none">
+  <div class="ph">
+    <div><div class="ph-t">📄 Presupuestos Sociedades</div><div class="ph-s">Confección de presupuestos para operaciones de sociedades</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-s" onclick="showV('sociedades')">← Volver a Sociedades</button>
+      <button class="btn btn-p" onclick="abrirNuevoPresupuestoSoc()">＋ Nuevo presupuesto</button>
+    </div>
+  </div>
+  <div class="card" style="padding:0;overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+      <thead>
+        <tr style="background:var(--surface)">
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">#</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Tipo</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Comprador</th>
+          <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Registro</th>
+          <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Total</th>
+          <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="soc-presup-tbody"></tbody>
+    </table>
+    <div id="soc-presup-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin presupuestos registrados</div>
+  </div>
+</div>
+
+<div id="v-soc-presupuesto-form" style="display:none">
+  <div class="ph">
+    <div><div class="ph-t" id="soc-presup-form-title">Nuevo presupuesto</div><div class="ph-s">Sociedades</div></div>
+    <button class="btn btn-s" onclick="showV('soc-presupuestos')">← Volver</button>
+  </div>
+  <div class="card" style="padding:26px;max-width:760px">
+    <input type="hidden" id="sp-id">
+
+    <div class="fc" style="margin-bottom:18px">
+      <label>Tipo de presupuesto</label>
+      <select id="sp-tipo" onchange="cambiarTipoPresupuestoSoc()">
+        <option value="PRENDA_DIGITAL">Prenda Digital</option>
+        <option value="AGRO">Agro</option>
+      </select>
+    </div>
+
+    <div class="fg">
+      <div class="fc"><label>Fecha presupuesto</label><input type="date" id="sp-fecha"></div>
+      <div class="fc"><label>Nombre comprador</label><input type="text" id="sp-comprador" placeholder="Nombre del comprador"></div>
+      <div class="fc"><label>Registro</label><input type="text" id="sp-registro" placeholder="Registro"></div>
+    </div>
+
+    <!-- ===== PRENDA DIGITAL ===== -->
+    <div id="sp-bloque-pd">
+      <div class="fg">
+        <div class="fc"><label>Monto de factura en pesos</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-monto" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Arancel (0,2% automático)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-arancel" type="number" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>Honorarios (incluye IVA)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-honorarios" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Adicional aproximado</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-adicional" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Formularios</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-formularios" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Movilidad ($)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-pd-movilidad-monto" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Movilidad (localidad)</label><input type="text" id="sp-pd-movilidad-localidad" placeholder="Ej: Río Cuarto"></div>
+      </div>
+    </div>
+
+    <!-- ===== AGRO ===== -->
+    <div id="sp-bloque-agro" style="display:none">
+      <div class="fg">
+        <div class="fc"><label>Monto de factura en pesos</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-monto" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Arancel</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-arancel" type="number" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>¿Exento sellado inscripción?</label>
+          <select id="sp-agro-exento-insc" onchange="calcPresupuestoSoc()">
+            <option value="NO">NO</option>
+            <option value="SI">SÍ</option>
+          </select>
+        </div>
+        <div class="fc"><label>Sellado de inscripción (1,5% automático)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-sellado-insc" type="text" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>Monto prenda contrato</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-monto-prenda" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Inscripción de prenda (0,15% automático)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-insc-prenda" type="number" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>Adicional aproximado / Formulario 08</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-adicional" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>¿Exento sellado prenda?</label>
+          <select id="sp-agro-exento-prenda" onchange="calcPresupuestoSoc()">
+            <option value="NO">NO</option>
+            <option value="SI">SÍ</option>
+          </select>
+        </div>
+        <div class="fc"><label>Sellado de prenda (1,2% automático)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-sellado-prenda" type="text" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>Honorarios (incluye IVA)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-honorarios" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Certificación de firmas — Cantidad</label><input type="number" id="sp-agro-cert-cant" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        <div class="fc"><label>Certificación de firmas — Total ($6.500 c/u automático)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-cert-total" type="number" readonly style="background:var(--surface)"></div>
+        </div>
+        <div class="fc"><label>Formularios</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-formularios" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Movilidad ($)</label>
+          <div class="cur"><span class="cur-s">$</span><input id="sp-agro-movilidad-monto" type="number" min="0" placeholder="0" oninput="calcPresupuestoSoc()"></div>
+        </div>
+        <div class="fc"><label>Movilidad (localidad / "RUTA")</label><input type="text" id="sp-agro-movilidad-localidad" placeholder='Ej: San Luis o "RUTA"' oninput="calcPresupuestoSoc()"></div>
+      </div>
+    </div>
+
+    <div style="border-top:1.5px solid var(--line);margin-top:18px;padding-top:18px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:15px;font-weight:800;color:var(--ink)">TOTAL</div>
+      <div id="sp-total" style="font-size:22px;font-weight:800;color:var(--blue);font-family:monospace">$ 0,00</div>
+    </div>
+
+    <div class="mfoot">
+      <button class="btn btn-s" onclick="showV('soc-presupuestos')">Cancelar</button>
+      <button class="btn btn-p" onclick="guardarPresupuestoSoc()">💾 Guardar presupuesto</button>
+    </div>
+  </div>
+</div>
+
 <!-- BANCOS -->
     <div id="v-genpdf" style="display:none">
       <div class="ph">
@@ -2206,7 +2345,10 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
     <div id="v-sociedades" style="display:none">
       <div class="ph">
         <div><div class="ph-t" id="soc-view-title">🏛️ Sociedades</div><div class="ph-s" id="soc-view-sub">Gestión de operaciones de sociedades</div></div>
-        <button class="btn btn-p" onclick="abrirNuevaSociedad()">＋ Nueva operación</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s" onclick="showV('soc-presupuestos');loadPresupuestosSociedades()">📄 Presupuestos</button>
+          <button class="btn btn-p" onclick="abrirNuevaSociedad()">＋ Nueva operación</button>
+        </div>
       </div>
 
       <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
@@ -7119,6 +7261,242 @@ async function poblarSelectGestorSociedad(selected) {
   sel.value = selected || '';
 }
 
+// ══════════════════════════════════════════════
+// PRESUPUESTOS SOCIEDADES
+// ══════════════════════════════════════════════
+let PRESUP_SOC_CACHE = [];
+
+async function loadPresupuestosSociedades() {
+  try {
+    const { data, error } = await SB.from('presupuestos_sociedades').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    PRESUP_SOC_CACHE = data || [];
+    renderPresupuestosSociedades();
+  } catch (e) {
+    console.error('Error cargando presupuestos de sociedades:', e);
+  }
+}
+
+function renderPresupuestosSociedades() {
+  const tbody = document.getElementById('soc-presup-tbody');
+  const empty = document.getElementById('soc-presup-empty');
+  if (!tbody) return;
+
+  if (!PRESUP_SOC_CACHE.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+  const fmtM = v => v ? '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+  const tipoLabel = t => t === 'AGRO' ? '🌾 Agro' : '📄 Prenda Digital';
+
+  tbody.innerHTML = PRESUP_SOC_CACHE.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--line)">
+      <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:8px 10px;font-weight:600">${tipoLabel(r.tipo)}</td>
+      <td style="padding:8px 10px;white-space:nowrap">${fmtD(r.fecha_presupuesto)}</td>
+      <td style="padding:8px 10px;font-weight:700">${r.nombre_comprador||'—'}</td>
+      <td style="padding:8px 10px">${r.registro||'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:monospace;font-weight:700">${fmtM(r.total)}</td>
+      <td style="padding:8px 10px;text-align:center;white-space:nowrap">
+        <button class="xbtn" onclick="abrirNuevoPresupuestoSoc('${r.id}')" title="Editar">✏️</button>
+        <button class="xbtn" onclick="eliminarPresupuestoSoc('${r.id}')" title="Eliminar">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function cambiarTipoPresupuestoSoc() {
+  const tipo = document.getElementById('sp-tipo').value;
+  document.getElementById('sp-bloque-pd').style.display = tipo === 'PRENDA_DIGITAL' ? '' : 'none';
+  document.getElementById('sp-bloque-agro').style.display = tipo === 'AGRO' ? '' : 'none';
+  calcPresupuestoSoc();
+}
+
+function calcPresupuestoSoc() {
+  const tipo = document.getElementById('sp-tipo').value;
+  const num = id => parseFloat(document.getElementById(id)?.value) || 0;
+  let total = 0;
+
+  if (tipo === 'PRENDA_DIGITAL') {
+    const monto = num('sp-pd-monto');
+    const arancel = monto * 2 / 1000; // 0,2%
+    document.getElementById('sp-pd-arancel').value = arancel ? arancel.toFixed(2) : '';
+    total = arancel + num('sp-pd-honorarios') + num('sp-pd-adicional') + num('sp-pd-formularios') + num('sp-pd-movilidad-monto');
+  } else {
+    const monto = num('sp-agro-monto');
+    const montoPrenda = num('sp-agro-monto-prenda');
+    const localidad = (document.getElementById('sp-agro-movilidad-localidad')?.value || '').trim().toUpperCase();
+
+    const arancel = localidad === 'RUTA' ? 65000 : monto * 3 / 1000; // 0,3% o fijo si RUTA
+    document.getElementById('sp-agro-arancel').value = arancel ? arancel.toFixed(2) : '';
+
+    const exentoInsc = document.getElementById('sp-agro-exento-insc').value;
+    const selladoInsc = exentoInsc === 'NO' ? monto * 1.5 / 100 : 0;
+    document.getElementById('sp-agro-sellado-insc').value = exentoInsc === 'NO' ? selladoInsc.toFixed(2) : 'NO ABONA';
+
+    const inscPrenda = montoPrenda * 0.15 / 100;
+    document.getElementById('sp-agro-insc-prenda').value = inscPrenda ? inscPrenda.toFixed(2) : '';
+
+    const exentoPrenda = document.getElementById('sp-agro-exento-prenda').value;
+    const selladoPrenda = exentoPrenda === 'NO' ? montoPrenda * 1.2 / 100 : 0;
+    document.getElementById('sp-agro-sellado-prenda').value = exentoPrenda === 'NO' ? selladoPrenda.toFixed(2) : 'NO ABONA';
+
+    const certCant = num('sp-agro-cert-cant');
+    const certTotal = certCant * 6500;
+    document.getElementById('sp-agro-cert-total').value = certTotal ? certTotal.toFixed(2) : '';
+
+    total = arancel + selladoInsc + inscPrenda + num('sp-agro-adicional') + selladoPrenda +
+            num('sp-agro-honorarios') + certTotal + num('sp-agro-formularios') + num('sp-agro-movilidad-monto');
+  }
+
+  document.getElementById('sp-total').textContent = '$ ' + total.toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function abrirNuevoPresupuestoSoc(id) {
+  const isEdit = !!id;
+  document.getElementById('soc-presup-form-title').textContent = isEdit ? 'Editar presupuesto' : 'Nuevo presupuesto';
+  document.getElementById('sp-id').value = id || '';
+
+  const setVal = (elId, v) => { const el = document.getElementById(elId); if (el) el.value = (v === null || v === undefined) ? '' : v; };
+
+  if (isEdit) {
+    const r = PRESUP_SOC_CACHE.find(x => x.id === id);
+    if (!r) return;
+    document.getElementById('sp-tipo').value = r.tipo;
+    setVal('sp-fecha', r.fecha_presupuesto);
+    setVal('sp-comprador', r.nombre_comprador);
+    setVal('sp-registro', r.registro);
+    if (r.tipo === 'PRENDA_DIGITAL') {
+      setVal('sp-pd-monto', r.monto_factura);
+      setVal('sp-pd-honorarios', r.honorarios);
+      setVal('sp-pd-adicional', r.adicional_aproximado);
+      setVal('sp-pd-formularios', r.formularios);
+      setVal('sp-pd-movilidad-monto', r.movilidad_monto);
+      setVal('sp-pd-movilidad-localidad', r.movilidad_localidad);
+    } else {
+      setVal('sp-agro-monto', r.monto_factura);
+      setVal('sp-agro-exento-insc', r.exento_sellado_inscripcion || 'NO');
+      setVal('sp-agro-monto-prenda', r.monto_prenda_contrato);
+      setVal('sp-agro-adicional', r.adicional_aproximado);
+      setVal('sp-agro-exento-prenda', r.exento_sellado_prenda || 'NO');
+      setVal('sp-agro-honorarios', r.honorarios);
+      setVal('sp-agro-cert-cant', r.certificacion_firmas_cant);
+      setVal('sp-agro-formularios', r.formularios);
+      setVal('sp-agro-movilidad-monto', r.movilidad_monto);
+      setVal('sp-agro-movilidad-localidad', r.movilidad_localidad);
+    }
+  } else {
+    document.getElementById('sp-tipo').value = 'PRENDA_DIGITAL';
+    ['sp-fecha','sp-comprador','sp-registro',
+     'sp-pd-monto','sp-pd-honorarios','sp-pd-adicional','sp-pd-formularios','sp-pd-movilidad-monto','sp-pd-movilidad-localidad',
+     'sp-agro-monto','sp-agro-monto-prenda','sp-agro-adicional','sp-agro-honorarios','sp-agro-cert-cant','sp-agro-formularios',
+     'sp-agro-movilidad-monto','sp-agro-movilidad-localidad'].forEach(elId => setVal(elId, ''));
+    setVal('sp-agro-exento-insc', 'NO');
+    setVal('sp-agro-exento-prenda', 'NO');
+    const today = new Date().toISOString().split('T')[0];
+    setVal('sp-fecha', today);
+  }
+
+  cambiarTipoPresupuestoSoc();
+  showV('soc-presupuesto-form');
+}
+
+async function guardarPresupuestoSoc() {
+  const id = document.getElementById('sp-id').value;
+  const isEdit = !!id;
+  const tipo = document.getElementById('sp-tipo').value;
+  const num = elId => parseFloat(document.getElementById(elId)?.value) || null;
+  const txt = elId => document.getElementById(elId)?.value || null;
+
+  let payload = {
+    tipo,
+    fecha_presupuesto: txt('sp-fecha'),
+    nombre_comprador: txt('sp-comprador'),
+    registro: txt('sp-registro'),
+    updated_at: new Date().toISOString()
+  };
+
+  if (tipo === 'PRENDA_DIGITAL') {
+    const monto = num('sp-pd-monto') || 0;
+    const arancel = monto * 2 / 1000;
+    payload = { ...payload,
+      monto_factura: monto,
+      arancel: arancel,
+      honorarios: num('sp-pd-honorarios'),
+      adicional_aproximado: num('sp-pd-adicional'),
+      formularios: num('sp-pd-formularios'),
+      movilidad_monto: num('sp-pd-movilidad-monto'),
+      movilidad_localidad: txt('sp-pd-movilidad-localidad'),
+      total: arancel + (num('sp-pd-honorarios')||0) + (num('sp-pd-adicional')||0) + (num('sp-pd-formularios')||0) + (num('sp-pd-movilidad-monto')||0)
+    };
+  } else {
+    const monto = num('sp-agro-monto') || 0;
+    const montoPrenda = num('sp-agro-monto-prenda') || 0;
+    const localidad = (txt('sp-agro-movilidad-localidad') || '').trim().toUpperCase();
+    const arancel = localidad === 'RUTA' ? 65000 : monto * 3 / 1000;
+    const exentoInsc = txt('sp-agro-exento-insc') || 'NO';
+    const selladoInsc = exentoInsc === 'NO' ? monto * 1.5 / 100 : 0;
+    const inscPrenda = montoPrenda * 0.15 / 100;
+    const exentoPrenda = txt('sp-agro-exento-prenda') || 'NO';
+    const selladoPrenda = exentoPrenda === 'NO' ? montoPrenda * 1.2 / 100 : 0;
+    const certCant = num('sp-agro-cert-cant') || 0;
+    const certTotal = certCant * 6500;
+
+    payload = { ...payload,
+      monto_factura: monto,
+      arancel: arancel,
+      exento_sellado_inscripcion: exentoInsc,
+      sellado_inscripcion: selladoInsc,
+      monto_prenda_contrato: montoPrenda,
+      inscripcion_prenda: inscPrenda,
+      adicional_aproximado: num('sp-agro-adicional'),
+      exento_sellado_prenda: exentoPrenda,
+      sellado_prenda: selladoPrenda,
+      honorarios: num('sp-agro-honorarios'),
+      certificacion_firmas_cant: certCant,
+      certificacion_firmas_total: certTotal,
+      formularios: num('sp-agro-formularios'),
+      movilidad_monto: num('sp-agro-movilidad-monto'),
+      movilidad_localidad: txt('sp-agro-movilidad-localidad'),
+      total: arancel + selladoInsc + inscPrenda + (num('sp-agro-adicional')||0) + selladoPrenda +
+             (num('sp-agro-honorarios')||0) + certTotal + (num('sp-agro-formularios')||0) + (num('sp-agro-movilidad-monto')||0)
+    };
+  }
+
+  try {
+    if (isEdit) {
+      const { error } = await SB.from('presupuestos_sociedades').update(payload).eq('id', id);
+      if (error) throw error;
+    } else {
+      payload.id = 'PSOC' + Date.now();
+      const { error } = await SB.from('presupuestos_sociedades').insert(payload);
+      if (error) throw error;
+    }
+    await loadPresupuestosSociedades();
+    showV('soc-presupuestos');
+    if (typeof toast === 'function') toast(isEdit ? 'Presupuesto actualizado' : 'Presupuesto creado');
+  } catch (e) {
+    console.error('Error guardando presupuesto de sociedades:', e);
+    alert('Error al guardar: ' + (e.message || e));
+  }
+}
+
+async function eliminarPresupuestoSoc(id) {
+  if (!confirm('¿Eliminar este presupuesto? Esta acción no se puede deshacer.')) return;
+  try {
+    const { error } = await SB.from('presupuestos_sociedades').delete().eq('id', id);
+    if (error) throw error;
+    await loadPresupuestosSociedades();
+    if (typeof toast === 'function') toast('Presupuesto eliminado');
+  } catch (e) {
+    console.error('Error eliminando presupuesto de sociedades:', e);
+    alert('Error al eliminar: ' + (e.message || e));
+  }
+}
+
 function duplicarSociedad(id) {
   abrirNuevaSociedad(id, true);
 }
@@ -8607,8 +8985,9 @@ function aplicarModoSidebar(modo) {
     const lblCuenta = document.getElementById('sb-lbl-cuenta');
     if (lblCuenta) lblCuenta.style.display = '';
   } else if (modo === 'sociedades') {
-    // Mostrar solo: Sociedades, Prendas Sociedades Finalizadas
+    // Mostrar solo: Sociedades, Prendas Sociedades Finalizadas, Presupuestos Sociedades
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = '');
+    document.querySelectorAll('.sb-item[onclick*="soc-presupuestos"]').forEach(btn => btn.style.display = '');
     const miCuentaBtn2 = document.querySelector('.sb-item[onclick*="micuenta"]');
     if (miCuentaBtn2) miCuentaBtn2.style.display = '';
     const cerrarSesionBtn2 = document.querySelector('.sb-item[onclick*="doLogout"]');
@@ -8638,6 +9017,7 @@ function aplicarModoSidebar(modo) {
     document.getElementById('sb-presupuestos').style.display = 'none';
     document.getElementById('sb-historico-presup').style.display = 'none';
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = 'none');
+    document.querySelectorAll('.sb-item[onclick*="soc-presupuestos"]').forEach(btn => btn.style.display = 'none');
     document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
     document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
     document.getElementById('sb-contabilidad').style.display = (ME?.rol === 'admin' || ['claudionieva','golcese','tolcese','Invitado'].includes(ME?.usr)) ? '' : 'none';
@@ -8707,7 +9087,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva','soc-seguimiento','panel-principal'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva','soc-seguimiento','soc-presupuestos','soc-presupuesto-form','panel-principal'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -12920,6 +13300,9 @@ function renderReportes() {
     </button>
     <button class="sb-item" onclick="closeSidebar();showV('sociedades');loadSociedades().then(()=>setSocTab('finalizadas'))">
       <span class="sb-icon">🏁</span> Prendas Sociedades Finalizadas
+    </button>
+    <button class="sb-item" onclick="closeSidebar();showV('soc-presupuestos');loadPresupuestosSociedades()">
+      <span class="sb-icon">📄</span> Presupuestos Sociedades
     </button>
 
     <button class="sb-item" id="sb-administracion" onclick="closeSidebar();showV('administracion')" style="display:none">
