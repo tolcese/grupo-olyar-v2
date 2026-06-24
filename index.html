@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.24.16</title>
+<title>Grupo Olyar — Solicitudes v2.24.17</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2209,7 +2209,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
         <button class="btn btn-p" onclick="abrirNuevaSociedad()">＋ Nueva operación</button>
       </div>
 
-      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+      <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
         <input id="soc-srch" class="fsel" placeholder="Buscar sociedad, cuit, gestor, comercial..." oninput="renderSociedades()" style="font-size:12px;padding:8px 12px;min-width:260px">
         <select id="soc-filtro-estado" class="fsel" onchange="renderSociedades()" style="font-size:12px;padding:8px 12px">
           <option value="">Todos los estados</option>
@@ -2217,7 +2217,56 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <option value="EN TRÁMITE">En trámite</option>
           <option value="FINALIZADA">Finalizada</option>
         </select>
+        <button class="btn btn-s" onclick="toggleFiltrosSociedades()" id="soc-filtros-toggle-btn" style="font-size:12px;padding:8px 14px">🔍 Más filtros</button>
+        <button class="btn btn-s" onclick="limpiarFiltrosSociedades()" style="font-size:12px;padding:8px 14px">✕ Limpiar filtros</button>
         <span id="soc-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
+      </div>
+
+      <div id="soc-filtros-avanzados" style="display:none;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:16px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Localidad</label>
+            <select id="soc-filtro-localidad" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 10px">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Gestor</label>
+            <select id="soc-filtro-gestor" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 10px">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Digital</label>
+            <select id="soc-filtro-digital" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 10px">
+              <option value="">Todos</option>
+              <option value="true">SÍ</option>
+              <option value="false">NO</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Pago honorarios</label>
+            <select id="soc-filtro-honorarios" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 10px">
+              <option value="">Todos</option>
+              <option value="true">SÍ</option>
+              <option value="false">NO</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha envío (desde - hasta)</label>
+            <div style="display:flex;gap:6px">
+              <input type="date" id="soc-filtro-envio-desde" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 8px">
+              <input type="date" id="soc-filtro-envio-hasta" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 8px">
+            </div>
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;display:block;margin-bottom:5px">Fecha entrega (desde - hasta)</label>
+            <div style="display:flex;gap:6px">
+              <input type="date" id="soc-filtro-entrega-desde" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 8px">
+              <input type="date" id="soc-filtro-entrega-hasta" class="fsel" onchange="renderSociedades()" style="width:100%;font-size:12px;padding:7px 8px">
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="card" style="padding:0;overflow-x:auto">
@@ -6806,6 +6855,7 @@ async function loadSociedades() {
       comentarios: r.comentarios
     }));
     renderSociedades();
+    poblarFiltrosSociedades();
   } catch (e) {
     console.error('Error cargando sociedades:', e);
   }
@@ -6854,6 +6904,41 @@ function setSocTab(tab) {
   renderSociedades();
 }
 
+function toggleFiltrosSociedades() {
+  const panel = document.getElementById('soc-filtros-avanzados');
+  const btn = document.getElementById('soc-filtros-toggle-btn');
+  if (!panel) return;
+  const isOpen = panel.style.display !== 'none';
+  panel.style.display = isOpen ? 'none' : '';
+  if (btn) btn.textContent = isOpen ? '🔍 Más filtros' : '🔍 Ocultar filtros';
+  if (!isOpen) poblarFiltrosSociedades();
+}
+
+function poblarFiltrosSociedades() {
+  const selLoc = document.getElementById('soc-filtro-localidad');
+  const selGes = document.getElementById('soc-filtro-gestor');
+  if (!selLoc || !selGes) return;
+
+  const localidades = [...new Set(SOCIEDADES.map(r => r.localidad).filter(Boolean))].sort();
+  const gestores = [...new Set(SOCIEDADES.map(r => r.gestor).filter(Boolean))].sort();
+
+  const valLoc = selLoc.value;
+  const valGes = selGes.value;
+  selLoc.innerHTML = '<option value="">Todas</option>' + localidades.map(l => `<option value="${l}">${l}</option>`).join('');
+  selGes.innerHTML = '<option value="">Todos</option>' + gestores.map(g => `<option value="${g}">${g}</option>`).join('');
+  selLoc.value = valLoc;
+  selGes.value = valGes;
+}
+
+function limpiarFiltrosSociedades() {
+  ['soc-srch'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['soc-filtro-estado','soc-filtro-localidad','soc-filtro-gestor','soc-filtro-digital','soc-filtro-honorarios',
+   'soc-filtro-envio-desde','soc-filtro-envio-hasta','soc-filtro-entrega-desde','soc-filtro-entrega-hasta'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  renderSociedades();
+}
+
 function renderSociedades() {
   const tbody = document.getElementById('soc-tbody');
   const empty = document.getElementById('soc-empty');
@@ -6862,6 +6947,15 @@ function renderSociedades() {
 
   const q = (document.getElementById('soc-srch')?.value || '').toLowerCase().trim();
   const filtroEstado = document.getElementById('soc-filtro-estado')?.value || '';
+  const filtroLocalidad = document.getElementById('soc-filtro-localidad')?.value || '';
+  const filtroGestor = document.getElementById('soc-filtro-gestor')?.value || '';
+  const filtroDigital = document.getElementById('soc-filtro-digital')?.value || '';
+  const filtroHonorarios = document.getElementById('soc-filtro-honorarios')?.value || '';
+  const envioDesde = document.getElementById('soc-filtro-envio-desde')?.value || '';
+  const envioHasta = document.getElementById('soc-filtro-envio-hasta')?.value || '';
+  const entregaDesde = document.getElementById('soc-filtro-entrega-desde')?.value || '';
+  const entregaHasta = document.getElementById('soc-filtro-entrega-hasta')?.value || '';
+
   let data = SOCIEDADES;
   if (window._socTab === 'finalizadas') {
     data = data.filter(r => estadoSociedad(r) === 'FINALIZADA');
@@ -6869,6 +6963,23 @@ function renderSociedades() {
   if (filtroEstado) {
     data = data.filter(r => estadoSociedad(r) === filtroEstado);
   }
+  if (filtroLocalidad) {
+    data = data.filter(r => (r.localidad||'') === filtroLocalidad);
+  }
+  if (filtroGestor) {
+    data = data.filter(r => (r.gestor||'') === filtroGestor);
+  }
+  if (filtroDigital) {
+    data = data.filter(r => String(!!r.digital) === filtroDigital);
+  }
+  if (filtroHonorarios) {
+    data = data.filter(r => String(!!r.pagoHonorarios) === filtroHonorarios);
+  }
+  if (envioDesde) data = data.filter(r => r.prendaFechaEnvio && r.prendaFechaEnvio >= envioDesde);
+  if (envioHasta) data = data.filter(r => r.prendaFechaEnvio && r.prendaFechaEnvio <= envioHasta);
+  if (entregaDesde) data = data.filter(r => r.prendaFechaEntrega && r.prendaFechaEntrega >= entregaDesde);
+  if (entregaHasta) data = data.filter(r => r.prendaFechaEntrega && r.prendaFechaEntrega <= entregaHasta);
+
   if (q) {
     data = data.filter(r =>
       (r.nombreSociedad||'').toLowerCase().includes(q) ||
