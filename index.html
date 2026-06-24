@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.1</title>
+<title>Grupo Olyar — Solicitudes v2.25.2</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -7306,8 +7306,10 @@ function renderPresupuestosSociedades() {
       <td style="padding:8px 10px">${r.registro||'—'}</td>
       <td style="padding:8px 10px;text-align:right;font-family:monospace;font-weight:700">${fmtM(r.total)}</td>
       <td style="padding:8px 10px;text-align:center;white-space:nowrap">
-        <button class="xbtn" onclick="abrirNuevoPresupuestoSoc('${r.id}')" title="Editar">✏️</button>
-        <button class="xbtn" onclick="eliminarPresupuestoSoc('${r.id}')" title="Eliminar">🗑️</button>
+        <div style="display:inline-flex;gap:6px;align-items:center">
+          <button class="xbtn" onclick="abrirNuevoPresupuestoSoc('${r.id}')" title="Editar">✏️</button>
+          <button class="xbtn" onclick="eliminarPresupuestoSoc('${r.id}')" title="Eliminar">🗑️</button>
+        </div>
       </td>
     </tr>`).join('');
 }
