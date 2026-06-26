@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.17</title>
+<title>Grupo Olyar — Solicitudes v2.25.18</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3362,7 +3362,7 @@ async function enterApp() {
   if (ME.rol === 'invitado') document.body.classList.add('is-invitado');
   else document.body.classList.remove('is-invitado');
   document.getElementById('btn-datero').style.display = ME.rol === 'admin' ? 'none' : '';
-  if (ME.usr === 'claudionieva') loadWeather();
+  if (ME.usr === 'claudionieva' || ME.rol === 'admin') loadWeather();
   syncUI('ok');
 
   // Verificar mantenimiento ANTES de mostrar la app
@@ -3531,7 +3531,7 @@ async function loadWeather() {
 }
 
 // Actualizar clima cada 30 minutos
-setInterval(() => { if (ME?.usr === 'claudionieva') loadWeather(); }, 30 * 60 * 1000);
+setInterval(() => { if (ME?.usr === 'claudionieva' || ME?.rol === 'admin') loadWeather(); }, 30 * 60 * 1000);
 
 function doLogout() {
   // Limpiar datos del usuario anterior
