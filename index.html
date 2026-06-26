@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.18</title>
+<title>Grupo Olyar — Solicitudes v2.25.19</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -9116,7 +9116,7 @@ function aplicarModoSidebar(modo) {
     // Re-aplicar restricciones normales por rol
     const isAdmin = ME.rol === 'admin';
     const isUser  = ME.rol === 'user';
-    document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser) ? '' : 'none';
+    document.getElementById('sb-envios-gestor').style.display = (isAdmin || isUser || ME?.rol === 'usuario_presupuestos') ? '' : 'none';
     document.getElementById('sc-imp').style.display = ME.rol === 'admin' ? '' : 'none';
     document.getElementById('f-usu').style.display = ME.rol === 'admin' ? '' : 'none';
     if (document.getElementById('sb-usuarios')) document.getElementById('sb-usuarios').style.display = isAdmin ? '' : 'none';
