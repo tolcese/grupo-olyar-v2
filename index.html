@@ -24,7 +24,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.14</title>
+<title>Grupo Olyar — Solicitudes v2.25.15</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -655,7 +655,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           <div style="font-size:26px;font-weight:800;color:var(--ink);margin-bottom:6px">¿A dónde querés ir?</div>
           <div style="font-size:14px;color:var(--muted)">Elegí una sección para continuar</div>
         </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
+        <div id="pp-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px">
           <div class="pp-card" onclick="irAModoPrincipal('presupuestos')" style="cursor:pointer;border:1.5px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;transition:all .15s;background:#fff" onmouseenter="this.style.borderColor='var(--blue)';this.style.boxShadow='0 8px 24px rgba(29,111,206,.12)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--line)';this.style.boxShadow='none';this.style.transform='none'">
             <div style="font-size:46px;margin-bottom:14px">📄</div>
             <div style="font-size:16px;font-weight:800;color:var(--ink)">Presupuestos</div>
@@ -670,6 +670,11 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div style="font-size:46px;margin-bottom:14px">🚗</div>
             <div style="font-size:16px;font-weight:800;color:var(--ink)">Comercializadora</div>
             <div style="font-size:12px;color:var(--muted);margin-top:4px">Sistema de solicitudes y gestión</div>
+          </div>
+          <div class="pp-card" id="pp-card-contabilidad" onclick="irAModoPrincipal('contabilidad')" style="display:none;cursor:pointer;border:1.5px solid var(--line);border-radius:16px;padding:34px 22px;text-align:center;transition:all .15s;background:#fff" onmouseenter="this.style.borderColor='var(--blue)';this.style.boxShadow='0 8px 24px rgba(29,111,206,.12)';this.style.transform='translateY(-3px)'" onmouseleave="this.style.borderColor='var(--line)';this.style.boxShadow='none';this.style.transform='none'">
+            <div style="font-size:46px;margin-bottom:14px">🧾</div>
+            <div style="font-size:16px;font-weight:800;color:var(--ink)">Contabilidad</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Acceso exclusivo de administración</div>
           </div>
         </div>
       </div>
@@ -3448,6 +3453,7 @@ async function enterApp() {
     showV('presupuestos');
   } else if (ME.rol === 'admin') {
     document.getElementById('sb-panel-principal').style.display = '';
+    document.getElementById('pp-card-contabilidad').style.display = '';
     showV('panel-principal');
   } else {
     // user, invitado, etc: ven el Panel Principal primero
@@ -9120,6 +9126,17 @@ function aplicarModoSidebar(modo) {
     document.getElementById('sb-genpdf').style.display = ME?.rol === 'user' ? '' : 'none';
     document.getElementById('sb-contabilidad').style.display = (ME?.rol === 'admin' || ['claudionieva','golcese','tolcese','Invitado'].includes(ME?.usr)) ? '' : 'none';
     document.getElementById('sb-administracion').style.display = (['admin','administracion','usuario_administracion'].includes(ME?.rol) && !['abarco','yohanavarro'].includes(ME?.usr)) ? '' : 'none';
+  } else if (modo === 'contabilidad') {
+    // Mostrar solo: Contabilidad, Mi cuenta, Cerrar sesión
+    document.getElementById('sb-contabilidad').style.display = '';
+    const miCuentaBtn3 = document.querySelector('.sb-item[onclick*="micuenta"]');
+    if (miCuentaBtn3) miCuentaBtn3.style.display = '';
+    const cerrarSesionBtn3 = document.querySelector('.sb-item[onclick*="doLogout"]');
+    if (cerrarSesionBtn3) cerrarSesionBtn3.style.display = '';
+    const divCuenta3 = document.getElementById('sb-div-cuenta');
+    if (divCuenta3) divCuenta3.style.display = '';
+    const lblCuenta3 = document.getElementById('sb-lbl-cuenta');
+    if (lblCuenta3) lblCuenta3.style.display = '';
   }
 }
 
@@ -9136,6 +9153,8 @@ async function irAModoPrincipal(modo) {
     showV('sociedades');
   } else if (modo === 'comercializadora') {
     showV('sol');
+  } else if (modo === 'contabilidad') {
+    showV('contabilidad');
   }
 }
 
