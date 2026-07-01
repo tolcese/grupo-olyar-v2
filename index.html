@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.25</title>
+<title>Grupo Olyar — Solicitudes v2.25.26</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1075,7 +1075,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Sociedad</th>
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap;width:120px">CUIT</th>
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
-                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gestor</th>
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap;width:160px;overflow:hidden;text-overflow:ellipsis">Gestor</th>
                 <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Total</th>
                 <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Honorarios</th>
                 <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Facturado</th>
@@ -1085,6 +1085,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <tbody id="cont-soc-tbody"></tbody>
           </table>
           <div id="cont-soc-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin operaciones registradas</div>
+          <div id="cont-soc-paginador"></div>
         </div>
       </div>
     </div>
@@ -11257,7 +11258,7 @@ async function loadContSoc() {
   }
 }
 
-function renderContSoc() {
+function renderContSoc(pagina) {
   const tbody = document.getElementById('cont-soc-tbody');
   const empty = document.getElementById('cont-soc-empty');
   const count = document.getElementById('cont-soc-count');
@@ -11273,30 +11274,50 @@ function renderContSoc() {
     );
   }
 
-  if (count) count.textContent = data.length + (data.length === 1 ? ' registro' : ' registros');
-
   if (!data.length) {
     tbody.innerHTML = '';
     if (empty) empty.style.display = '';
+    if (count) count.textContent = '0 registros';
     return;
   }
   if (empty) empty.style.display = 'none';
 
+  const POR_PAG = 10;
+  const totalPags = Math.ceil(data.length / POR_PAG);
+  if (!window._contSocPag || pagina !== undefined) window._contSocPag = pagina || 1;
+  const pag = window._contSocPag;
+  const inicio = (pag - 1) * POR_PAG;
+  const pagData = data.slice(inicio, inicio + POR_PAG);
+
+  if (count) count.textContent = `${data.length} ${data.length === 1 ? 'registro' : 'registros'} · Página ${pag} de ${totalPags}`;
+
   const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
   const fmtM = v => v ? '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
 
-  tbody.innerHTML = data.map((r, i) => `
+  tbody.innerHTML = pagData.map((r, i) => `
     <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openContSocPanel('${r.id}')">
-      <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:8px 10px;color:var(--muted);font-size:11px">${inicio+i+1}</td>
       <td style="padding:8px 10px;font-weight:700">${r.nombre_sociedad||'—'}</td>
       <td style="padding:8px 10px">${r.cuit||'—'}</td>
       <td style="padding:8px 10px;white-space:nowrap">${fmtD(r.fecha)}</td>
-      <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
+      <td style="padding:8px 10px;color:var(--blue);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.gestor||'—'}</td>
       <td style="padding:8px 10px;text-align:right;font-family:monospace;font-weight:700">${fmtM(r.importe_facturado)}</td>
       <td style="padding:8px 10px;text-align:center">${r.pago_honorarios ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
       <td style="padding:8px 10px;text-align:center">${r.facturado ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
       <td style="padding:8px 10px;text-align:right;font-family:monospace">${fmtM(r.gastos_importe)}</td>
     </tr>`).join('');
+
+  // Paginador
+  let paginador = '';
+  if (totalPags > 1) {
+    paginador = `<div style="display:flex;gap:8px;justify-content:center;padding:14px;align-items:center">
+      <button class="btn btn-s" onclick="renderContSoc(${pag-1})" ${pag===1?'disabled':''} style="padding:6px 14px">← Anterior</button>
+      <span style="font-size:12px;color:var(--muted)">${pag} / ${totalPags}</span>
+      <button class="btn btn-s" onclick="renderContSoc(${pag+1})" ${pag===totalPags?'disabled':''} style="padding:6px 14px">Siguiente →</button>
+    </div>`;
+  }
+  const existingPag = document.getElementById('cont-soc-paginador');
+  if (existingPag) existingPag.innerHTML = paginador;
 }
 
 function openContSocPanel(id) {
