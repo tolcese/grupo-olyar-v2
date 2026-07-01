@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.21</title>
+<title>Grupo Olyar — Solicitudes v2.25.22</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1030,6 +1030,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       <!-- TABS -->
       <div class="tab-bar" style="display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:20px;overflow-x:auto">
         <button id="adm-tab-tramites" onclick="showAdmTab('tramites')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;white-space:nowrap">📋 Trámites</button>
+        <button id="adm-tab-cont-soc" onclick="showAdmTab('cont-soc')" style="padding:10px 20px;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:-2px;white-space:nowrap">🧾 Contabilidad Sociedades</button>
       </div>
 
       <!-- TAB TRAMITES -->
@@ -1058,6 +1059,92 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
           </table>
         </div>
         <div id="adm-tramites-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin trámites registrados</div>
+      </div>
+
+      <!-- TAB CONTABILIDAD SOCIEDADES -->
+      <div id="adm-cont-soc" style="display:none">
+        <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+          <input type="text" id="cont-soc-srch" class="fsel" placeholder="Buscar sociedad, CUIT, gestor..." oninput="renderContSoc()" style="max-width:280px">
+          <span id="cont-soc-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
+        </div>
+        <div class="card" style="padding:0;overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;font-size:12.5px">
+            <thead>
+              <tr style="background:var(--surface)">
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">#</th>
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Sociedad</th>
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">CUIT</th>
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
+                <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gestor</th>
+                <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Honorarios</th>
+                <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Facturado</th>
+                <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gastos</th>
+              </tr>
+            </thead>
+            <tbody id="cont-soc-tbody"></tbody>
+          </table>
+          <div id="cont-soc-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin operaciones registradas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL LATERAL CONTABILIDAD SOCIEDADES -->
+    <div style="position:fixed;inset:0;z-index:550;display:flex;justify-content:flex-end;pointer-events:none" id="cont-soc-panel-overlay" onclick="if(event.target===this)closeContSocPanel()">
+      <div style="width:420px;max-width:95vw;background:#fff;height:100%;box-shadow:-4px 0 24px rgba(15,23,42,.12);transform:translateX(100%);transition:transform .28s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;overflow-y:auto;pointer-events:all" id="cont-soc-side-panel">
+        <div class="panel-head" style="padding:20px 20px 14px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+            <div>
+              <div class="panel-name" id="cont-soc-panel-nombre">—</div>
+              <div class="panel-sub" id="cont-soc-panel-sub">Contabilidad</div>
+            </div>
+            <button class="xbtn" onclick="closeContSocPanel()">×</button>
+          </div>
+        </div>
+        <div style="padding:16px 20px;flex:1">
+          <input type="hidden" id="cont-soc-panel-id">
+
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line)">Honorarios</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <input type="checkbox" id="cont-soc-pago-hon" style="width:16px;height:16px">
+              <label for="cont-soc-pago-hon" style="font-size:13px;font-weight:600">Pagó honorarios</label>
+            </div>
+            <div class="fc" style="margin-bottom:0">
+              <label>Fecha de pago</label>
+              <input type="date" id="cont-soc-fecha-pago">
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line)">Facturación</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <input type="checkbox" id="cont-soc-facturado" style="width:16px;height:16px">
+              <label for="cont-soc-facturado" style="font-size:13px;font-weight:600">Facturado</label>
+            </div>
+            <div class="fc" style="margin-bottom:10px">
+              <label>Nº de factura</label>
+              <input type="text" id="cont-soc-nro-factura" placeholder="Ej: 0001-00001234">
+            </div>
+            <div class="fc" style="margin-bottom:0">
+              <label>Importe facturado ($)</label>
+              <div class="cur"><span class="cur-s">$</span><input type="number" id="cont-soc-importe-factura" min="0" placeholder="0"></div>
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line)">Gastos</div>
+            <div class="fc" style="margin-bottom:10px">
+              <label>Detalle</label>
+              <input type="text" id="cont-soc-gastos-det" placeholder="Descripción del gasto">
+            </div>
+            <div class="fc" style="margin-bottom:0">
+              <label>Importe ($)</label>
+              <div class="cur"><span class="cur-s">$</span><input type="number" id="cont-soc-gastos-imp" min="0" placeholder="0"></div>
+            </div>
+          </div>
+
+          <button class="btn btn-p" onclick="guardarContSoc()" style="width:100%;margin-top:8px">💾 Guardar</button>
+        </div>
       </div>
     </div>
 
@@ -11132,7 +11219,7 @@ async function guardarEnvioGestor() {
 let TRAMITES_DATA = [];
 
 function showAdmTab(tab) {
-  ['tramites'].forEach(t => {
+  ['tramites','cont-soc'].forEach(t => {
     const panel = document.getElementById('adm-' + t);
     const btn   = document.getElementById('adm-tab-' + t);
     if (panel) panel.style.display = t === tab ? '' : 'none';
@@ -11144,6 +11231,124 @@ function showAdmTab(tab) {
   const btnNuevo = document.getElementById('adm-btn-nuevo');
   if (btnNuevo) btnNuevo.style.display = tab === 'tramites' ? '' : 'none';
   if (tab === 'tramites') loadTramites();
+  if (tab === 'cont-soc') loadContSoc();
+}
+
+// ══════════════════════════════════════════════
+// CONTABILIDAD SOCIEDADES
+// ══════════════════════════════════════════════
+let CONT_SOC_CACHE = [];
+
+async function loadContSoc() {
+  try {
+    const { data, error } = await SB.from('sociedades')
+      .select('id,nombre_sociedad,cuit,fecha,gestor,pago_honorarios,fecha_pago_honorarios,facturado,nro_factura,importe_facturado,gastos_detalle,gastos_importe')
+      .order('fecha', { ascending: false });
+    if (error) throw error;
+    CONT_SOC_CACHE = data || [];
+    renderContSoc();
+  } catch(e) {
+    console.error('Error cargando contabilidad sociedades:', e);
+  }
+}
+
+function renderContSoc() {
+  const tbody = document.getElementById('cont-soc-tbody');
+  const empty = document.getElementById('cont-soc-empty');
+  const count = document.getElementById('cont-soc-count');
+  if (!tbody) return;
+
+  const q = (document.getElementById('cont-soc-srch')?.value || '').toLowerCase().trim();
+  let data = CONT_SOC_CACHE;
+  if (q) {
+    data = data.filter(r =>
+      (r.nombre_sociedad||'').toLowerCase().includes(q) ||
+      (r.cuit||'').toString().includes(q) ||
+      (r.gestor||'').toLowerCase().includes(q)
+    );
+  }
+
+  if (count) count.textContent = data.length + (data.length === 1 ? ' registro' : ' registros');
+
+  if (!data.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+  const fmtM = v => v ? '$ ' + Number(v).toLocaleString('es-AR', {minimumFractionDigits:2, maximumFractionDigits:2}) : '—';
+
+  tbody.innerHTML = data.map((r, i) => `
+    <tr style="border-bottom:1px solid var(--line);cursor:pointer" onmouseover="this.style.background='var(--surface)'" onmouseout="this.style.background=''" onclick="openContSocPanel('${r.id}')">
+      <td style="padding:8px 10px;color:var(--muted);font-size:11px">${i+1}</td>
+      <td style="padding:8px 10px;font-weight:700">${r.nombre_sociedad||'—'}</td>
+      <td style="padding:8px 10px">${r.cuit||'—'}</td>
+      <td style="padding:8px 10px;white-space:nowrap">${fmtD(r.fecha)}</td>
+      <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
+      <td style="padding:8px 10px;text-align:center">${r.pago_honorarios ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
+      <td style="padding:8px 10px;text-align:center">${r.facturado ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:monospace">${fmtM(r.gastos_importe)}</td>
+    </tr>`).join('');
+}
+
+function openContSocPanel(id) {
+  const r = CONT_SOC_CACHE.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('cont-soc-panel-id').value = id;
+  document.getElementById('cont-soc-panel-nombre').textContent = r.nombre_sociedad || '—';
+  document.getElementById('cont-soc-panel-sub').textContent = 'CUIT ' + (r.cuit || '—');
+
+  document.getElementById('cont-soc-pago-hon').checked = !!r.pago_honorarios;
+  document.getElementById('cont-soc-fecha-pago').value = r.fecha_pago_honorarios || '';
+  document.getElementById('cont-soc-facturado').checked = !!r.facturado;
+  document.getElementById('cont-soc-nro-factura').value = r.nro_factura || '';
+  document.getElementById('cont-soc-importe-factura').value = r.importe_facturado || '';
+  document.getElementById('cont-soc-gastos-det').value = r.gastos_detalle || '';
+  document.getElementById('cont-soc-gastos-imp').value = r.gastos_importe || '';
+
+  const overlay = document.getElementById('cont-soc-panel-overlay');
+  const panel   = document.getElementById('cont-soc-side-panel');
+  overlay.style.pointerEvents = 'all';
+  panel.style.transform = 'translateX(0)';
+}
+
+function closeContSocPanel() {
+  const overlay = document.getElementById('cont-soc-panel-overlay');
+  const panel   = document.getElementById('cont-soc-side-panel');
+  overlay.style.pointerEvents = 'none';
+  panel.style.transform = 'translateX(100%)';
+}
+
+async function guardarContSoc() {
+  const id = document.getElementById('cont-soc-panel-id').value;
+  if (!id) return;
+
+  const payload = {
+    pago_honorarios: document.getElementById('cont-soc-pago-hon').checked,
+    fecha_pago_honorarios: document.getElementById('cont-soc-fecha-pago').value || null,
+    facturado: document.getElementById('cont-soc-facturado').checked,
+    nro_factura: document.getElementById('cont-soc-nro-factura').value || null,
+    importe_facturado: parseFloat(document.getElementById('cont-soc-importe-factura').value) || null,
+    gastos_detalle: document.getElementById('cont-soc-gastos-det').value || null,
+    gastos_importe: parseFloat(document.getElementById('cont-soc-gastos-imp').value) || null,
+    updated_at: new Date().toISOString()
+  };
+
+  try {
+    const { error } = await SB.from('sociedades').update(payload).eq('id', id);
+    if (error) throw error;
+    const r = CONT_SOC_CACHE.find(x => x.id === id);
+    if (r) Object.assign(r, payload);
+    renderContSoc();
+    closeContSocPanel();
+    if (typeof toast === 'function') toast('Datos contables actualizados');
+  } catch(e) {
+    console.error('Error guardando contabilidad sociedad:', e);
+    alert('Error al guardar: ' + (e.message || e));
+  }
 }
 
 async function loadAdministracion() {
