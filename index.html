@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.26</title>
+<title>Grupo Olyar — Solicitudes v2.25.27</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -11354,10 +11354,18 @@ async function guardarContSoc() {
   const id = document.getElementById('cont-soc-panel-id').value;
   if (!id) return;
 
+  const facturado = document.getElementById('cont-soc-facturado').checked;
+  const fechaFactura = document.getElementById('cont-soc-fecha-factura').value;
+  if (facturado && !fechaFactura) {
+    toast('Falta la fecha de factura', 'warn');
+    document.getElementById('cont-soc-fecha-factura').focus();
+    return;
+  }
+
   const payload = {
     pago_honorarios: document.getElementById('cont-soc-pago-hon').checked,
     fecha_pago_honorarios: document.getElementById('cont-soc-fecha-pago').value || null,
-    facturado: document.getElementById('cont-soc-facturado').checked,
+    facturado: facturado,
     fecha_factura: document.getElementById('cont-soc-fecha-factura').value || null,
     nro_factura: document.getElementById('cont-soc-nro-factura').value || null,
     importe_facturado: parseFloat(document.getElementById('cont-soc-importe-factura').value) || null,
