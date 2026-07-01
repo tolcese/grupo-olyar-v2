@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.31</title>
+<title>Grupo Olyar — Solicitudes v2.25.32</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -5654,7 +5654,14 @@ async function renderRecordatoriosWA() {
     const hora = new Date().getHours();
     const saludo = hora < 13 ? 'Buenos días' : 'Buenas tardes';
     // Validar datos completos antes de generar el mensaje
-    const datosIncompletos = !c.cantCuotas || !c.fechaInicio;
+    const faltantes = [];
+    if (!c.cantCuotas) faltantes.push('cantidad de cuotas');
+    if (!c.fechaInicio) faltantes.push('fecha de inicio');
+    if (!cd.telefono) faltantes.push('teléfono');
+    if (!cd.direccion) faltantes.push('domicilio');
+    if (!cd.localidad) faltantes.push('localidad');
+    if (!cd.provincia) faltantes.push('provincia');
+    const datosIncompletos = faltantes.length > 0;
     // Calcular número de cuota actual
     const cant = parseInt(c.cantCuotas) || 0;
     let nroCuota = 1;
@@ -5673,7 +5680,7 @@ async function renderRecordatoriosWA() {
         <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:2px">${c.cliente||'—'}</div>
         <div style="font-size:11.5px;color:var(--muted);margin-bottom:10px">${c.banco||'—'} · Vence: <b style="color:var(--red)">${fmtF(venc)}</b> · <b style="color:var(--blue)">Cuota ${nroCuota} de ${cant}</b></div>
         ${datosIncompletos
-          ? `<div style="font-size:11px;background:#fff7ed;border:1px solid #f97316;border-radius:8px;padding:8px 10px;color:#c2410c;margin-bottom:6px">⚠️ Datos incompletos: completá <b>cantidad de cuotas</b> y <b>fecha de inicio</b> en el crédito antes de enviar.</div>
+          ? `<div style="font-size:11px;background:#fff7ed;border:1px solid #f97316;border-radius:8px;padding:8px 10px;color:#c2410c;margin-bottom:6px">⚠️ Datos incompletos: <b>${faltantes.join(', ')}</b>. Completalos antes de enviar.</div>
              <button class="btn btn-p" style="background:#ccc;border-color:#ccc;font-size:12px;padding:7px 14px;width:100%;cursor:not-allowed" disabled>💬 Enviar WhatsApp</button>`
           : waUrl
             ? `<a href="${waUrl}" target="_blank" style="text-decoration:none" onclick="marcarRecordatorioEnviado('${c.id}','${vencMes}');setTimeout(renderRecordatoriosWA,500)">
