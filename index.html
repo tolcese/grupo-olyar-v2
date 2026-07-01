@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.29</title>
+<title>Grupo Olyar — Solicitudes v2.25.30</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3535,6 +3535,8 @@ async function enterApp() {
       const lblCuentaM = document.getElementById('sb-lbl-cuenta');
       if (lblCuentaM) lblCuentaM.style.display = '';
       document.getElementById('pp-card-administracion').style.display = '';
+      // Ocultar todos los demas cuadros del Panel Principal
+      document.querySelectorAll('.pp-card').forEach(c => { if (c.id !== 'pp-card-administracion') c.style.display = 'none'; });
       window._rolMalvarez = true;
       showV('panel-principal');
     } else {
