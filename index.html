@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.23</title>
+<title>Grupo Olyar — Solicitudes v2.25.24</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1120,6 +1120,10 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
               <input type="checkbox" id="cont-soc-facturado" style="width:16px;height:16px">
               <label for="cont-soc-facturado" style="font-size:13px;font-weight:600">Facturado</label>
+            </div>
+            <div class="fc" style="margin-bottom:10px">
+              <label>Fecha de factura</label>
+              <input type="date" id="cont-soc-fecha-factura">
             </div>
             <div class="fc" style="margin-bottom:10px">
               <label>Nº de factura</label>
@@ -11242,7 +11246,7 @@ let CONT_SOC_CACHE = [];
 async function loadContSoc() {
   try {
     const { data, error } = await SB.from('sociedades')
-      .select('id,nombre_sociedad,cuit,fecha,gestor,pago_honorarios,fecha_pago_honorarios,facturado,nro_factura,importe_facturado,gastos_detalle,gastos_importe')
+      .select('id,nombre_sociedad,cuit,fecha,gestor,pago_honorarios,fecha_pago_honorarios,facturado,fecha_factura,nro_factura,importe_facturado,gastos_detalle,gastos_importe')
       .order('fecha', { ascending: false });
     if (error) throw error;
     CONT_SOC_CACHE = data || [];
@@ -11304,6 +11308,7 @@ function openContSocPanel(id) {
   document.getElementById('cont-soc-pago-hon').checked = !!r.pago_honorarios;
   document.getElementById('cont-soc-fecha-pago').value = r.fecha_pago_honorarios || '';
   document.getElementById('cont-soc-facturado').checked = !!r.facturado;
+  document.getElementById('cont-soc-fecha-factura').value = r.fecha_factura || '';
   document.getElementById('cont-soc-nro-factura').value = r.nro_factura || '';
   document.getElementById('cont-soc-importe-factura').value = r.importe_facturado || '';
   document.getElementById('cont-soc-gastos-det').value = r.gastos_detalle || '';
@@ -11330,6 +11335,7 @@ async function guardarContSoc() {
     pago_honorarios: document.getElementById('cont-soc-pago-hon').checked,
     fecha_pago_honorarios: document.getElementById('cont-soc-fecha-pago').value || null,
     facturado: document.getElementById('cont-soc-facturado').checked,
+    fecha_factura: document.getElementById('cont-soc-fecha-factura').value || null,
     nro_factura: document.getElementById('cont-soc-nro-factura').value || null,
     importe_facturado: parseFloat(document.getElementById('cont-soc-importe-factura').value) || null,
     gastos_detalle: document.getElementById('cont-soc-gastos-det').value || null,
