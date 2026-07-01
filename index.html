@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.28</title>
+<title>Grupo Olyar — Solicitudes v2.25.29</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -3520,20 +3520,39 @@ async function enterApp() {
     document.getElementById('sb-panel-principal').style.display = '';
     showV('panel-principal');
   } else if (ME.rol === 'administracion') {
-    // Ocultar toda la navegación del sistema — solo ve Administración
-    document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
-    document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
-    document.getElementById('btn-datero').style.display = 'none';
-    document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
-    document.getElementById('sb-administracion').style.display = ['abarco','yohanavarro'].includes(ME?.usr) ? 'none' : '';
-    document.getElementById('sb-nueva').style.display = 'none';
-    // Ocultar secciones del sidebar que no corresponden
-    ['sb-div-calc','sb-lbl-calc','sb-div-cuenta','sb-lbl-cuenta'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = 'none';
-    });
-    window._rolAdminPuro = true;
-    showV('administracion');
+    if (ME.usr === 'malvarez') {
+      // malvarez: Panel Principal con solo cuadro Administración, sidebar mínimo
+      document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+      document.getElementById('btn-datero').style.display = 'none';
+      document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
+      document.getElementById('sb-panel-principal').style.display = '';
+      const miCuentaBtnM = document.querySelector('.sb-item[onclick*="micuenta"]');
+      if (miCuentaBtnM) miCuentaBtnM.style.display = '';
+      const cerrarSesionBtnM = document.querySelector('.sb-item[onclick*="doLogout"]');
+      if (cerrarSesionBtnM) cerrarSesionBtnM.style.display = '';
+      const divCuentaM = document.getElementById('sb-div-cuenta');
+      if (divCuentaM) divCuentaM.style.display = '';
+      const lblCuentaM = document.getElementById('sb-lbl-cuenta');
+      if (lblCuentaM) lblCuentaM.style.display = '';
+      document.getElementById('pp-card-administracion').style.display = '';
+      window._rolMalvarez = true;
+      showV('panel-principal');
+    } else {
+      // Ocultar toda la navegación del sistema — solo ve Administración
+      document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
+      document.querySelectorAll('.invitado-hidden').forEach(btn => btn.style.display = 'none');
+      document.getElementById('btn-datero').style.display = 'none';
+      document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
+      document.getElementById('sb-administracion').style.display = ['abarco','yohanavarro'].includes(ME?.usr) ? 'none' : '';
+      document.getElementById('sb-nueva').style.display = 'none';
+      // Ocultar secciones del sidebar que no corresponden
+      ['sb-div-calc','sb-lbl-calc','sb-div-cuenta','sb-lbl-cuenta'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+      window._rolAdminPuro = true;
+      showV('administracion');
+    }
   } else if (ME.rol === 'presupuestos') {
     // Ocultar toda la navegacion del sistema
     document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
@@ -3554,25 +3573,6 @@ async function enterApp() {
     document.getElementById('sb-panel-principal').style.display = '';
     document.getElementById('pp-card-contabilidad').style.display = '';
     document.getElementById('pp-card-administracion').style.display = '';
-    showV('panel-principal');
-  } else if (ME.usr === 'malvarez') {
-    // malvarez: Panel Principal con solo el acceso a Administración
-    // Sidebar: solo Panel Principal, Mi cuenta, Cerrar sesión
-    document.querySelectorAll('.tn').forEach(btn => btn.style.display = 'none');
-    document.getElementById('btn-datero').style.display = 'none';
-    document.querySelectorAll('.sb-item').forEach(btn => btn.style.display = 'none');
-    document.getElementById('sb-panel-principal').style.display = '';
-    const miCuentaBtnM = document.querySelector('.sb-item[onclick*="micuenta"]');
-    if (miCuentaBtnM) miCuentaBtnM.style.display = '';
-    const cerrarSesionBtnM = document.querySelector('.sb-item[onclick*="doLogout"]');
-    if (cerrarSesionBtnM) cerrarSesionBtnM.style.display = '';
-    const divCuentaM = document.getElementById('sb-div-cuenta');
-    if (divCuentaM) divCuentaM.style.display = '';
-    const lblCuentaM = document.getElementById('sb-lbl-cuenta');
-    if (lblCuentaM) lblCuentaM.style.display = '';
-    // Panel Principal: solo cuadro Administración
-    document.getElementById('pp-card-administracion').style.display = '';
-    window._rolMalvarez = true;
     showV('panel-principal');
   } else {
     // user, invitado, etc: ven el Panel Principal primero
