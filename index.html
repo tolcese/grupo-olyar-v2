@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.20</title>
+<title>Grupo Olyar — Solicitudes v2.25.21</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -5499,9 +5499,19 @@ async function renderRecordatoriosWA() {
         <div style="margin-bottom:8px;font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.05em">✅ Enviados este mes</div>
         ${enviadosMes.map(c => {
           const venc = proximoVencimientoCuota(c);
+          const cant = parseInt(c.cantCuotas) || 0;
+          let nroCuota = 1;
+          if (c.fechaInicio) {
+            const partes = c.fechaInicio.split('-');
+            const inicio = new Date(parseInt(partes[0]), parseInt(partes[1])-1, parseInt(partes[2]));
+            const hoyN = new Date(); hoyN.setHours(0,0,0,0);
+            const meses = (hoyN.getFullYear() - inicio.getFullYear()) * 12 + (hoyN.getMonth() - inicio.getMonth());
+            nroCuota = Math.min(Math.max(meses + 1, 1), cant);
+          }
+          const infoCuota = cant ? `<span style="color:var(--blue);font-weight:700"> · Cuota ${nroCuota} de ${cant}</span>` : '';
           return `<div style="font-size:12px;padding:5px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between">
             <span style="font-weight:600">${c.cliente||'—'}</span>
-            <span style="color:var(--muted)">${c.banco||'—'} · ${venc ? fmtFE(venc) : '—'}</span>
+            <span style="color:var(--muted)">${c.banco||'—'} · ${venc ? fmtFE(venc) : '—'}${infoCuota}</span>
           </div>`;
         }).join('')}`;
     } else {
