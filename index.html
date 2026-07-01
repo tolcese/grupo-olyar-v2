@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.24</title>
+<title>Grupo Olyar — Solicitudes v2.25.25</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1076,6 +1076,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap;width:120px">CUIT</th>
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Fecha</th>
                 <th style="padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gestor</th>
+                <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Total</th>
                 <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Honorarios</th>
                 <th style="padding:8px 10px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Facturado</th>
                 <th style="padding:8px 10px;text-align:right;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;border-bottom:2px solid var(--line);white-space:nowrap">Gastos</th>
@@ -11291,6 +11292,7 @@ function renderContSoc() {
       <td style="padding:8px 10px">${r.cuit||'—'}</td>
       <td style="padding:8px 10px;white-space:nowrap">${fmtD(r.fecha)}</td>
       <td style="padding:8px 10px;color:var(--blue);font-weight:600">${r.gestor||'—'}</td>
+      <td style="padding:8px 10px;text-align:right;font-family:monospace;font-weight:700">${fmtM(r.importe_facturado)}</td>
       <td style="padding:8px 10px;text-align:center">${r.pago_honorarios ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
       <td style="padding:8px 10px;text-align:center">${r.facturado ? '<span style="color:var(--green);font-weight:700">SÍ</span>' : '<span style="color:var(--muted)">NO</span>'}</td>
       <td style="padding:8px 10px;text-align:right;font-family:monospace">${fmtM(r.gastos_importe)}</td>
