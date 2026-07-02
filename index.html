@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.32</title>
+<title>Grupo Olyar — Solicitudes v2.25.33</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -2178,6 +2178,19 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
       </div>
     </div>
   </div>
+</div>
+
+<div id="v-soc-seguimiento-lista" style="display:none">
+  <div class="ph">
+    <div><div class="ph-t">📝 Seguimiento Sociedades</div><div class="ph-s">Comentarios y notas por operación</div></div>
+    <button class="btn btn-s" onclick="showV('sociedades')">← Volver a Sociedades</button>
+  </div>
+  <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center">
+    <input id="seg-soc-srch" class="fsel" placeholder="Buscar sociedad, CUIT, gestor..." oninput="renderSeguimientoSociedades()" style="font-size:12px;padding:8px 12px;min-width:280px">
+    <span id="seg-soc-count" style="font-size:12px;font-weight:700;color:var(--muted)"></span>
+  </div>
+  <div id="seg-soc-lista" style="display:flex;flex-direction:column;gap:12px"></div>
+  <div id="seg-soc-empty" style="display:none;text-align:center;padding:40px;color:var(--muted)">Sin operaciones con comentarios</div>
 </div>
 
 <div id="v-soc-presupuestos" style="display:none">
@@ -7744,6 +7757,57 @@ function duplicarSociedad(id) {
   abrirNuevaSociedad(id, true);
 }
 
+async function loadSeguimientoSociedades() {
+  // Reusar SOCIEDADES si ya está cargado, sino cargar
+  if (!SOCIEDADES || !SOCIEDADES.length) {
+    await loadSociedades();
+  }
+  renderSeguimientoSociedades();
+}
+
+function renderSeguimientoSociedades() {
+  const lista = document.getElementById('seg-soc-lista');
+  const empty = document.getElementById('seg-soc-empty');
+  const count = document.getElementById('seg-soc-count');
+  if (!lista) return;
+
+  const q = (document.getElementById('seg-soc-srch')?.value || '').toLowerCase().trim();
+  let data = (SOCIEDADES || []);
+  if (q) {
+    data = data.filter(r =>
+      (r.nombreSociedad||'').toLowerCase().includes(q) ||
+      (r.cuit||'').toString().includes(q) ||
+      (r.gestor||'').toLowerCase().includes(q)
+    );
+  }
+
+  if (count) count.textContent = data.length + (data.length === 1 ? ' operación' : ' operaciones');
+
+  if (!data.length) {
+    lista.innerHTML = '';
+    if (empty) empty.style.display = '';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  const fmtD = v => { if (!v) return '—'; const p = v.split('-'); return p.length === 3 ? p[2]+'/'+p[1]+'/'+p[0] : v; };
+
+  lista.innerHTML = data.map(r => `
+    <div class="card" style="padding:18px 22px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:12px">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--ink)">${r.nombreSociedad||'—'}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">CUIT ${r.cuit||'—'} · ${fmtD(r.fecha)} · <span style="color:var(--blue);font-weight:600">${r.gestor||'—'}</span></div>
+        </div>
+        <div>${estadoSociedadBadge(r)}</div>
+      </div>
+      <div style="font-size:13px;color:${r.comentarios ? 'var(--ink)' : 'var(--muted)'};white-space:pre-wrap;line-height:1.6;background:var(--surface);border-radius:8px;padding:12px 14px;min-height:40px">${r.comentarios || '<i>Sin comentarios</i>'}</div>
+      <div style="margin-top:10px;text-align:right">
+        <button class="btn btn-s" style="font-size:11px;padding:5px 12px" onclick="closeSidebar();abrirSeguimientoSociedad('${r.id}')">✏️ Editar comentario</button>
+      </div>
+    </div>`).join('');
+}
+
 function abrirSeguimientoSociedad(id) {
   const r = SOCIEDADES.find(x => x.id === id);
   if (!r) return;
@@ -9228,9 +9292,11 @@ function aplicarModoSidebar(modo) {
     const lblCuenta = document.getElementById('sb-lbl-cuenta');
     if (lblCuenta) lblCuenta.style.display = '';
   } else if (modo === 'sociedades') {
-    // Mostrar solo: Sociedades, Prendas Sociedades Finalizadas, Presupuestos Sociedades
+    // Mostrar solo: Sociedades, Prendas Sociedades Finalizadas, Seguimiento, Presupuestos Sociedades
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = '');
     document.querySelectorAll('.sb-item[onclick*="soc-presupuestos"]').forEach(btn => btn.style.display = '');
+    const sbSegSoc = document.getElementById('sb-soc-seguimiento');
+    if (sbSegSoc) sbSegSoc.style.display = '';
     const inlinePresupBtn = document.getElementById('soc-presup-inline-btn');
     if (inlinePresupBtn) inlinePresupBtn.style.display = '';
     const miCuentaBtn2 = document.querySelector('.sb-item[onclick*="micuenta"]');
@@ -9263,6 +9329,8 @@ function aplicarModoSidebar(modo) {
     document.getElementById('sb-historico-presup').style.display = 'none';
     document.querySelectorAll('.sb-item[onclick*="sociedades"]').forEach(btn => btn.style.display = 'none');
     document.querySelectorAll('.sb-item[onclick*="soc-presupuestos"]').forEach(btn => btn.style.display = 'none');
+    const sbSegSocC = document.getElementById('sb-soc-seguimiento');
+    if (sbSegSocC) sbSegSocC.style.display = 'none';
     const inlinePresupBtnC = document.getElementById('soc-presup-inline-btn');
     if (inlinePresupBtnC) inlinePresupBtnC.style.display = 'none';
     document.getElementById('sb-calc-galicia-mail').style.display = ME?.usr === 'claudionieva' ? '' : 'none';
@@ -9373,7 +9441,7 @@ function showV(v) {
       setTimeout(renderReportes, 50);
     }
   }
-  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva','soc-seguimiento','soc-presupuestos','soc-presupuesto-form','panel-principal'].forEach(id => {
+  ['sol','nueva','usuarios','config','micuenta','reportes','backup','contabilidad','creditos','bancos','datero','calendario','presupuestos','historico-presup','calculadores','genpdf','envios-gestor','administracion','calc-galicia-mail','sociedades','soc-nueva','soc-seguimiento','soc-seguimiento-lista','soc-presupuestos','soc-presupuesto-form','panel-principal'].forEach(id => {
     const el = document.getElementById('v-'+id);
     if (el) el.style.display = id===v ? '' : 'none';
 
@@ -13735,6 +13803,9 @@ function renderReportes() {
     </button>
     <button class="sb-item" onclick="closeSidebar();showV('sociedades');loadSociedades().then(()=>setSocTab('finalizadas'))">
       <span class="sb-icon">🏁</span> Prendas Sociedades Finalizadas
+    </button>
+    <button class="sb-item" id="sb-soc-seguimiento" onclick="closeSidebar();showV('soc-seguimiento-lista');loadSeguimientoSociedades()">
+      <span class="sb-icon">📝</span> Seguimiento Sociedades
     </button>
     <button class="sb-item" id="sb-soc-presupuestos" onclick="closeSidebar();showV('soc-presupuestos');loadPresupuestosSociedades()" style="display:none">
       <span class="sb-icon">📄</span> Presupuestos Sociedades
