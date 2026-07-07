@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.33</title>
+<title>Grupo Olyar — Solicitudes v2.25.34</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -5705,6 +5705,42 @@ async function renderRecordatoriosWA() {
   }).join('');
 }
 
+async function checkCuotasVencimientoPopup() {
+  try {
+    const { data: creditos } = await SB.from('creditos').select('id,cliente,cant_cuotas,fecha_inicio,dia_vencimiento');
+    const { data: enviados } = await SB.from('recordatorios_enviados').select('credito_id,mes');
+    if (!creditos || !creditos.length) return;
+
+    const hoy = new Date(); hoy.setHours(0,0,0,0);
+    const mesActual = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}`;
+    const yaEnviados = new Set((enviados||[]).map(e => `${e.credito_id}_${e.mes}`));
+
+    const pendientes = creditos.filter(c => {
+      if (!c.fecha_inicio || !c.cant_cuotas) return false;
+      const dia = parseInt(c.dia_vencimiento) || 5;
+      const venc = new Date(hoy.getFullYear(), hoy.getMonth(), dia);
+      if (venc < hoy) return false;
+      return !yaEnviados.has(`${c.id}_${mesActual}`);
+    });
+
+    if (!pendientes.length) return;
+
+    const msg = pendientes.length === 1
+      ? `Tenés <b>1 recordatorio de cuota</b> pendiente de enviar este mes para <b>${pendientes[0].cliente}</b>.`
+      : `Tenés <b>${pendientes.length} recordatorios de cuota</b> pendientes de enviar este mes desde la sección <b>Sistema de Créditos</b>.`;
+
+    document.getElementById('popup-cuotas-msg').innerHTML = msg;
+    document.getElementById('popup-cuotas').style.display = 'flex';
+    window._cuotasPopupVisto = true;
+  } catch(e) {
+    console.error('Error verificando cuotas:', e);
+  }
+}
+
+function cerrarPopupCuotas() {
+  document.getElementById('popup-cuotas').style.display = 'none';
+}
+
 async function loadCreditos() {
   try {
     const [{ data: credData }, { data: cuotaData }] = await Promise.all([
@@ -9375,6 +9411,9 @@ async function irAModoPrincipal(modo) {
     showV('sociedades');
   } else if (modo === 'comercializadora') {
     showV('sol');
+    if (!window._cuotasPopupVisto) {
+      checkCuotasVencimientoPopup();
+    }
   } else if (modo === 'contabilidad') {
     showV('contabilidad');
   } else if (modo === 'administracion-admin') {
@@ -15054,6 +15093,16 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- POPUP VENCIMIENTO CUOTAS -->
+<div id="popup-cuotas" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(15,23,42,.5);align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:18px;padding:32px 36px;max-width:420px;width:90%;box-shadow:0 20px 60px rgba(15,23,42,.25);text-align:center;position:relative">
+    <button onclick="cerrarPopupCuotas()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">×</button>
+    <div style="font-size:40px;margin-bottom:14px">🔔</div>
+    <div style="font-size:17px;font-weight:800;color:var(--ink);margin-bottom:10px">Recordatorio de cuotas</div>
+    <div id="popup-cuotas-msg" style="font-size:14px;color:var(--muted);line-height:1.6"></div>
+  </div>
+</div>
 
 </body>
 </html>
