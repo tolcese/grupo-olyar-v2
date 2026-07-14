@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.35</title>
+<title>Grupo Olyar — Solicitudes v2.25.36</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -11092,10 +11092,39 @@ function renderStockCards() {
     const alerta = cant <= 5 ? 'border:2px solid #dc2626' : '';
     return `<div class="card" style="padding:20px;${alerta};cursor:default">
       <div style="font-size:13px;font-weight:700;color:${color};margin-bottom:8px">${banco}</div>
-      <div style="font-size:36px;font-weight:800;color:${cant <= 5 ? '#dc2626' : 'var(--ink)'};line-height:1">${cant}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant <= 5 ? '⚠️ Stock bajo' : 'prendas disponibles'}</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input id="stock-edit-${banco}" type="number" min="0" value="${cant}"
+          style="font-size:32px;font-weight:800;color:${cant<=5?'#dc2626':'var(--ink)'};line-height:1;width:80px;border:none;border-bottom:2px solid transparent;background:transparent;outline:none;padding:0"
+          onfocus="this.style.borderBottomColor='${color}'"
+          onblur="this.style.borderBottomColor='transparent';guardarStockDirecto('${banco}',this)"
+          onkeydown="if(event.key==='Enter'){this.blur()}"
+        >
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant <= 5 ? '⚠️ Stock bajo' : 'prendas disponibles'} · <span style="color:${color};cursor:pointer;font-weight:600" onclick="document.getElementById('stock-edit-${banco}').focus()">✏️ editar</span></div>
     </div>`;
   }).join('');
+}
+
+async function guardarStockDirecto(banco, input) {
+  const nueva = parseInt(input.value);
+  if (isNaN(nueva) || nueva < 0) { input.value = STOCK_DATA[banco]?.cantidad || 0; return; }
+  const anterior = STOCK_DATA[banco]?.cantidad || 0;
+  if (nueva === anterior) return;
+  try {
+    await SB.from('stock_prendas').upsert({ banco, cantidad: nueva, updated_at: new Date().toISOString() }, { onConflict: 'banco' });
+    const diff = nueva - anterior;
+    await SB.from('stock_prendas_movimientos').insert({
+      banco, tipo: diff > 0 ? 'entrada' : 'salida_gestor',
+      cantidad: Math.abs(diff), nota: 'Corrección manual de stock', usuario: ME?.usr, fecha: new Date().toISOString()
+    });
+    if (!STOCK_DATA[banco]) STOCK_DATA[banco] = {};
+    STOCK_DATA[banco].cantidad = nueva;
+    toast(`Stock ${banco} actualizado a ${nueva} ✓`, 'ok');
+    renderStockCards();
+  } catch(e) {
+    toast('Error al guardar', 'err');
+    input.value = anterior;
+  }
 }
 
 function renderMovimientos() {
