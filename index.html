@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.36</title>
+<title>Grupo Olyar — Solicitudes v2.25.37</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -11279,8 +11279,12 @@ function renderStockCardsEnvios() {
     const alerta = cant <= 5 ? 'border:2px solid #dc2626' : '';
     return `<div class="card" style="padding:16px;${alerta}">
       <div style="font-size:12px;font-weight:700;color:${color};margin-bottom:6px">${banco}</div>
-      <div style="font-size:32px;font-weight:800;color:${cant<=5?'#dc2626':'var(--ink)'};line-height:1">${cant}</div>
-      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant<=5?'⚠️ Stock bajo':'disponibles'}</div>
+      <input id="stock-edit-${banco}" type="number" min="0" value="${cant}"
+        style="font-size:32px;font-weight:800;color:${cant<=5?'#dc2626':'var(--ink)'};line-height:1;width:80px;border:none;border-bottom:2px solid transparent;background:transparent;outline:none;padding:0;cursor:text"
+        onfocus="this.style.borderBottomColor='${color}'"
+        onblur="this.style.borderBottomColor='transparent';guardarStockDirecto('${banco}',this)"
+        onkeydown="if(event.key==='Enter'){this.blur()}">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${cant<=5?'⚠️ Stock bajo':'disponibles'} · <span style="color:${color};cursor:pointer;font-weight:600" onclick="document.getElementById('stock-edit-${banco}').focus()">✏️ editar</span></div>
     </div>`;
   }).join('');
 }
