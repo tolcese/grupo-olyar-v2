@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.38</title>
+<title>Grupo Olyar — Solicitudes v2.25.39</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -1450,7 +1450,7 @@ pre{background:#0f172a;color:#7dd3fc;padding:18px;font-family:'JetBrains Mono',m
             <div class="fc"><label>Registro</label><input id="pf-registro" type="text" placeholder="CORDOBA N° 16"></div>
             <div class="fc"><label>Marca</label><input id="pf-marca" type="text"></div>
             <div class="fc"><label>Valuación DNRPA</label><input id="pf-valuacion" type="number" placeholder="0" oninput="calcPresup()"></div>
-            <div class="fc"><label>Base Imponible 70%</label><input id="pf-base-imp" type="number" placeholder="0" readonly style="background:var(--surface)"></div>
+            <div class="fc"><label>Base Imponible 70%</label><input id="pf-base-imp" type="number" placeholder="0" oninput="window._baseImpManual=true;calcPresup()"></div>
             <div class="fc"><label>Monto a colocar en 08</label><input id="pf-monto-colocar" type="number" placeholder="0" oninput="calcPresup()"></div>
           </div>
         </div>
@@ -4485,6 +4485,7 @@ async function togglePagadoPresup(id, pagado) {
 
 function nuevoPresupuesto() {
   PRESUP_EDIT_ID = null;
+  window._baseImpManual = false;
   document.getElementById('presup-form-title').textContent = 'Nuevo presupuesto';
   document.getElementById('presup-id').value = '';
   document.getElementById('pf-fecha').value = new Date().toISOString().slice(0,10);
@@ -4528,6 +4529,7 @@ function editarPresupuesto(id) {
   document.getElementById('pf-marca').value = p.marca || '';
   document.getElementById('pf-valuacion').value = p.valuacion_dnrpa || '';
   document.getElementById('pf-base-imp').value = p.base_imponible_70 || '';
+  window._baseImpManual = false;
   document.getElementById('pf-monto-colocar').value = p.monto_colocar || '';
   document.getElementById('pf-certificacion').value = p.certificacion || '';
   document.getElementById('pf-certificacion-titulo').value = p.certificacion_titulo || 'Certificación (08 Compra, 02 Y Nota)';
@@ -4689,7 +4691,7 @@ function calcPresup() {
   const n = id => parseFloat(document.getElementById(id)?.value||0) || 0;
   const val = n('pf-valuacion');
   const base70 = Math.round(val * 0.70);
-  document.getElementById('pf-base-imp').value = base70 || '';
+  if (!window._baseImpManual) document.getElementById('pf-base-imp').value = base70 || '';
   const total = 
     n('pf-certificacion') + getTotalFormularios() + n('pf-arancel') +
     n('pf-sellado-base') + n('pf-sellado-prenda') + n('pf-legalizaciones') +
