@@ -25,7 +25,7 @@ document.documentElement.scrollTop = 0;
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<title>Grupo Olyar — Solicitudes v2.25.39</title>
+<title>Grupo Olyar — Solicitudes v2.25.40</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* CRITICAL: Forzar paint inicial en Chrome Android — va ANTES de todo */
@@ -4698,7 +4698,8 @@ function calcPresup() {
     n('pf-anotaciones') + n('pf-informe-dominio') +
     n('pf-mun1-valor') + n('pf-mun2-valor') + n('pf-multas-valor') +
     n('pf-munjuicios-valor') + n('pf-rentasjuicios-valor') +
-    n('pf-movilidad') + n('pf-altas-bajas') + n('pf-honorarios');
+    n('pf-movilidad') + n('pf-altas-bajas') + n('pf-honorarios') +
+    n('pf-base-imp');
   document.getElementById('pf-total-display').textContent = '$' + Math.round(total).toLocaleString('es-AR');
 }
 
